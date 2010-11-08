@@ -20,6 +20,48 @@
 
 # Script copyright (C) Campbell Barton
 
+# This script uses spaces for indents NOT tabs.
+
+# --------------------------------------------------------------------------
+# ***** HISTORY *****
+# --------------------------------------------------------------------------
+# Campbell Barton (AKA Ideasman42) 
+# Created the original FBX exporter for Blender.
+# --------------------------------------------------------------------------
+# Fritz@triplebgames.com 
+# Modified the script to work with XNA
+# Save textures in the same folder, changes to suit XNA and other fixes for
+# v2.44 of Blender.
+# --------------------------------------------------------------------------
+# John C Brown (JCBDigger @MistyManor) http://games.DiscoverThat.co.uk
+# Attempted to make a 2.5x script work with XNA 4.0
+# November 2010
+# --------------------------------------------------------------------------
+
+# --------------------------------------------------------------------------
+# ** LIMITATIONS **
+# --------------------------------------------------------------------------
+# To work with XNA the objects (meshes) must NOT have a scale applied
+# Bone transforms in actions must not use scale, only use Rotation and location
+# All the objects must have the same centre ideally at the origin, (0, 0, 0)
+# --------------------------------------------------------------------------
+
+# --------------------------------------------------------------------------
+# ** Tasks **
+# --------------------------------------------------------------------------
+# - Remove the Default_Take
+# - Change the takes so they use the same code as the 2.4x XNA FBX script
+# Done OK - Remove 'Blend_Root'
+# Done OK - Make the armature the root instead of Blend_Root
+# Done OK - Connect the armature to the scene not to root
+# Done OK - Check that the first bone is connected to the armature object not to root
+# Done OK - Connect all the objects (meshes) to the scene not to the armature
+# Done OK - Change 'Limb' to 'LimbNode'
+# Done OK - Make the armature a LimbNode instead of a null
+# --------------------------------------------------------------------------
+
+
+
 """
 This script is an exporter to the FBX file format.
 
@@ -735,7 +777,8 @@ def save(operator, context, filepath="",
     # -------------------------------------------- Armatures
     #def write_bone(bone, name, matrix_mod):
     def write_bone(my_bone):
-        file.write('\n\tModel: "Model::%s", "Limb" {' % my_bone.fbxName)
+        #file.write('\n\tModel: "Model::%s", "Limb" {' % my_bone.fbxName)
+        file.write('\n\tModel: "Model::%s", "LimbNode" {' % my_bone.fbxName)
         file.write('\n\t\tVersion: 232')
 
         #poseMatrix = write_object_props(my_bone.blenBone, None, None, my_bone.fbxArm.parRelMatrix())[3]
@@ -2253,7 +2296,8 @@ Objects:  {''')
     write_camera_switch()
 
     # Write the null object
-    write_null(None, 'blend_root')# , GLOBAL_MATRIX)
+    # Not necessary (I hope)
+    # write_null(None, 'blend_root')# , GLOBAL_MATRIX)
 
     for my_null in ob_null:
         write_null(my_null)
@@ -2356,13 +2400,16 @@ Objects:  {''')
 
 Relations:  {''')
 
-    file.write('\n\tModel: "Model::blend_root", "Null" {\n\t}')
+    # Not necessary
+    # file.write('\n\tModel: "Model::blend_root", "Null" {\n\t}')
 
     for my_null in ob_null:
         file.write('\n\tModel: "Model::%s", "Null" {\n\t}' % my_null.fbxName)
 
+    # These need to be LimbNodes, not null and there should only be one armature
     for my_arm in ob_arms:
-        file.write('\n\tModel: "Model::%s", "Null" {\n\t}' % my_arm.fbxName)
+        #file.write('\n\tModel: "Model::%s", "Null" {\n\t}' % my_arm.fbxName)
+        file.write('\n\tModel: "Model::%s", "LimbNode" {\n\t}' % my_arm.fbxName)
 
     for my_mesh in ob_meshes:
         file.write('\n\tModel: "Model::%s", "Mesh" {\n\t}' % my_mesh.fbxName)
@@ -2370,7 +2417,8 @@ Relations:  {''')
     # TODO - limbs can have the same name for multiple armatures, should prefix.
     #for bonename, bone, obname, me, armob in ob_bones:
     for my_bone in ob_bones:
-        file.write('\n\tModel: "Model::%s", "Limb" {\n\t}' % my_bone.fbxName)
+        #file.write('\n\tModel: "Model::%s", "Limb" {\n\t}' % my_bone.fbxName)
+        file.write('\n\tModel: "Model::%s", "LimbNode" {\n\t}' % my_bone.fbxName)
 
     for my_cam in ob_cameras:
         file.write('\n\tModel: "Model::%s", "Camera" {\n\t}' % my_cam.fbxName)
@@ -2436,15 +2484,40 @@ Connections:  {''')
 
 
     # write the fake root node
-    file.write('\n\tConnect: "OO", "Model::blend_root", "Model::Scene"')
+    # I don't think we need this
+    #file.write('\n\tConnect: "OO", "Model::blend_root", "Model::Scene"')
 
-    for ob_generic in ob_all_typegroups: # all blender 'Object's we support
-        for my_ob in ob_generic:
-            if my_ob.fbxParent:
-                file.write('\n\tConnect: "OO", "Model::%s", "Model::%s"' % (my_ob.fbxName, my_ob.fbxParent.fbxName))
-            else:
-                file.write('\n\tConnect: "OO", "Model::%s", "Model::blend_root"' % my_ob.fbxName)
+    # Changed so that if it does not have a parent it connects to the scene
+    # Removed in favour of specific mappings not everything
+    #for ob_generic in ob_all_typegroups: # all blender 'Object's we support
+    #    for my_ob in ob_generic:
+    #        if my_ob.fbxParent:
+    #            file.write('\n\tConnect: "OO", "Model::%s", "Model::%s"' % (my_ob.fbxName, my_ob.fbxParent.fbxName))
+    #        else:
+    #            # file.write('\n\tConnect: "OO", "Model::%s", "Model::blend_root"' % my_ob.fbxName)
+    #            file.write('\n\tConnect: "OO", "Model::%s", "Model::Scene"' % my_ob.fbxName)
 
+    # Added specific for each type of object we support
+    # Armature
+    for my_arm in ob_arms:
+        file.write('\n\tConnect: "OO", "Model::%s", "Model::Scene"' % my_arm.fbxName)
+              
+    # Added
+    # Mesh objects
+    for my_mesh in ob_meshes:
+        file.write('\n\tConnect: "OO", "Model::%s", "Model::Scene"' % my_mesh.fbxName)
+    
+    # Moved up near the top because I like the armature first for easy reading
+    #for bonename, bone, obname, me, armob in ob_bones:
+    for my_bone in ob_bones:
+        # Always parent to armature now
+        if my_bone.parent:
+            file.write('\n\tConnect: "OO", "Model::%s", "Model::%s"' % (my_bone.fbxName, my_bone.parent.fbxName) )
+        else:
+            # the armature object is written as an empty and all root level bones connect to it
+            # Changed the armature object to be a LimbNode but still need to parent all bones to it
+            file.write('\n\tConnect: "OO", "Model::%s", "Model::%s"' % (my_bone.fbxName, my_bone.fbxArm.fbxName) )
+                
     if materials:
         for my_mesh in ob_meshes:
             # Connect all materials to all objects, not good form but ok for now.
@@ -2484,15 +2557,6 @@ Connections:  {''')
             file.write('\n\tConnect: "OO", "Model::%s", "SubDeformer::Cluster %s %s"' % (my_bone.fbxName, fbxMeshObName, my_bone.fbxName))
 
 
-    #for bonename, bone, obname, me, armob in ob_bones:
-    for my_bone in ob_bones:
-        # Always parent to armature now
-        if my_bone.parent:
-            file.write('\n\tConnect: "OO", "Model::%s", "Model::%s"' % (my_bone.fbxName, my_bone.parent.fbxName) )
-        else:
-            # the armature object is written as an empty and all root level bones connect to it
-            file.write('\n\tConnect: "OO", "Model::%s", "Model::%s"' % (my_bone.fbxName, my_bone.fbxArm.fbxName) )
-
     # groups
     if groups:
         for ob_generic in ob_all_typegroups:
@@ -2500,8 +2564,12 @@ Connections:  {''')
                 for fbxGroupName in ob_base.fbxGroupNames:
                     file.write('\n\tConnect: "OO", "Model::%s", "GroupSelection::%s"' % (ob_base.fbxName, fbxGroupName))
 
-    for my_arm in ob_arms:
-        file.write('\n\tConnect: "OO", "Model::%s", "Model::blend_root"' % my_arm.fbxName)
+    # Connect the armature to the scene not the root
+    # This duplicates above at the start of connections that already picks up any objects that does not have a parent
+    # This has been removed
+    #for my_arm in ob_arms:
+        #file.write('\n\tConnect: "OO", "Model::%s", "Model::blend_root"' % my_arm.fbxName)
+        #file.write('\n\tConnect: "OO", "Model::%s", "Model::Scene"' % my_arm.fbxName)
 
     file.write('\n}')
 

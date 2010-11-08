@@ -43,20 +43,24 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
     EXP_OBS_SELECTED = BoolProperty(name="Selected Objects", description="Export selected objects on visible layers", default=True)
 # 	EXP_OBS_SCENE = BoolProperty(name="Scene Objects", description="Export all objects in this scene", default=True)
     TX_SCALE = FloatProperty(name="Scale", description="Scale all data, (Note! some imports dont support scaled armatures)", min=0.01, max=1000.0, soft_min=0.01, soft_max=1000.0, default=1.0)
-    TX_XROT90 = BoolProperty(name="Rot X90", description="Rotate all objects 90 degrees about the X axis", default=True)
+# Rotation is unlikely to work so turned off for the time being.
+    TX_XROT90 = BoolProperty(name="Rot X90", description="Rotate all objects 90 degrees about the X axis", default=False)
     TX_YROT90 = BoolProperty(name="Rot Y90", description="Rotate all objects 90 degrees about the Y axis", default=False)
     TX_ZROT90 = BoolProperty(name="Rot Z90", description="Rotate all objects 90 degrees about the Z axis", default=False)
     EXP_EMPTY = BoolProperty(name="Empties", description="Export empty objects", default=True)
-    EXP_CAMERA = BoolProperty(name="Cameras", description="Export camera objects", default=True)
-    EXP_LAMP = BoolProperty(name="Lamps", description="Export lamp objects", default=True)
+# Cameras and lamps are of no use to XNA so are turned off by default
+    EXP_CAMERA = BoolProperty(name="Cameras", description="Export camera objects", default=False)
+    EXP_LAMP = BoolProperty(name="Lamps", description="Export lamp objects", default=False)
     EXP_ARMATURE = BoolProperty(name="Armatures", description="Export armature objects", default=True)
     EXP_MESH = BoolProperty(name="Meshes", description="Export mesh objects", default=True)
     EXP_MESH_APPLY_MOD = BoolProperty(name="Modifiers", description="Apply modifiers to mesh objects", default=True)
-    EXP_MESH_HQ_NORMALS = BoolProperty(name="HQ Normals", description="Generate high quality normals", default=True)
+# HQ normals are just something else to worry about so turned off until we can get the model working
+    EXP_MESH_HQ_NORMALS = BoolProperty(name="HQ Normals", description="Generate high quality normals", default=False)
     EXP_IMAGE_COPY = BoolProperty(name="Copy Image Files", description="Copy image files to the destination path", default=False)
     # armature animation
     ANIM_ENABLE = BoolProperty(name="Enable Animation", description="Export keyframe animation", default=True)
-    ANIM_OPTIMIZE = BoolProperty(name="Optimize Keyframes", description="Remove double keyframes", default=True)
+# Optimising Keyframes are another thing we don't need to worry about yet    
+    ANIM_OPTIMIZE = BoolProperty(name="Optimize Keyframes", description="Remove double keyframes", default=False)
     ANIM_OPTIMIZE_PRECISSION = FloatProperty(name="Precision", description="Tolerence for comparing double keyframes (higher for greater accuracy)", min=1, max=16, soft_min=1, soft_max=16, default=6.0)
 # 	ANIM_ACTION_ALL = BoolProperty(name="Current Action", description="Use actions currently applied to the armatures (use scene start/end frame)", default=True)
     ANIM_ACTION_ALL = BoolProperty(name="All Actions", description="Use all actions for armatures, if false, use current action", default=False)
