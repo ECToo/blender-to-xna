@@ -29,29 +29,33 @@
 # Created the original FBX exporter for Blender.
 # --------------------------------------------------------------------------
 # Fritz@triplebgames.com 
-# Modified the script to work with XNA
-# Save textures in the same folder, changes to suit XNA and other fixes for
-# v2.44 of Blender.
+# Modified the 2.4x script to work with XNA
+# Save textures in the same folder, changes to suit XNA and other fixes
 # --------------------------------------------------------------------------
 # John C Brown (JCBDigger @MistyManor) http://games.DiscoverThat.co.uk
-# Attempted to make a 2.5x script work with XNA 4.0
+# Attempt to make a 2.5x script work with XNA 4.0
 # November 2010
 # --------------------------------------------------------------------------
 
 # --------------------------------------------------------------------------
 # ** LIMITATIONS **
 # --------------------------------------------------------------------------
-# To work with XNA the objects (meshes) must NOT have a scale applied
-# Bone transforms in actions must not use scale, only use Rotation and location
-# All the objects must have the same centre ideally at the origin, (0, 0, 0)
+# To work with XNA:
+# - the objects (meshes) must NOT have a scale applied
+# - bone transforms in actions must not use scale, only use Rotation and location
+# - all the objects must have the same centre ideally at the origin, (0, 0, 0)
 # --------------------------------------------------------------------------
 
 # --------------------------------------------------------------------------
 # ** Tasks **
 # --------------------------------------------------------------------------
-# - Remove the Default_Take
 # - Change the takes so they use the same code as the 2.4x XNA FBX script
+# Done OK - Make it export just the current take if all actions is not selected
+# Done OK - Remove the Default_Take
+#             There is no requirement to have a take at all
 # Done OK - Remove 'Blend_Root'
+#             As far as I can tell there is no need for any form of root object.
+#             A valid model can be as simple as a single mesh connected to the scene.
 # Done OK - Make the armature the root instead of Blend_Root
 # Done OK - Connect the armature to the scene not to root
 # Done OK - Check that the first bone is connected to the armature object not to root
@@ -2609,44 +2613,51 @@ Connections:  {''')
         # instead of tagging
         tagged_actions = []
 
+        # get the default name
+        for my_arm in ob_arms:
+            if not blenActionDefault:
+                blenActionDefault = my_arm.blenAction
+        
         if ANIM_ACTION_ALL:
 # 			bpy.data.actions.tag = False
             tmp_actions = bpy.data.actions[:]
+        else:
+            tmp_actions.append(blenActionDefault)
 
+        # find which actions are compatible with the armatures
+        # blenActions is not yet initialized so do it now.
+        tmp_act_count = 0
+        for my_arm in ob_arms:
 
-            # find which actions are compatible with the armatures
-            # blenActions is not yet initialized so do it now.
-            tmp_act_count = 0
-            for my_arm in ob_arms:
+            # get the default name
+            #if not blenActionDefault:
+            #    blenActionDefault = my_arm.blenAction
 
-                # get the default name
-                if not blenActionDefault:
-                    blenActionDefault = my_arm.blenAction
+            arm_bone_names = set([my_bone.blenName for my_bone in my_arm.fbxBones])
 
-                arm_bone_names = set([my_bone.blenName for my_bone in my_arm.fbxBones])
+            for action in tmp_actions:
 
-                for action in tmp_actions:
-
-                    action_chan_names = arm_bone_names.intersection( set([g.name for g in action.groups]) )
+                action_chan_names = arm_bone_names.intersection( set([g.name for g in action.groups]) )
 # 					action_chan_names = arm_bone_names.intersection( set(action.getChannelNames()) )
 
-                    if action_chan_names: # at least one channel matches.
-                        my_arm.blenActionList.append(action)
-                        tagged_actions.append(action.name)
+                if action_chan_names: # at least one channel matches.
+                    my_arm.blenActionList.append(action)
+                    tagged_actions.append(action.name)
 # 						action.tag = True
-                        tmp_act_count += 1
+                    tmp_act_count += 1
 
-                        # incase there is no actions applied to armatures
-                        action_lastcompat = action
+                    # incase there is no actions applied to armatures
+                    action_lastcompat = action
 
-            if tmp_act_count:
-                # unlikely to ever happen but if no actions applied to armatures, just use the last compatible armature.
-                if not blenActionDefault:
-                    blenActionDefault = action_lastcompat
+        if tmp_act_count:
+            # unlikely to ever happen but if no actions applied to armatures, just use the last compatible armature.
+            if not blenActionDefault:
+                blenActionDefault = action_lastcompat
 
         del action_lastcompat
 
-        tmp_actions.insert(0, None) # None is the default action
+        # We do not need a default take
+        # tmp_actions.insert(0, None) # None is the default action
 
         file.write('''
 ;Takes and animation section
@@ -2692,7 +2703,8 @@ Takes:  {''')
                         # print '\t\tSetting Action!', blenAction
                 # scene.update(1)
 
-            file.write('\n\t\tFileName: "Default_Take.tak"') # ??? - not sure why this is needed
+            #file.write('\n\t\tFileName: "Default_Take.tak"') # ??? - not sure why this is needed
+            file.write('\n\t\tFileName: "%s.tak"' % sane_name_mapping_take[blenAction.name]) # ??? - not sure why this is needed
             file.write('\n\t\tLocalTime: %i,%i' % (fbx_time(act_start-1), fbx_time(act_end-1))) # ??? - not sure why this is needed
             file.write('\n\t\tReferenceTime: %i,%i' % (fbx_time(act_start-1), fbx_time(act_end-1))) # ??? - not sure why this is needed
 
