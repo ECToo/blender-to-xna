@@ -1,3 +1,5 @@
+#summary Thanks to those other people whos code has been used
+
 = Introduction =
 
 The scripts will be based on work originally created by others.  This page acknowledges and thanks those others for their work.
