@@ -24,8 +24,8 @@ You can just delete all the files in that folder as you are about to replace the
 
 Copy both the modified script files in to that folder.
 
-__init__.py
+'__init__.py'
 
-export_fbx.py
+'export_fbx.py'
 
 Start Blender and Export FBX from the File->Export menu as normal.
