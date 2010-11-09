@@ -50,7 +50,12 @@
 # --------------------------------------------------------------------------
 # ** Tasks **
 # --------------------------------------------------------------------------
+# - Change object_tx()
+#             Remove the rotation applied to the armature
 # - Change the takes so they use the same code as the 2.4x XNA FBX script
+#             Part done
+#             Changed to C,n instead of L
+#             Still using previous rotation [1] instead of [0]
 # Done OK - Make it export just the current take if all actions is not selected
 # Done OK - Remove the Default_Take
 #             There is no requirement to have a take at all
@@ -63,9 +68,6 @@
 # Done OK - Connect all the objects (meshes) to the scene not to the armature
 # Done OK - Change 'Limb' to 'LimbNode'
 # Done OK - Make the armature a LimbNode instead of a null
-# --------------------------------------------------------------------------
-# Left unchanged for the time being:
-# object_tx()
 # --------------------------------------------------------------------------
 
 
