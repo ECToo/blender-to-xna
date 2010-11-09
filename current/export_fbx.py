@@ -309,7 +309,7 @@ def save(operator, context, filepath="",
 
     # testing
     mtx_x90		= Matrix.Rotation( math.pi/2.0, 3, 'X') # used
-    mtx4_z90	= Matrix.Rotation( math.pi/2.0, 4, 'Z')
+    #mtx4_z90	= Matrix.Rotation( math.pi/2.0, 4, 'Z')
 
     if GLOBAL_MATRIX is None:
         GLOBAL_MATRIX = Matrix()
@@ -512,10 +512,14 @@ def save(operator, context, filepath="",
             #arm_mat = self.fbxArm.parRelMatrix()
             if not self.parent:
                 #return mtx4_z90 * (self.getPoseMatrix(frame) * arm_mat) # dont apply arm matrix anymore
-                return self.getPoseMatrix(frame) * mtx4_z90
+                #return self.getPoseMatrix(frame) * mtx4_z90
+                # XNA
+                return self.getPoseMatrix(frame)
             else:
                 #return (mtx4_z90 * ((self.getPoseMatrix(frame) * arm_mat)))  *  (mtx4_z90 * (self.parent.getPoseMatrix(frame) * arm_mat)).invert()
-                return (self.parent.getPoseMatrix(frame) * mtx4_z90).invert() * ((self.getPoseMatrix(frame)) * mtx4_z90)
+                #return (self.parent.getPoseMatrix(frame) * mtx4_z90).invert() * ((self.getPoseMatrix(frame)) * mtx4_z90)
+                # XNA
+                return (self.parent.getPoseMatrix(frame)).invert() * ((self.getPoseMatrix(frame)))
 
         # we need thes because cameras and lights modified rotations
         def getAnimParRelMatrixRot(self, frame):
@@ -627,15 +631,20 @@ def save(operator, context, filepath="",
         if isinstance(ob, bpy.types.Bone):
 # 		if isinstance(ob, Blender.Types.BoneType):
 
+
+            # Remove the rotations for XNA
+            
             # we know we have a matrix
             # matrix = mtx4_z90 * (ob.matrix['ARMATURESPACE'] * matrix_mod)
-            matrix = ob.matrix_local * mtx4_z90 # dont apply armature matrix anymore
+            #matrix = ob.matrix_local * mtx4_z90 # dont apply armature matrix anymore
+            matrix = ob.matrix_local # XNA
 # 			matrix = mtx4_z90 * ob.matrix['ARMATURESPACE'] # dont apply armature matrix anymore
 
             parent = ob.parent
             if parent:
                 #par_matrix = mtx4_z90 * (parent.matrix['ARMATURESPACE'] * matrix_mod)
-                par_matrix = parent.matrix_local * mtx4_z90 # dont apply armature matrix anymore
+                #par_matrix = parent.matrix_local * mtx4_z90 # dont apply armature matrix anymore
+                par_matrix = parent.matrix_local # XNA
 # 				par_matrix = mtx4_z90 * parent.matrix['ARMATURESPACE'] # dont apply armature matrix anymore
                 matrix = par_matrix.copy().invert() * matrix
 
@@ -644,6 +653,9 @@ def save(operator, context, filepath="",
             loc =			tuple(matrix.translation_part())
             scale =			tuple(matrix.scale_part())
             rot =			tuple(matrix_rot.to_euler())
+            
+            # XNA return the original matrix
+            matrix = ob.matrix_local
 
         else:
             # This is bad because we need the parent relative matrix from the fbx parent (if we have one), dont use anymore
@@ -687,7 +699,7 @@ def save(operator, context, filepath="",
 
         file.write('\n\t\t\tProperty: "Lcl Translation", "Lcl Translation", "A+",%.15f,%.15f,%.15f' % loc)
         file.write('\n\t\t\tProperty: "Lcl Rotation", "Lcl Rotation", "A+",%.15f,%.15f,%.15f' % tuple(eulerRadToDeg(rot)))
-# 		file.write('\n\t\t\tProperty: "Lcl Rotation", "Lcl Rotation", "A+",%.15f,%.15f,%.15f' % rot)
+        #file.write('\n\t\t\tProperty: "Lcl Rotation", "Lcl Rotation", "A+",%.15f,%.15f,%.15f' % rot)
         file.write('\n\t\t\tProperty: "Lcl Scaling", "Lcl Scaling", "A+",%.15f,%.15f,%.15f' % scale)
         return loc, rot, scale, matrix, matrix_rot
 
@@ -1426,10 +1438,12 @@ def save(operator, context, filepath="",
 
         if my_mesh.fbxParent:
             # TODO FIXME, this case is broken in some cases. skinned meshes just shouldnt have parents where possible!
-            m = (my_mesh.matrixWorld.copy().invert() * my_bone.fbxArm.matrixWorld.copy() * my_bone.restMatrix) * mtx4_z90
+            #m = (my_mesh.matrixWorld.copy().invert() * my_bone.fbxArm.matrixWorld.copy() * my_bone.restMatrix) * mtx4_z90
+            m = (my_mesh.matrixWorld.copy().invert() * my_bone.fbxArm.matrixWorld.copy() * my_bone.restMatrix)
         else:
             # Yes! this is it...  - but dosnt work when the mesh is a.
-            m = (my_mesh.matrixWorld.copy().invert() * my_bone.fbxArm.matrixWorld.copy() * my_bone.restMatrix) * mtx4_z90
+            #m = (my_mesh.matrixWorld.copy().invert() * my_bone.fbxArm.matrixWorld.copy() * my_bone.restMatrix) * mtx4_z90
+            m = (my_mesh.matrixWorld.copy().invert() * my_bone.fbxArm.matrixWorld.copy() * my_bone.restMatrix)
 
         #m = mtx4_z90 * my_bone.restMatrix
         matstr = mat4x4str(m)
@@ -2773,9 +2787,11 @@ Takes:  {''')
                                     #if prev_eul:	prev_eul = mtx[1].to_euler('XYZ', prev_eul)
                                     #else:			prev_eul = mtx[1].to_euler()
                                     # for XNA
-                                    if prev_eul:	prev_eul = mtx[0].to_euler('XYZ', prev_eul)
-                                    else:			prev_eul = mtx[0].to_euler()
+                                    prev_eul = mtx[0].to_euler()
+                                    #if prev_eul:	prev_eul = mtx[0].to_euler('XYZ', prev_eul)
+                                    #else:			prev_eul = mtx[0].to_euler()
                                     context_bone_anim_vecs.append(eulerRadToDeg(prev_eul))
+                                    #context_bone_anim_vecs.append(prev_eul)
 
                             file.write('\n\t\t\t\tChannel: "%s" {' % TX_CHAN) # translation
 
