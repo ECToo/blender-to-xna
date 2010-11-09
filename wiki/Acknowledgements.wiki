@@ -7,7 +7,11 @@ The scripts will be based on work originally created by others.  This page ackno
 = Thanks =
 
 The original FBX exporter was created by Campbell Barton (ideasman42)
+
 http://wiki.blender.org/index.php/Extensions:2.4/Py/Scripts/Export/FBX
 
 The modified 2.4x version for XNA was done by Fritz@triplebgames.com
+
 http://wiki.blender.org/index.php/Extensions:2.4/Py/Scripts/Export/FBX-xna
+
+http://www.triplebgames.com/downloads.html
