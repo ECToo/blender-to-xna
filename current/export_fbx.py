@@ -31,6 +31,7 @@
 # Fritz@triplebgames.com 
 # Modified the 2.4x script to work with XNA
 # Save textures in the same folder, changes to suit XNA and other fixes
+# http://blenderartists.org/forum/showthread.php/119783-XNA-.fbx-Exporter(s)
 # --------------------------------------------------------------------------
 # John C Brown (JCBDigger @MistyManor) http://games.DiscoverThat.co.uk
 # Attempt to make a 2.5x script work with XNA 4.0
@@ -63,7 +64,9 @@
 # Done OK - Change 'Limb' to 'LimbNode'
 # Done OK - Make the armature a LimbNode instead of a null
 # --------------------------------------------------------------------------
-
+# Left unchanged for the time being:
+# object_tx()
+# --------------------------------------------------------------------------
 
 
 """
@@ -2765,8 +2768,11 @@ Takes:  {''')
                                 context_bone_anim_vecs = []
                                 prev_eul = None
                                 for mtx in context_bone_anim_mats:
-                                    if prev_eul:	prev_eul = mtx[1].to_euler('XYZ', prev_eul)
-                                    else:			prev_eul = mtx[1].to_euler()
+                                    #if prev_eul:	prev_eul = mtx[1].to_euler('XYZ', prev_eul)
+                                    #else:			prev_eul = mtx[1].to_euler()
+                                    # for XNA
+                                    if prev_eul:	prev_eul = mtx[0].to_euler('XYZ', prev_eul)
+                                    else:			prev_eul = mtx[0].to_euler()
                                     context_bone_anim_vecs.append(eulerRadToDeg(prev_eul))
 
                             file.write('\n\t\t\t\tChannel: "%s" {' % TX_CHAN) # translation
@@ -2787,8 +2793,10 @@ Takes:  {''')
                                             file.write(',')
 
                                         # Curve types are 'C,n' for constant, 'L' for linear
-                                        # C,n is for bezier? - linear is best for now so we can do simple keyframe removal
-                                        file.write('\n\t\t\t\t\t\t\t%i,%.15f,L'  % (fbx_time(frame-1), context_bone_anim_vecs[frame-act_start][i] ))
+                                        # Linear is best for now so we can do simple keyframe removal
+                                        # file.write('\n\t\t\t\t\t\t\t%i,%.15f,L'  % (fbx_time(frame-1), context_bone_anim_vecs[frame-act_start][i] ))
+		                                # For XNA use
+                                        file.write('\n\t\t\t\t\t\t\t%i,%.15f,C,n'  % (fbx_time(frame-1), context_bone_anim_vecs[frame-act_start][i] ))
                                         frame+=1
                                 else:
                                     # remove unneeded keys, j is the frame, needed when some frames are removed.
@@ -2831,7 +2839,10 @@ Takes:  {''')
                                         # better write one, otherwise we loose poses with no animation
                                         file.write('\n\t\t\t\t\t\tKeyCount: 1')
                                         file.write('\n\t\t\t\t\t\tKey: ')
-                                        file.write('\n\t\t\t\t\t\t\t%i,%.15f,L'  % (fbx_time(start), context_bone_anim_keys[0][0]))
+                                        #file.write('\n\t\t\t\t\t\t\t%i,%.15f,L'  % (fbx_time(start), context_bone_anim_keys[0][0]))
+                                        # for XNA
+                                        file.write('\n\t\t\t\t\t\t\t%i,%.15f,C,n'  % (fbx_time(start), context_bone_anim_keys[0][0]))
+										
                                     else:
                                         # We only need to write these if there is at least one
                                         file.write('\n\t\t\t\t\t\tKeyCount: %i' % len(context_bone_anim_keys))
@@ -2840,7 +2851,9 @@ Takes:  {''')
                                             if frame != context_bone_anim_keys[0][1]: # not the first
                                                 file.write(',')
                                             # frame is already one less then blenders frame
-                                            file.write('\n\t\t\t\t\t\t\t%i,%.15f,L'  % (fbx_time(frame), val ))
+                                            #file.write('\n\t\t\t\t\t\t\t%i,%.15f,L'  % (fbx_time(frame), val ))
+                                            # for XNA
+                                            file.write('\n\t\t\t\t\t\t\t%i,%.15f,C,n'  % (fbx_time(frame), val ))
 
                                 if		i==0:	file.write('\n\t\t\t\t\t\tColor: 1,0,0')
                                 elif	i==1:	file.write('\n\t\t\t\t\t\tColor: 0,1,0')
