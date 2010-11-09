@@ -1,4 +1,5 @@
 #summary How to add this in to Blender
+#labels Phase-Deploy
 = Introduction =
 
 The script is written to replace the existing FBX exporter.
