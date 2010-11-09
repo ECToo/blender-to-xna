@@ -15,3 +15,6 @@ The modified 2.4x version for XNA was done by Fritz@triplebgames.com
 http://wiki.blender.org/index.php/Extensions:2.4/Py/Scripts/Export/FBX-xna
 
 http://www.triplebgames.com/downloads.html
+
+The discussion thread to go with it:
+http://blenderartists.org/forum/showthread.php/119783-XNA-.fbx-Exporter(s)
