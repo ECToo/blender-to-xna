@@ -48,11 +48,40 @@
 # --------------------------------------------------------------------------
 
 # --------------------------------------------------------------------------
-# ** Tasks **
+# ** Tasks to adjust the output to work with XNA 4.0 ** 
 # --------------------------------------------------------------------------
-# - Change object_tx()
+# - Try setting the parent of the root bone to None for the
+#   purposes of calculating the relative matrices
+#   Perhaps flag the root bone
+# - The arms and hands get distorted but the rest of the animations
+#   look OK.
+#   The difference is that the collar bones and the fingers are not connected
+#   directly to the rest of the armature.
+#   Neither are the legs though so I am not sure why they work!
+# - See the Weights transformers at line 1416 
+#    This could affect the whole model.
+# - If the parent if the armature do not take the armature rotation and location
+#   for the bone position.
+#   Everything should be relative ti the armature
+# - See line 2028 and perhaps need to calculate the rest pose positions
+# - See where getAnimParRelMatrix(self, frame): is used
+#   it might be that this is where the armature parent position is used in error.
+
+
+# Done - Remove batch support
+#        This is just to be tidy and to avoid an additional complication 
+# --------------------------------------------------------------------------
+
+
+# --------------------------------------------------------------------------
+# ** Tasks to replicate the Blender 2.4x version of the XNA exporter** 
+# --------------------------------------------------------------------------
+# As far as I can tell the following made the output the same or similar to the 
+# Blender 2.4x version of the XNA FBX exporter.
+# The results are still wrong in XNA 4.0
+# Done - Change object_tx()
 #             Remove the rotation applied to the armature
-# - Change the takes so they use the same code as the 2.4x XNA FBX script
+# Done - Change the takes so they use the same code as the 2.4x XNA FBX script
 #             Part done
 #             Changed to C,n instead of L
 #             Still using previous rotation [1] instead of [0]
@@ -85,33 +114,6 @@ import shutil # for file copying
 import bpy
 from mathutils import Vector, Euler, Matrix
 
-# XXX not used anymore, images are copied one at a time
-def copy_images(dest_dir, textures):
-    import shutil
-    
-    if not dest_dir.endswith(os.sep):
-        dest_dir += os.sep
-
-    image_paths = set()
-    for tex in textures:
-        image_paths.add(bpy.path.abspath(tex.filepath))
-
-    # Now copy images
-    copyCount = 0
-    for image_path in image_paths:
-        if Blender.sys.exists(image_path):
-            # Make a name for the target path.
-            dest_image_path = dest_dir + image_path.split('\\')[-1].split('/')[-1]
-            if not Blender.sys.exists(dest_image_path): # Image isnt already there
-                print("\tCopying %r > %r" % (image_path, dest_image_path))
-                try:
-                    shutil.copy(image_path, dest_image_path)
-                    copyCount+=1
-                except:
-                    print("\t\tWarning, file failed to copy, skipping.")
-
-    print('\tCopied %d images' % copyCount)
-
 # I guess FBX uses degrees instead of radians (Arystan).
 # Call this function just before writing to FBX.
 def eulerRadToDeg(eul):
@@ -122,10 +124,6 @@ def eulerRadToDeg(eul):
     ret.z = 180 / math.pi * eul[2]
 
     return ret
-
-
-# def strip_path(p):
-# 	return p.split('\\')[-1].split('/')[-1]
 
 # Used to add the scene name into the filepath without using odd chars
 sane_name_mapping_ob = {}
@@ -149,7 +147,8 @@ def increment_string(t):
 
 
 
-# todo - Disallow the name 'Scene' and 'blend_root' - it will bugger things up.
+# TODO - Disallow the name 'Scene' - it will bugger things up.
+#        'Blend_Root' is no longer used so it does not matter
 def sane_name(data, dct):
     #if not data: return None
 
@@ -195,25 +194,6 @@ def sane_matname(data):		return sane_name(data, sane_name_mapping_mat)
 def sane_texname(data):		return sane_name(data, sane_name_mapping_tex)
 def sane_takename(data):	return sane_name(data, sane_name_mapping_take)
 def sane_groupname(data):	return sane_name(data, sane_name_mapping_group)
-
-# def derived_paths(fname_orig, basepath, FORCE_CWD=False):
-# 	'''
-# 	fname_orig - blender path, can be relative
-# 	basepath - fname_rel will be relative to this
-# 	FORCE_CWD - dont use the basepath, just add a ./ to the filepath.
-# 		use when we know the file will be in the basepath.
-# 	'''
-# 	fname = bpy.path.abspath(fname_orig)
-# # 	fname = Blender.sys.expandpath(fname_orig)
-# 	fname_strip = os.path.basename(fname)
-# # 	fname_strip = strip_path(fname)
-# 	if FORCE_CWD:
-# 		fname_rel = '.' + os.sep + fname_strip
-# 	else:
-# 		fname_rel = bpy.path.relpath(fname, basepath)
-# # 		fname_rel = Blender.sys.relpath(fname, basepath)
-# 	if fname_rel.startswith('//'): fname_rel = '.' + os.sep + fname_rel[2:]
-# 	return fname, fname_strip, fname_rel
 
 
 def mat4x4str(mat):
@@ -283,6 +263,7 @@ header_comment = \
 
 '''
 
+# Called from the user interface script  __init__.py
 # This func can be called with just the filepath
 def save(operator, context, filepath="",
         GLOBAL_MATRIX =				None,
@@ -298,17 +279,10 @@ def save(operator, context, filepath="",
         ANIM_OPTIMIZE =				True,
         ANIM_OPTIMIZE_PRECISSION =	6,
         ANIM_ACTION_ALL =			False,
-        BATCH_ENABLE =				False,
-        BATCH_GROUP =				True,
-        BATCH_FILE_PREFIX =			'',
-        BATCH_OWN_DIR =				False
     ):
 
-    #XXX, missing arg 
-    batch_objects = None
-
     # testing
-    mtx_x90		= Matrix.Rotation( math.pi/2.0, 3, 'X') # used
+    mtx_x90		= Matrix.Rotation( math.pi/2.0, 3, 'X') # used for lamp and camera rotations only
     #mtx4_z90	= Matrix.Rotation( math.pi/2.0, 4, 'Z')
 
     if GLOBAL_MATRIX is None:
@@ -317,114 +291,6 @@ def save(operator, context, filepath="",
     if bpy.ops.object.mode_set.poll():
         bpy.ops.object.mode_set(mode='OBJECT')
 
-    # ----------------- Batch support!
-    if BATCH_ENABLE:
-        fbxpath = filepath
-
-        # get the path component of filepath
-        tmp_exists = bpy.utils.exists(fbxpath)
-# 		tmp_exists = Blender.sys.exists(fbxpath)
-
-        if tmp_exists != 2: # a file, we want a path
-            fbxpath = os.path.dirname(fbxpath)
-# 			while fbxpath and fbxpath[-1] not in ('/', '\\'):
-# 				fbxpath = fbxpath[:-1]
-            if not fbxpath:
-# 			if not filepath:
-                # XXX
-                print('Error%t|Directory does not exist!')
-# 				Draw.PupMenu('Error%t|Directory does not exist!')
-                return
-
-            tmp_exists = bpy.utils.exists(fbxpath)
-# 			tmp_exists = Blender.sys.exists(fbxpath)
-
-        if tmp_exists != 2:
-            # XXX
-            print('Error%t|Directory does not exist!')
-# 			Draw.PupMenu('Error%t|Directory does not exist!')
-            return
-
-        if not fbxpath.endswith(os.sep):
-            fbxpath += os.sep
-        del tmp_exists
-
-
-        if BATCH_GROUP:
-            data_seq = bpy.data.groups
-        else:
-            data_seq = bpy.data.scenes
-
-        # call this function within a loop with BATCH_ENABLE == False
-        orig_sce = context.scene
-# 		orig_sce = bpy.data.scenes.active
-
-        new_fbxpath = fbxpath # own dir option modifies, we need to keep an original
-        for data in data_seq: # scene or group
-            newname = BATCH_FILE_PREFIX + bpy.path.clean_name(data.name)
-
-
-            if BATCH_OWN_DIR:
-                new_fbxpath = fbxpath + newname + os.sep
-                # path may already exist
-                # TODO - might exist but be a file. unlikely but should probably account for it.
-
-                if bpy.utils.exists(new_fbxpath) == 0:
-# 				if Blender.sys.exists(new_fbxpath) == 0:
-                    os.mkdir(new_fbxpath)
-
-
-            filepath = new_fbxpath + newname + '.fbx'
-
-            print('\nBatch exporting %s as...\n\t%r' % (data, filepath))
-
-            # XXX don't know what to do with this, probably do the same? (Arystan)
-            if BATCH_GROUP: #group
-                # group, so objects update properly, add a dummy scene.
-                scene = bpy.data.scenes.new()
-                scene.Layers = (1<<20) -1
-                bpy.data.scenes.active = scene
-                for ob_base in data.objects:
-                    scene.objects.link(ob_base)
-
-                scene.update(1)
-
-                # TODO - BUMMER! Armatures not in the group wont animate the mesh
-
-            else:# scene
-
-
-                data_seq.active = data
-
-
-            # Call self with modified args
-            # Dont pass batch options since we already usedt them
-            write(filepath, data.objects,
-                context,
-                False,
-                EXP_MESH,
-                EXP_MESH_APPLY_MOD,
-                EXP_ARMATURE,
-                EXP_LAMP,
-                EXP_CAMERA,
-                EXP_EMPTY,
-                EXP_IMAGE_COPY,
-                GLOBAL_MATRIX,
-                ANIM_ENABLE,
-                ANIM_OPTIMIZE,
-                ANIM_OPTIMIZE_PRECISSION,
-                ANIM_ACTION_ALL
-            )
-
-            if BATCH_GROUP:
-                # remove temp group scene
-                bpy.data.scenes.unlink(scene)
-
-        bpy.data.scenes.active = orig_sce
-
-        return # so the script wont run after we have batch exported.
-
-    # end batch support
 
     # Use this for working out paths relative to the export location
     basepath = os.path.dirname(filepath) or '.'
@@ -1393,7 +1259,7 @@ def save(operator, context, filepath="",
             if my_mesh.fbxBoneParent == my_bone:
                 # TODO - this is a bit lazy, we could have a simple write loop
                 # for this case because all weights are 1.0 but for now this is ok
-                # Parent Bones arent used all that much anyway.
+                # Parent Bones are not used all that much anyway.
                 vgroup_data = [(j, 1.0) for j in range(len(my_mesh.blenData.vertices))]
             else:
                 # This bone is not a parent of this mesh object, no weights
@@ -1449,6 +1315,7 @@ def save(operator, context, filepath="",
         matstr = mat4x4str(m)
         matstr_i = mat4x4str(m.invert())
 
+		# TODO: this is one possible place that could affect the whole model in XNA
         file.write('\n\t\tTransform: %s' % matstr_i) # THIS IS __NOT__ THE GLOBAL MATRIX AS DOCUMENTED :/
         file.write('\n\t\tTransformLink: %s' % matstr)
         file.write('\n\t}')
@@ -1943,11 +1810,8 @@ def save(operator, context, filepath="",
     tmp_ob_type = ob_type = None # incase no objects are exported, so as not to raise an error
 
     # if EXP_OBS_SELECTED is false, use sceens objects
-    if not batch_objects:
-        if EXP_OBS_SELECTED:	tmp_objects = context.selected_objects
-        else:					tmp_objects = scene.objects
-    else:
-        tmp_objects = batch_objects
+    if EXP_OBS_SELECTED:	tmp_objects = context.selected_objects
+    else:					tmp_objects = scene.objects
 
     if EXP_ARMATURE:
         # This is needed so applying modifiers dosnt apply the armature deformation, its also needed
@@ -2972,12 +2836,6 @@ Takes:  {''')
     ob_lights[:] =	[]
     ob_meshes[:] =	[]
     ob_null[:] =	[]
-
-
-    # copy images if enabled
-# 	if EXP_IMAGE_COPY:
-# # 		copy_images( basepath,  [ tex[1] for tex in textures if tex[1] != None ])
-# 		bpy.util.copy_images( [ tex[1] for tex in textures if tex[1] != None ], basepath)
 
     print('export finished in %.4f sec.' % (time.clock() - start_time))
     return {'FINISHED'}
