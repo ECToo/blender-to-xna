@@ -66,10 +66,10 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
 # 	ANIM_ACTION_ALL = BoolProperty(name="Current Action", description="Use actions currently applied to the armatures (use scene start/end frame)", default=True)
     ANIM_ACTION_ALL = BoolProperty(name="All Actions", description="Use all actions for armatures, if false, use current action", default=False)
     # batch
-    BATCH_ENABLE = BoolProperty(name="Enable Batch", description="Automate exporting multiple scenes or groups to files", default=False)
-    BATCH_GROUP = BoolProperty(name="Group > File", description="Export each group as an FBX file, if false, export each scene as an FBX file", default=False)
-    BATCH_OWN_DIR = BoolProperty(name="Own Dir", description="Create a dir for each exported file", default=True)
-    BATCH_FILE_PREFIX = StringProperty(name="Prefix", description="Prefix each file with this name", maxlen=1024, default="")
+    #BATCH_ENABLE = BoolProperty(name="Enable Batch", description="Automate exporting multiple scenes or groups to files", default=False)
+    #BATCH_GROUP = BoolProperty(name="Group > File", description="Export each group as an FBX file, if false, export each scene as an FBX file", default=False)
+    #BATCH_OWN_DIR = BoolProperty(name="Own Dir", description="Create a dir for each exported file", default=True)
+    #BATCH_FILE_PREFIX = StringProperty(name="Prefix", description="Prefix each file with this name", maxlen=1024, default="")
 
     def execute(self, context):
         import math
@@ -105,10 +105,6 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
             ANIM_OPTIMIZE=self.ANIM_OPTIMIZE,
             ANIM_OPTIMIZE_PRECISSION=self.ANIM_OPTIMIZE_PRECISSION,
             ANIM_ACTION_ALL=self.ANIM_ACTION_ALL,
-            BATCH_ENABLE=self.BATCH_ENABLE,
-            BATCH_GROUP=self.BATCH_GROUP,
-            BATCH_FILE_PREFIX=self.BATCH_FILE_PREFIX,
-            BATCH_OWN_DIR=self.BATCH_OWN_DIR,
             )
 
 
