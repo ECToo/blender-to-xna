@@ -50,23 +50,25 @@
 # --------------------------------------------------------------------------
 # ** Tasks to adjust the output to work with XNA 4.0 ** 
 # --------------------------------------------------------------------------
-# - Try setting the parent of the root bone to None for the
-#   purposes of calculating the relative matrices
-#   Perhaps flag the root bone
-# - The arms and hands get distorted but the rest of the animations
-#   look OK.
-#   The difference is that the collar bones and the fingers are not connected
-#   directly to the rest of the armature.
-#   Neither are the legs though so I am not sure why they work!
+# - See where getAnimParRelMatrix(self, frame): is used
+#   it might be that this is where the armature parent position is used in error.
+#   my_ob.getAnimParRelMatrix(frame), my_ob.getAnimParRelMatrixRot(frame)
+#   TODO: if the parent is NOT a bone then return as if no parent
 # - See the Weights transformers at line 1416 
 #    This could affect the whole model.
 # - If the parent if the armature do not take the armature rotation and location
 #   for the bone position.
-#   Everything should be relative ti the armature
-# - See line 2028 and perhaps need to calculate the rest pose positions
-# - See where getAnimParRelMatrix(self, frame): is used
-#   it might be that this is where the armature parent position is used in error.
-
+#   Everything should be relative to the armature
+# Cannot find - Try setting the parent of the root bone to None for the
+#   purposes of calculating the relative matrices
+#   Perhaps flag the root bone
+#   If the parent is not also a bone is probably the easiest way
+# Cannot find - The arms and hands get distorted but the rest of the animations
+#   look OK.
+#   The difference is that the collar bones and the fingers are not connected
+#   directly to the rest of the armature.
+#   Neither are the legs though so I am not sure why they work!
+# Looks OK - See line 2028 and perhaps need to calculate the rest pose positions
 
 # Done - Remove batch support
 #        This is just to be tidy and to avoid an additional complication 
@@ -74,7 +76,7 @@
 
 
 # --------------------------------------------------------------------------
-# ** Tasks to replicate the Blender 2.4x version of the XNA exporter** 
+# Completed tasks to replicate the Blender 2.4x version of the XNA exporter
 # --------------------------------------------------------------------------
 # As far as I can tell the following made the output the same or similar to the 
 # Blender 2.4x version of the XNA FBX exporter.
@@ -325,8 +327,8 @@ def save(operator, context, filepath="",
 # 			self.restMatrix =		blenBone.matrix['ARMATURESPACE']
 
             # not used yet
-            # self.restMatrixInv =	self.restMatrix.copy().invert()
-            # self.restMatrixLocal =	None # set later, need parent matrix
+            #self.restMatrixInv =	self.restMatrix.copy().invert()
+            #self.restMatrixLocal =	None # set later, need parent matrix
 
             self.parent =			None
 
@@ -346,6 +348,7 @@ def save(operator, context, filepath="",
             else:
                 self.restMatrixLocal = self.restMatrix.copy()
         '''
+
         def setPoseFrame(self, f):
             # cache pose info here, frame must be set beforehand
 
@@ -507,11 +510,16 @@ def save(operator, context, filepath="",
 # 			matrix = mtx4_z90 * ob.matrix['ARMATURESPACE'] # dont apply armature matrix anymore
 
             parent = ob.parent
+            
+            
+            
             if parent:
+                # XNA GUESS: the parent should also be a bone (made no difference)
+                #if isinstance(parent, bpy.types.Bone):
                 #par_matrix = mtx4_z90 * (parent.matrix['ARMATURESPACE'] * matrix_mod)
                 #par_matrix = parent.matrix_local * mtx4_z90 # dont apply armature matrix anymore
                 par_matrix = parent.matrix_local # XNA
-# 				par_matrix = mtx4_z90 * parent.matrix['ARMATURESPACE'] # dont apply armature matrix anymore
+                #par_matrix = mtx4_z90 * parent.matrix['ARMATURESPACE'] # dont apply armature matrix anymore
                 matrix = par_matrix.copy().invert() * matrix
 
             matrix_rot =	matrix.rotation_part()
@@ -668,21 +676,25 @@ def save(operator, context, filepath="",
         file.write('\n\tModel: "Model::%s", "LimbNode" {' % my_bone.fbxName)
         file.write('\n\t\tVersion: 232')
 
+        # XNA try with matrices (JCB) made no difference!
         #poseMatrix = write_object_props(my_bone.blenBone, None, None, my_bone.fbxArm.parRelMatrix())[3]
         poseMatrix = write_object_props(my_bone.blenBone)[3] # dont apply bone matricies anymore
         pose_items.append( (my_bone.fbxName, poseMatrix) )
 
 
         # file.write('\n\t\t\tProperty: "Size", "double", "",%.6f' % ((my_bone.blenData.head['ARMATURESPACE'] - my_bone.blenData.tail['ARMATURESPACE']) * my_bone.fbxArm.parRelMatrix()).length)
+        # JCB: What is Size?
+        #      Changing it made no difference!
         file.write('\n\t\t\tProperty: "Size", "double", "",1')
 
         #((my_bone.blenData.head['ARMATURESPACE'] * my_bone.fbxArm.matrixWorld) - (my_bone.blenData.tail['ARMATURESPACE'] * my_bone.fbxArm.parRelMatrix())).length)
 
-        """
+        '''
         file.write('\n\t\t\tProperty: "LimbLength", "double", "",%.6f' %\
             ((my_bone.blenBone.head['ARMATURESPACE'] - my_bone.blenBone.tail['ARMATURESPACE']) * my_bone.fbxArm.parRelMatrix()).length)
-        """
+        '''
 
+        # JCB: Changing th length of the following made no difference
         file.write('\n\t\t\tProperty: "LimbLength", "double", "",%.6f' %
                    (my_bone.blenBone.head_local - my_bone.blenBone.tail_local).length)
 # 			(my_bone.blenBone.head['ARMATURESPACE'] - my_bone.blenBone.tail['ARMATURESPACE']).length)
@@ -1236,7 +1248,7 @@ def save(operator, context, filepath="",
     def write_sub_deformer_skin(my_mesh, my_bone, weights):
 
         '''
-        Each subdeformer is spesific to a mesh, but the bone it links to can be used by many sub-deformers
+        Each subdeformer is specific to a mesh, but the bone it links to can be used by many sub-deformers
         So the SubDeformer needs the mesh-object name as a prefix to make it unique
 
         Its possible that there is no matching vgroup in this mesh, in that case no verts are in the subdeformer,
@@ -1315,7 +1327,7 @@ def save(operator, context, filepath="",
         matstr = mat4x4str(m)
         matstr_i = mat4x4str(m.invert())
 
-		# TODO: this is one possible place that could affect the whole model in XNA
+		# TODO: this is one possible place that could affect the whole model in XNA (JCB)
         file.write('\n\t\tTransform: %s' % matstr_i) # THIS IS __NOT__ THE GLOBAL MATRIX AS DOCUMENTED :/
         file.write('\n\t\tTransformLink: %s' % matstr)
         file.write('\n\t}')
@@ -1814,9 +1826,9 @@ def save(operator, context, filepath="",
     else:					tmp_objects = scene.objects
 
     if EXP_ARMATURE:
-        # This is needed so applying modifiers dosnt apply the armature deformation, its also needed
+        # This is needed so applying modifiers does not apply the armature deformation, its also needed
         # ...so mesh objects return their rest worldspace matrix when bone-parents are exported as weighted meshes.
-        # set every armature to its rest, backup the original values so we done mess up the scene
+        # set every armature to its rest, backup the original values so we do not mess up the scene
         ob_arms_orig_rest = [arm.pose_position for arm in bpy.data.armatures]
 
         for arm in bpy.data.armatures:
@@ -2033,6 +2045,7 @@ def save(operator, context, filepath="",
                     break
 
         # Not used at the moment
+        # give it a try for XNA (JCB) to many bits missing did not work
         # my_bone.calcRestMatrixLocal()
         bone_deformer_count += len(my_bone.blenMeshes)
 
@@ -2183,7 +2196,7 @@ Objects:  {''')
     write_camera_switch()
 
     # Write the null object
-    # Not necessary (I hope)
+    # Not necessary (I hope, JCB)
     # write_null(None, 'blend_root')# , GLOBAL_MATRIX)
 
     for my_null in ob_null:
@@ -2371,11 +2384,11 @@ Connections:  {''')
 
 
     # write the fake root node
-    # I don't think we need this
+    # I don't think we need this (JCB)
     #file.write('\n\tConnect: "OO", "Model::blend_root", "Model::Scene"')
 
     # Changed so that if it does not have a parent it connects to the scene
-    # Removed in favour of specific mappings not everything
+    # Removed in favour of specific mappings not everything (JCB)
     #for ob_generic in ob_all_typegroups: # all blender 'Object's we support
     #    for my_ob in ob_generic:
     #        if my_ob.fbxParent:
@@ -2384,12 +2397,12 @@ Connections:  {''')
     #            # file.write('\n\tConnect: "OO", "Model::%s", "Model::blend_root"' % my_ob.fbxName)
     #            file.write('\n\tConnect: "OO", "Model::%s", "Model::Scene"' % my_ob.fbxName)
 
-    # Added specific for each type of object we support
+    # Added specific for each type of object we support (JCB)
     # Armature
     for my_arm in ob_arms:
         file.write('\n\tConnect: "OO", "Model::%s", "Model::Scene"' % my_arm.fbxName)
               
-    # Added
+    # Added (JCB)
     # Mesh objects
     for my_mesh in ob_meshes:
         file.write('\n\tConnect: "OO", "Model::%s", "Model::Scene"' % my_mesh.fbxName)
@@ -2451,7 +2464,7 @@ Connections:  {''')
                 for fbxGroupName in ob_base.fbxGroupNames:
                     file.write('\n\tConnect: "OO", "Model::%s", "GroupSelection::%s"' % (ob_base.fbxName, fbxGroupName))
 
-    # Connect the armature to the scene not the root
+    # Connect the armature to the scene not the root (JCB)
     # This duplicates above at the start of connections that already picks up any objects that does not have a parent
     # This has been removed
     #for my_arm in ob_arms:
@@ -2488,7 +2501,7 @@ Connections:  {''')
         if ANIM_OPTIMIZE:
             ANIM_OPTIMIZE_PRECISSION_FLOAT = 0.1 ** ANIM_OPTIMIZE_PRECISSION
 
-        # default action, when no actions are avaioable
+        # default action, when no actions are available
         tmp_actions = []
         blenActionDefault = None
         action_lastcompat = None
@@ -2496,7 +2509,7 @@ Connections:  {''')
         # instead of tagging
         tagged_actions = []
 
-        # get the default name
+        # get the default name - current action (JCB)
         for my_arm in ob_arms:
             if not blenActionDefault:
                 blenActionDefault = my_arm.blenAction
@@ -2511,10 +2524,6 @@ Connections:  {''')
         # blenActions is not yet initialized so do it now.
         tmp_act_count = 0
         for my_arm in ob_arms:
-
-            # get the default name
-            #if not blenActionDefault:
-            #    blenActionDefault = my_arm.blenAction
 
             arm_bone_names = set([my_bone.blenName for my_bone in my_arm.fbxBones])
 
@@ -2539,7 +2548,7 @@ Connections:  {''')
 
         del action_lastcompat
 
-        # We do not need a default take
+        # We do not need a default take (JCB)
         # tmp_actions.insert(0, None) # None is the default action
 
         file.write('''
