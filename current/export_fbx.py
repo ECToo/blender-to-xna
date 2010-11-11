@@ -50,6 +50,9 @@
 # --------------------------------------------------------------------------
 # ** Tasks to adjust the output to work with XNA 4.0 ** 
 # --------------------------------------------------------------------------
+# - See line 2055 ish
+#   Add a console message to confirm that the bones get parents
+#   These are necessary for calculating the bone matrices
 # - See where getAnimParRelMatrix(self, frame): is used
 #   it might be that this is where the armature parent position is used in error.
 #   my_ob.getAnimParRelMatrix(frame), my_ob.getAnimParRelMatrixRot(frame)
@@ -379,16 +382,25 @@ def save(operator, context, filepath="",
         def getAnimParRelMatrix(self, frame):
             #arm_mat = self.fbxArm.matrixWorld
             #arm_mat = self.fbxArm.parRelMatrix()
+            # XNA test
+            # None of the things called here appear to have a parent!
+            #return (self.parent.getPoseMatrix(frame)).invert() * ((self.getPoseMatrix(frame)))
+            
             if not self.parent:
                 #return mtx4_z90 * (self.getPoseMatrix(frame) * arm_mat) # dont apply arm matrix anymore
                 #return self.getPoseMatrix(frame) * mtx4_z90
                 # XNA
                 return self.getPoseMatrix(frame)
             else:
-                #return (mtx4_z90 * ((self.getPoseMatrix(frame) * arm_mat)))  *  (mtx4_z90 * (self.parent.getPoseMatrix(frame) * arm_mat)).invert()
-                #return (self.parent.getPoseMatrix(frame) * mtx4_z90).invert() * ((self.getPoseMatrix(frame)) * mtx4_z90)
-                # XNA
+                # XNA check to see if the parent is a bone
+                #if isinstance(self.parent, bpy.types.Bone):
+                #    #return (mtx4_z90 * ((self.getPoseMatrix(frame) * arm_mat)))  *  (mtx4_z90 * (self.parent.getPoseMatrix(frame) * arm_mat)).invert()
+                #    #return (self.parent.getPoseMatrix(frame) * mtx4_z90).invert() * ((self.getPoseMatrix(frame)) * mtx4_z90)
+                #    # XNA
                 return (self.parent.getPoseMatrix(frame)).invert() * ((self.getPoseMatrix(frame)))
+                #else:
+                #    return self.getPoseMatrix(frame)
+            
 
         # we need thes because cameras and lights modified rotations
         def getAnimParRelMatrixRot(self, frame):
@@ -2629,6 +2641,9 @@ Takes:  {''')
 
             #for bonename, bone, obname, me, armob in ob_bones:
             for ob_generic in (ob_bones, ob_meshes, ob_null, ob_cameras, ob_lights, ob_arms):
+            # Just try Bones
+            #for ob_generic in ob_bones:
+            #for my_ob in ob_bones:
 
                 for my_ob in ob_generic:
 
@@ -2763,7 +2778,7 @@ Takes:  {''')
             file.write('\n\t}')
 
             # end action loop. set original actions
-            # do this after every loop incase actions effect eachother.
+            # do this after every loop incase actions effect each other.
             for my_bone in ob_arms:
                 if my_bone.blenObject.animation_data:
                     my_bone.blenObject.animation_data.action = my_bone.blenAction
