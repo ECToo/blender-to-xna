@@ -1,4 +1,4 @@
-#summary How to add this in to Blender
+#summary How to add the scripts in to Blender
 #labels Phase-Deploy
 = Introduction =
 
