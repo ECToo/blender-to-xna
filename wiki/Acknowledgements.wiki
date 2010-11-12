@@ -19,3 +19,7 @@ http://www.triplebgames.com/downloads.html
 
 The discussion thread to go with it:
 http://blenderartists.org/forum/showthread.php/119783-XNA-.fbx-Exporter(s)
+
+I looked at the DirectX exporter to try to get that to work with XNA that was created by Chris Foster (Kira Vakaan):
+
+http://wiki.blender.org/index.php/Extensions:2.5/Py/
