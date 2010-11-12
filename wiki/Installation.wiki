@@ -2,7 +2,7 @@
 #labels Phase-Deploy
 = Introduction =
 
-There are various scripts provided and they should be installed in their respective folder.  Be careful if you rename anything because class and folder names may be included in the scripts.
+There are various scripts provided and they should be installed in their respective folders.  Be careful if you rename anything because class and folder names may be included in the scripts.
 
 = Location =
 
