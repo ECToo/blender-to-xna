@@ -25,7 +25,7 @@ The AppData folder is usually hidden.
 = Installation =
 
 Make sure you have exited Blender.
-You must delete the compiled Python files from the install folder otherwise Blnder will use the old scripts.  The compiled files are the ones ending .pyc.
+You must delete the compiled Python files from the install folder otherwise Blender will use the old scripts.  The compiled files are the ones ending .pyc.
 You can just delete all the files in that folder as you are about to replace them anyway.  
 
 Copy all the script files in to the install folder.  Typically that is one '__init__.py' file and one or more class files, such as 'export_xxx.py'.
