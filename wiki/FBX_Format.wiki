@@ -4,4 +4,4 @@
 
 My initial experiments to adjust the existing FBX exporter to work with XNA failed.  It is particularly difficult because the FBX file format is not documented.  The other problem is that from what I have read FBX is very versatile.  
 
-That means even the FBX SDK is likely to save what it has been given making no attempt to convert it to what another application needs.  This means the output file may not match what XNA requires even if the file output is a valid file for some other appliation!
+That means even the FBX SDK is likely to save what it has been given making no attempt to convert it to what another application needs.  This means the output file may not match what XNA requires even if the file output is a valid file for some other application!
