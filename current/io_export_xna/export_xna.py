@@ -27,13 +27,26 @@
 # that work with XNA 4.0 this is an alternate solution using the keyframe
 # format from the XNA skinning sample.
 # --------------------------------------------------------------------------
+# * File format *
+# --------------------------------------------------------------------------
+# First line:
+# Number of bones in the armature (space) duration of the animation loop
+# One line for each keyframe bone transform:
+# BoneID (space) FrameTime |(pipe) Transform matrix (space separated numbers)
+# --------------------------------------------------------------------------
+# ** Limitations **
+# --------------------------------------------------------------------------
+# - Can only export the currently selected action
+# --------------------------------------------------------------------------
+
 
 # This script uses spaces for indents NOT tabs.
+# Remember that there is a scripting console built in to Blender 2.5x
+# See: Help -> Operator Cheat Sheet from within Blender 2.5x
 
 # --------------------------------------------------------------------------
 # *** TASKS ***
 # --------------------------------------------------------------------------
-# - Remove all unnecessary code from the script I used as a starting point
 # - Create the user interface
 #     All actions or just the current action (default to current only)
 #     Add the action name as a suffix to the filename (default)
@@ -72,55 +85,36 @@ Execute this script from the "File->Export" menu.
 """
 
 import bpy
+    
 
+def export_xna(filepath, currentAction):
 
-def faceToTriangles(face):
-    triangles = []
-    if (len(face) == 4): #quad
-        triangles.append( [ face[0], face[1], face[2] ] )
-        triangles.append( [ face[2], face[3], face[0] ] )
-    else:
-        triangles.append(face)
+    # store each keyframe bone transform as a separate line
+    # File format:
+    # BoneID FrameTime | Transform matrix
+    keyframes = []
+    
+    # Currently selected (context) action
+    KeyframeCount = bpy.context.scene.frame_end - bpy.context.scene.frame_start + 1
 
-    return triangles
+    # Loop through all the frames starting with the first one in the selected action
+    for frameID in range(0, KeyframeCount):
+        # I think this sets the current frame
+        bpy.context.scene.frame_set(frameID + bpy.context.scene.frame_start)
+        
+        # Try getting every bone in the frame 
+        # bpy.context.scene.frame.bones (or something like that)
+        
+        # for bone in bpy.context.scene.frame.bones:
+        
+            # bone.matrix_local
+    
+        keyframes.append(stuff)
 
-
-def faceValues(face, mesh, matrix):
-    fv = []
-    for verti in face.vertices_raw:
-        fv.append(matrix * mesh.vertices[verti].co)
-    return fv
-
-
-def faceToLine(face):
-    line = ""
-    for v in face:
-        line += str(v[0]) + " " + str(v[1]) + " " + str(v[2]) + " "
-    return line[:-1] + "\n"
-
-
-def export_xna(filepath, applyMods, triangulate):
-    faces = []
-    for obj in bpy.context.selected_objects:
-        if obj.type == 'MESH':
-            matrix = obj.matrix_world
-
-            if (applyMods):
-                me = obj.create_mesh(bpy.context.scene, True, "PREVIEW")
-            else:
-                me = obj.data
-
-            for face in me.faces:
-                fv = faceValues(face, me, matrix)
-                if triangulate:
-                    faces.extend(faceToTriangles(fv))
-                else:
-                    faces.append(fv)
-
-    # write the faces to a file
+    # write the frames to a file
     file = open(filepath, "w")
-    for face in faces:
-        file.write(faceToLine(face))
+    for keyframe in keyframes:
+        file.write(keyframe)
     file.close()
 
 
@@ -135,11 +129,10 @@ class XNAExporter(bpy.types.Operator):
     filepath = StringProperty(name="File Path", description="Filepath used for exporting the file", maxlen= 1024, default= "", subtype='FILE_PATH')
     check_existing = BoolProperty(name="Check Existing", description="Check and warn on overwriting existing files", default=True, options={'HIDDEN'})
 
-    apply_modifiers = BoolProperty(name="Apply Modifiers", description="Use transformed mesh data from each object", default=True)
-    triangulate = BoolProperty(name="Triangulate", description="Triangulate quads.", default=True)
+    current_action = BoolProperty(name="Current Action", description="No choice this only Exports the current action", default=True)
 
     def execute(self, context):
-        export_xna(self.filepath, self.apply_modifiers, self.triangulate)
+        export_xna(self.filepath, self.current_action)
         return {'FINISHED'}
 
     def invoke(self, context, event):
