@@ -2,31 +2,34 @@
 #labels Phase-Deploy
 = Introduction =
 
-The script is written to replace the existing FBX exporter.
+There are various scripts provided and they should be installed in their respective folder.  Be careful if you rename anything because class and folder names may be included in the scripts.
 
 = Location =
 
-The current FBX exporter ships with Blender 2.5x beta.
-Depending on the settings used while installing Blender the scripts may be in different locations.  On Windows if you accepted the default the scripts should be in the users application data folder.
+The first attempts overwrite the FBX exporter which ships with Blender 2.5x beta in the folder "$SCRIPTS\op\io_scene_fbx".
 
-"C:\Users\%USERNAME%\AppData\Roaming\Blender Foundation\Blender\2.5x\scripts\op\io_scene_fbx"
+All other scripts should be installed in the 'addons' folder within new folders.
 
-or on a network
+They are script packages not individual scripts.  The package should be in a sub folder of the 'addons' folder.
 
-"%USERPROFILE%\AppData\Roaming\Blender Foundation\Blender\2.5x\scripts\op\io_scene_fbx"
+Depending on the settings used while installing Blender the scripts may be in different locations.  On Windows if you accepted the default the scripts should be in the users application data folder:
+
+"C:\Users\%USERNAME%\AppData\Roaming\Blender Foundation\Blender\2.5x\scripts\addons"
+
+or on a network:
+
+"%USERPROFILE%\AppData\Roaming\Blender Foundation\Blender\2.5x\scripts\addons"
 
 The AppData folder is usually hidden.
 
 = Installation =
 
 Make sure you have exited Blender.
-You must delete the compiled Python files from the above folder otherwise Blnder will use the old scripts.  The compiled files are the ones ending .pyc.
+You must delete the compiled Python files from the install folder otherwise Blnder will use the old scripts.  The compiled files are the ones ending .pyc.
 You can just delete all the files in that folder as you are about to replace them anyway.  
 
-Copy both the modified script files in to that folder.
+Copy all the script files in to the install folder.  Typically that is one '__init__.py' file and one or more class files, such as 'export_xxx.py'.
 
-'__init__.py'
+Start Blender and bring up the File->Preferences menu.  Select the 'Addons' tab, find the new script from the list and enable it by puting a tick in the small box.
 
-'export_fbx.py'
-
-Start Blender and Export FBX from the File->Export menu as normal.
+If the script is an export script it will then be available on the File->Export menu.
