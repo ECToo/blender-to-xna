@@ -1,0 +1,38 @@
+# ** Blender Object Model
+# Using the console in Blender to find methods
+
+# Actions
+bpy.contect.scene.objects[4].animation_data_action
+bpy.data.actions["Duck"]
+
+# Each action
+.fcurves
+.frame_range
+.keys()
+.keyframe_delete()
+.keyframe_insert()
+.library
+.name
+.path_from_id()
+.path_resolve()
+.pose_markers
+.rna_type
+.tag
+.type_recast()
+.use_fake_user
+.user_clear()
+.users
+.values() # custome properties
+
+# Each Fcurve
+.foreach_get()
+.foreach_set()
+.get()
+.id_data
+.items()
+.keys()
+.new() # python rna function
+.path_from_it()
+.remove()
+.rna_type
+.values()
