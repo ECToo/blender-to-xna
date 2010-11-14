@@ -3,3 +3,5 @@ Prop3=19,2
 [InternetShortcut]
 URL=http://wiki.blender.org/index.php/Dev:2.5/Py/API/Intro
 IDList=
+IconFile=http://wiki.blender.org/favicon.ico
+IconIndex=1

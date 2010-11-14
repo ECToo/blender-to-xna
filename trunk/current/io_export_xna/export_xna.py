@@ -93,30 +93,53 @@ def export_xna(filepath, currentAction):
     # File format:
     # BoneID FrameTime | Transform matrix
     keyframes = []
+    # Number of bones
+    boneCount = 0
+
+    currentAction = None
     
     # Currently selected (context) action
     KeyframeCount = bpy.context.scene.frame_end - bpy.context.scene.frame_start + 1
 
-    # Loop through all the frames starting with the first one in the selected action
-    for frameID in range(0, KeyframeCount):
-        # I think this sets the current frame
-        bpy.context.scene.frame_set(frameID + bpy.context.scene.frame_start)
+    # Get the armature (hopefully only one)
+    for arm_obj in bpy.context.scene.objects:
+        if arm_obj.type == 'ARMATURE':
         
-        # Try getting every bone in the frame 
-        # bpy.context.scene.frame.bones (or something like that)
-        
-        # for bone in bpy.context.scene.frame.bones:
-        
-            # bone.matrix_local
-    
-        keyframes.append(stuff)
+            print ('Armature: %s' % arm_obj.name)
+            
+            # get the current action
+            if arm_obj.animation_data:
+                if not currentAction:
+                    currentAction =	arm_obj.animation_data.action
 
-    # write the frames to a file
-    file = open(filepath, "w")
-    for keyframe in keyframes:
-        file.write(keyframe)
-    file.close()
+            if currentAction:
+            
+                print ('Current Action: %s' % currentAction.name)
+            
+                boneCount = len(arm_obj.pose.bones)
+        
+                # Loop through all the frames starting with the first one in the selected action
+                for frameID in range(0, KeyframeCount):
+                    # I think this sets the current frame
+                    bpy.context.scene.frame_set(frameID + bpy.context.scene.frame_start)
+                    
+                    # Try getting every bone in the frame 
+                    # bpy.context.scene.frame.bones (or something like that)
+                    
+                    # for bone in bpy.context.scene.frame.bones:
+                    
+                        # bone.matrix_lo
+                
+                    keyframes.append(stuff)
 
+                # write the frames to a file
+                file = open(filepath, "w")
+                file.write('%s \n' % boneCount)
+                for keyframe in keyframes:
+                    file.write(keyframe)
+                file.close()
+        
+    # Repeat for each armature
 
 from bpy.props import *
 
