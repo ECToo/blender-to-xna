@@ -57,6 +57,7 @@
 # - Calculate how many bones are used in the armature
 # - Calculate the total time of the animation
 # - Loop through all keyframes in the animation
+# - Get the start time of each frame
 # - Convert the time to be the same as used by XNA
 # - Convert to a matrix
 #     May also have an option for separate Scale, rotation and location
@@ -87,7 +88,9 @@ Execute this script from the "File->Export" menu.
 import bpy
     
 
-def export_xna(filepath, currentAction):
+def export_xna(filepath, allActions):
+
+    print ('Export animation(s) to file: %s' % filepath)
 
     # store each keyframe bone transform as a separate line
     # File format:
@@ -95,7 +98,7 @@ def export_xna(filepath, currentAction):
     keyframes = []
     # Number of bones
     boneCount = 0
-
+    # At the moment this only exports the current animation
     currentAction = None
     
     # Currently selected (context) action
@@ -113,30 +116,47 @@ def export_xna(filepath, currentAction):
                     currentAction =	arm_obj.animation_data.action
 
             if currentAction:
-            
-                print ('Current Action: %s' % currentAction.name)
+                print ('Action: %s' % currentAction.name)
             
                 boneCount = len(arm_obj.pose.bones)
+                print ('Number of bones: %s' % boneCount)
         
                 # Loop through all the frames starting with the first one in the selected action
                 for frameID in range(0, KeyframeCount):
-                    # I think this sets the current frame
+                    # Set the current frame in the current action
+                    # This sets the armature in to this frames pose (I hope!)
                     bpy.context.scene.frame_set(frameID + bpy.context.scene.frame_start)
                     
-                    # Try getting every bone in the frame 
-                    # bpy.context.scene.frame.bones (or something like that)
+                    # TODO: get the frame time
                     
-                    # for bone in bpy.context.scene.frame.bones:
-                    
-                        # bone.matrix_lo
-                
-                    keyframes.append(stuff)
+                    # Get every pose bone in the frame 
+                    # the pose bones in the armature store the rotations etc. for the animations
+                    # http://www.blender.org/documentation/250PythonDoc/bpy.types.PoseBone.html#bpy.types.PoseBone
+                    poseBones = arm_obj.pose.bones
+                    # The bones are unlikely to be sorted or indexed so we will use the
+                    # bone names and index them later for use by XNA (or import and index them in XNA perhaps?)
+                    # The pose bone is not a bone but contains a link to the bone it is associated with.
+                    # poseBones[i].bone
+                    # The pose bones contain the rotation, location and scale and other settings in various formats
+                    # the one we are most likely to need is .matrix_local (but this is still only beta in the 2.5x API)
+                    # matrix_local is a 4x4 matrix.
+                    # TODO: is matrix_local relative to the parent bone or the inverse (e.g. the parent relative to the child)
+                    for poseBone in poseBones:
+                        # Save the local matrix
+                        # Split in to four rows just because it is tidier to read and therefore easier to debug
+                        rowOne = "{0} {1} {2} {3}".format(poseBone.matrix_local[0][0], poseBone.matrix_local[0][1], poseBone.matrix_local[0][2], poseBone.matrix_local[0][3])
+                        rowTwo = "{0} {1} {2} {3}".format(poseBone.matrix_local[1][0], poseBone.matrix_local[1][1], poseBone.matrix_local[1][2], poseBone.matrix_local[1][3])
+                        rowThree = "{0} {1} {2} {3}".format(poseBone.matrix_local[2][0], poseBone.matrix_local[2][1], poseBone.matrix_local[2][2], poseBone.matrix_local[2][3])
+                        rowFour = "{0} {1} {2} {3}".format(poseBone.matrix_local[3][0], poseBone.matrix_local[3][1], poseBone.matrix_local[3][2], poseBone.matrix_local[3][3])
+                        resultFrame = "{0} |{1} {2} {3} {4}".format(poseBone.bone.name, rowOne, rowTwo, rowThree, rowFour)
+                        keyframes.append(resultFrame)
+                        print (resultFrame)
 
                 # write the frames to a file
                 file = open(filepath, "w")
                 file.write('%s \n' % boneCount)
                 for keyframe in keyframes:
-                    file.write(keyframe)
+                    file.write('%s\n' % keyframe)
                 file.close()
         
     # Repeat for each armature
@@ -144,6 +164,7 @@ def export_xna(filepath, currentAction):
 from bpy.props import *
 
 # Starts here
+# Display the user interface
 class XNAExporter(bpy.types.Operator):
     '''Save XNA compatible animations'''
     bl_idname = "export_xna.clip"
@@ -152,10 +173,10 @@ class XNAExporter(bpy.types.Operator):
     filepath = StringProperty(name="File Path", description="Filepath used for exporting the file", maxlen= 1024, default= "", subtype='FILE_PATH')
     check_existing = BoolProperty(name="Check Existing", description="Check and warn on overwriting existing files", default=True, options={'HIDDEN'})
 
-    current_action = BoolProperty(name="Current Action", description="No choice this only Exports the current action", default=True)
+    all_actions = BoolProperty(name="All Actions", description="No choice this only Exports the current action", default=False)
 
     def execute(self, context):
-        export_xna(self.filepath, self.current_action)
+        export_xna(self.filepath, self.all_actions)
         return {'FINISHED'}
 
     def invoke(self, context, event):
@@ -163,4 +184,4 @@ class XNAExporter(bpy.types.Operator):
         wm.add_fileselect(self)
         return {'RUNNING_MODAL'}
 
-# package manages registering
+# package manages registering (__init__.py)

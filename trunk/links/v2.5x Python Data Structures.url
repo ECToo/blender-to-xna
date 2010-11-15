@@ -3,3 +3,5 @@ Prop3=19,2
 [InternetShortcut]
 URL=http://www.blender.org/documentation/250PythonDoc/bpy.types.bpy_struct.html
 IDList=
+IconFile=http://www.blender.org/documentation/250PythonDoc/_static/favicon.ico
+IconIndex=1
