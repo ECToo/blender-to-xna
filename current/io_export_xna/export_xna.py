@@ -47,7 +47,6 @@
 # --------------------------------------------------------------------------
 # *** TASKS ***
 # --------------------------------------------------------------------------
-# - Change the importer for XNA to accept bone names and convert to their index
 # - Work out the file name based on the action name (if necessary)
 #     Add the action name as a suffix to the filename (default)
 #       Action as a filename suffix (filename-action.clip)
@@ -55,6 +54,7 @@
 #   - Round floating point number to 7 or 8 decimal places which should be acurate 
 #       enough for our needs (perhaps try as low as 6 decimal places)
 #       Try {0:9f} to have a field size of 9 rather than simply 8 decimal places
+# Done - Change the importer for XNA to accept bone names and convert to their index
 # Done - Create the user interface
 # Does for all - Check that there is only one armature
 # Done - Check that the bones are all in that armature
@@ -107,12 +107,6 @@ def export_xna(filepath, framesPerSecond, allActions):
     # At the moment this only exports the current animation
     currentAction = None
     
-    # The start and end frame set within the action editor for playback
-    # this is not what we want we need the frames in the current action
-    keyFrameCount = bpy.context.scene.frame_end - bpy.context.scene.frame_start + 1
-    # The time from the start to the end of the clip where it usually loops back to the start again
-    totalClipTime = round((frameTime * (keyFrameCount - 1)), 0)
-
     # Get the armature (hopefully only one)
     for arm_obj in bpy.context.scene.objects:
         if arm_obj.type == 'ARMATURE':
@@ -124,21 +118,26 @@ def export_xna(filepath, framesPerSecond, allActions):
                 if not currentAction:
                     currentAction =	arm_obj.animation_data.action
 
+            # http://www.blender.org/documentation/250PythonDoc/bpy.types.Action.html
             if currentAction:
                 print ("Action: {0}".format(currentAction.name))
-                
-                print ("FCurve count: {0}".format(len(currentAction.fcurves)))
-            
+                frameStart = int(currentAction.frame_range[0])
+                frameEnd = int(currentAction.frame_range[1])
+                frameCount = int(frameEnd - frameStart + 1)
+                print ("Frame range from {0} to {1}".format(frameStart, frameEnd))
+                # Calculate the total length of the animation loop
+                totalClipTime = round((frameTime * (frameCount - 1)), 0)
+                # This counts all the bones in the armature
                 boneCount = len(arm_obj.pose.bones)
                 print ("Number of bones: {0}".format(boneCount))
                 print ("Total clip duration (ticks): {0:.0f}".format(totalClipTime))
         
                 # Loop through all the frames starting with the first one in the selected action
                 # This gets every frame including those blended from inserted frames
-                for frameID in range(0, keyFrameCount):
+                for frameID in range(0, frameCount):
                     # Set the current frame in the current action
-                    # This sets the armature in to this frames pose (I hope!)
-                    bpy.context.scene.frame_set(frameID + bpy.context.scene.frame_start)
+                    # This sets the armature in to this frames pose
+                    bpy.context.scene.frame_set(frameID + frameStart)
                     
                     # Calculate the frame start time
                     thisFrameTime = round(frameID * frameTime, 0)
@@ -146,9 +145,11 @@ def export_xna(filepath, framesPerSecond, allActions):
                     # Get every pose bone in the frame 
                     # the pose bones in the armature store the rotations etc. for the animations
                     # http://www.blender.org/documentation/250PythonDoc/bpy.types.PoseBone.html#bpy.types.PoseBone
+                    # poseBones = arm_obj.pose.bones, returns all the bones ideally we would like a function that only
+                    # returns the bones used in this action
                     poseBones = arm_obj.pose.bones
-                    # The bones are unlikely to be sorted or indexed so we will use the
-                    # bone names and index them later for use by XNA (or import and index them in XNA perhaps?)
+                    # The bones might not be sorted or indexed the way we need them so we will use the
+                    # bone names and index and sort them when imported in to XNA
                     # The pose bone is not a bone but contains a link to the bone it is associated with.
                     # poseBones[i].bone
                     # The pose bones contain the rotation, location and scale and other settings in various formats
