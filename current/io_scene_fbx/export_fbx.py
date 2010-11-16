@@ -50,6 +50,15 @@
 # --------------------------------------------------------------------------
 # ** Tasks to adjust the output to work with XNA 4.0 ** 
 # --------------------------------------------------------------------------
+#
+# - To try:
+#       Reverse the order of the matrix multiplications for the animations
+#       Experimenting in XNA produced similar results to the warped FBX imports
+#       wrong:  bindPose[bone] * frameTransform[bone]
+#       better: frameTransform[bone] * bindPose[bone]
+# - Other areas to look at:
+# - Look at changing the whole way the take information is extracted
+#       Use the local_matrix of the PoseBones instead of the method copied from 2.4x
 # - See line 2055 ish
 #   Add a console message to confirm that the bones get parents
 #   These are necessary for calculating the bone matrices
@@ -59,7 +68,7 @@
 #   TODO: if the parent is NOT a bone then return as if no parent
 # - See the Weights transformers at line 1416 
 #    This could affect the whole model.
-# - If the parent if the armature do not take the armature rotation and location
+# - If the parent of the armature do not take the armature rotation and location
 #   for the bone position.
 #   Everything should be relative to the armature
 # Cannot find - Try setting the parent of the root bone to None for the
