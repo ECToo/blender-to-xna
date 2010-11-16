@@ -107,8 +107,7 @@ def export_xna(filepath, framesPerSecond, allActions):
     # At the moment this only exports the current animation
     currentAction = None
     
-    # The start and end frame set within the action editor for playback
-    # this is not what we want we need the frames in the current action
+    # Currently selected (context) action
     keyFrameCount = bpy.context.scene.frame_end - bpy.context.scene.frame_start + 1
     # The time from the start to the end of the clip where it usually loops back to the start again
     totalClipTime = round((frameTime * (keyFrameCount - 1)), 0)
@@ -126,8 +125,6 @@ def export_xna(filepath, framesPerSecond, allActions):
 
             if currentAction:
                 print ("Action: {0}".format(currentAction.name))
-                
-                print ("FCurve count: {0}".format(len(currentAction.fcurves)))
             
                 boneCount = len(arm_obj.pose.bones)
                 print ("Number of bones: {0}".format(boneCount))
