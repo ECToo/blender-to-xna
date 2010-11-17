@@ -53,10 +53,12 @@
 #
 # - Move the user interface in to the export_fbx file
 # - Change the title to XNA FBX Model
+# - Remove the options for setting scale and rotation
+# - Set the GLOBAL_MATRIX to identity
 # - Move the script to the export_xna folder
-# - Remove all the rotations
-# - Remove the scale
 # - Register the fbx script in the __init__.py script along with export_xna
+#
+# - Remove the lamps and cameras they are unnecessary for XNA
 #
 # - To try:
 #       Reverse the order of the matrix multiplications for the animations
@@ -306,9 +308,15 @@ def save(operator, context, filepath="",
     mtx_x90		= Matrix.Rotation( math.pi/2.0, 3, 'X') # used for lamp and camera rotations only
     #mtx4_z90	= Matrix.Rotation( math.pi/2.0, 4, 'Z')
 
+    '''
     if GLOBAL_MATRIX is None:
         GLOBAL_MATRIX = Matrix()
+    '''
 
+    # Create a new 4x4 identity matrix (JCB)
+    # http://www.blender.org/documentation/249PythonDoc/Mathutils.Matrix-class.html
+    GLOBAL_MATRIX = Matrix([1,0,0,0], [0,1,0,0], [0,0,1,0], [0,0,0,1])
+    
     if bpy.ops.object.mode_set.poll():
         bpy.ops.object.mode_set(mode='OBJECT')
 
