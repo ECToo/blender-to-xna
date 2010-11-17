@@ -2907,3 +2907,86 @@ Takes:  {''')
 # - bpy.sys.time move to bpy.sys.util?
 # - new scene creation, activation: lines 327-342, 368
 # - uses bpy.path.abspath, *.relpath - replace at least relpath
+
+# ** User interface
+
+from bpy.props import *
+from io_utils import ExportHelper
+
+# io_utils is in the user folder .../2.55/scripts/modules 
+
+class FBXExporter(bpy.types.Operator, ExportHelper):
+    '''Selection to an ASCII Autodesk FBX'''
+    bl_idname = "export_scene.fbx"
+    bl_label = "XNA FBX Export"
+
+    filename_ext = ".fbx"
+
+    # List of operator properties, the attributes will be assigned
+    # to the class instance from the operator settings before calling.
+
+# for testing select all objects
+    EXP_OBS_SELECTED = BoolProperty(name="Selected Objects", description="Export selected objects on visible layers", default=False)
+    #TX_SCALE = FloatProperty(name="Scale", description="Scale all data, (Note! some imports dont support scaled armatures)", min=0.01, max=1000.0, soft_min=0.01, soft_max=1000.0, default=1.0)
+# Rotation is unlikely to work so turned off for the time being.
+    #TX_XROT90 = BoolProperty(name="Rot X90", description="Rotate all objects 90 degrees about the X axis", default=False)
+    #TX_YROT90 = BoolProperty(name="Rot Y90", description="Rotate all objects 90 degrees about the Y axis", default=False)
+    #TX_ZROT90 = BoolProperty(name="Rot Z90", description="Rotate all objects 90 degrees about the Z axis", default=False)
+    EXP_EMPTY = BoolProperty(name="Empties", description="Export empty objects", default=True)
+# Cameras and lamps are of no use to XNA so are turned off by default
+    EXP_CAMERA = BoolProperty(name="Cameras", description="Export camera objects", default=False)
+    EXP_LAMP = BoolProperty(name="Lamps", description="Export lamp objects", default=False)
+    EXP_ARMATURE = BoolProperty(name="Armatures", description="Export armature objects", default=True)
+    EXP_MESH = BoolProperty(name="Meshes", description="Export mesh objects", default=True)
+    EXP_MESH_APPLY_MOD = BoolProperty(name="Modifiers", description="Apply modifiers to mesh objects", default=True)
+# HQ normals are just something else to worry about so turned off until we can get the model working
+    EXP_MESH_HQ_NORMALS = BoolProperty(name="HQ Normals", description="Generate high quality normals", default=False)
+    EXP_IMAGE_COPY = BoolProperty(name="Copy Image Files", description="Copy image files to the destination path", default=False)
+    # armature animation
+    ANIM_ENABLE = BoolProperty(name="Enable Animation", description="Export keyframe animation", default=True)
+# Optimising Keyframes are another thing we don't need to worry about yet    
+    ANIM_OPTIMIZE = BoolProperty(name="Optimize Keyframes", description="Remove double keyframes", default=False)
+    ANIM_OPTIMIZE_PRECISSION = FloatProperty(name="Precision", description="Tolerence for comparing double keyframes (higher for greater accuracy)", min=1, max=16, soft_min=1, soft_max=16, default=6.0)
+    ANIM_ACTION_ALL = BoolProperty(name="All Actions", description="Use all actions for armatures, if false, use current action", default=False)
+
+    def execute(self, context):
+        import math
+        from mathutils import Matrix
+        if not self.filepath:
+            raise Exception("filepath not set")
+
+        '''
+        mtx4_x90n = Matrix.Rotation(-math.pi / 2.0, 4, 'X')
+        mtx4_y90n = Matrix.Rotation(-math.pi / 2.0, 4, 'Y')
+        mtx4_z90n = Matrix.Rotation(-math.pi / 2.0, 4, 'Z')
+
+        GLOBAL_MATRIX = Matrix()
+        GLOBAL_MATRIX[0][0] = GLOBAL_MATRIX[1][1] = GLOBAL_MATRIX[2][2] = self.TX_SCALE
+        if self.TX_XROT90:
+            GLOBAL_MATRIX = mtx4_x90n * GLOBAL_MATRIX
+        if self.TX_YROT90:
+            GLOBAL_MATRIX = mtx4_y90n * GLOBAL_MATRIX
+        if self.TX_ZROT90:
+            GLOBAL_MATRIX = mtx4_z90n * GLOBAL_MATRIX
+        '''
+        
+        
+
+        return save(self, context, self.filepath,
+            GLOBAL_MATRIX=GLOBAL_MATRIX,
+            EXP_OBS_SELECTED=self.EXP_OBS_SELECTED,
+            EXP_MESH=self.EXP_MESH,
+            EXP_MESH_APPLY_MOD=self.EXP_MESH_APPLY_MOD,
+            EXP_ARMATURE=self.EXP_ARMATURE,
+            EXP_LAMP=self.EXP_LAMP,
+            EXP_CAMERA=self.EXP_CAMERA,
+            EXP_EMPTY=self.EXP_EMPTY,
+            EXP_IMAGE_COPY=self.EXP_IMAGE_COPY,
+            ANIM_ENABLE=self.ANIM_ENABLE,
+            ANIM_OPTIMIZE=self.ANIM_OPTIMIZE,
+            ANIM_OPTIMIZE_PRECISSION=self.ANIM_OPTIMIZE_PRECISSION,
+            ANIM_ACTION_ALL=self.ANIM_ACTION_ALL,
+            )
+
+# package manages registering (__init__.py)
+
