@@ -192,6 +192,7 @@ class XNAExporter(bpy.types.Operator):
 
     # User interface
     # http://www.blender.org/documentation/250PythonDoc/bpy.props.html
+    # This is very similar to the ExportHelper class in io_utils.py in the user folder .../2.55/scripts/modules 
     filepath = StringProperty(name="File Path", description="Filepath used for exporting the file", maxlen= 1024, default= "", subtype='FILE_PATH')
     check_existing = BoolProperty(name="Check Existing", description="Check and warn on overwriting existing files", default=True, options={'HIDDEN'})
 

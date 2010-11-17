@@ -29,6 +29,7 @@ import bpy
 from bpy.props import *
 from io_utils import ExportHelper
 
+# io_utils is in the user folder .../2.55/scripts/modules 
 
 class ExportFBX(bpy.types.Operator, ExportHelper):
     '''Selection to an ASCII Autodesk FBX'''
