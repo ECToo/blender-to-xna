@@ -42,36 +42,37 @@ import bpy
 try:
     init_data
     # Add any classes here to reload if necessary
-    reload(export_xna_action)
-    reload(export_xna_fbx)
+    reload(xna_export_action)
+    reload(xna_export_fbx)
 except:
     # Add any classes here to match above
-    from io_export_xna import export_xna
+    from io_export_xna import xna_export_action
+    from io_export_xna import xna_export_fbx
 
 init_data = True
 
-'''
-def menu_import(self, context):
-    from io_export_xna import import_xna
-    self.layout.operator(import_xna.XNAImporter.bl_idname, text="XNA Keyframes (.clip)").filepath = "*.clip"
-'''
-
 # Add each additional script in a simlar block to this
-def menu_export(self, context):
-    from io_export_xna import export_xna
+def menu_export_action(self, context):
+    from io_export_xna import xna_export_action
     import os
     default_path = os.path.splitext(bpy.data.filepath)[0] + ".action"
-    self.layout.operator(export_xna.XNAExporter.bl_idname, text="XNA Keyframes (.action)").filepath = default_path
+    self.layout.operator(xna_export_action.ActionExporter.bl_idname, text="XNA Keyframes (.action)").filepath = default_path
+
+def menu_export_fbx(self, context):
+    from io_export_xna import xna_export_fbx
+    import os
+    default_path = os.path.splitext(bpy.data.filepath)[0] + ".fbx"
+    self.layout.operator(xna_export_fbx.FBXExporter.bl_idname, text="XNA FBX Model (.fbx)").filepath = default_path
 
 # Add references to all scripts invoked by this class
 def register():
-    #bpy.types.INFO_MT_file_import.append(menu_import)
-    bpy.types.INFO_MT_file_export.append(menu_export)
+    bpy.types.INFO_MT_file_export.append(menu_export_action)
+    bpy.types.INFO_MT_file_export.append(menu_export_fbx)
 
 # Add references to all scripts invoked by this class
 def unregister():
-    #bpy.types.INFO_MT_file_import.remove(menu_import)
-    bpy.types.INFO_MT_file_export.remove(menu_export)
+    bpy.types.INFO_MT_file_export.remove(menu_export_action)
+    bpy.types.INFO_MT_file_export.remove(menu_export_fbx)
 
 if __name__ == "__main__":
     register()
