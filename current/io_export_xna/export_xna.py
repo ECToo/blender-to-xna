@@ -190,6 +190,8 @@ class XNAExporter(bpy.types.Operator):
     bl_idname = "export_xna.action"
     bl_label = "XNA Export Actions"
 
+    filename_ext = ".action"
+    
     # User interface
     # http://www.blender.org/documentation/250PythonDoc/bpy.props.html
     # This is very similar to the ExportHelper class in io_utils.py in the user folder .../2.55/scripts/modules 

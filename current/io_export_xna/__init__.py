@@ -29,8 +29,8 @@ bl_addon_info = {
     "version": (1,0),
     "blender": (2, 5, 5),
     "api": 32738,
-    "location": "File > Export > XNA Keyframes ",
-    "description": "Export XNA Keyframes (.action format)",
+    "location": "File > Export > XNA Keyframes and XNA FBX model",
+    "description": "Export the model and animations for use in XNA",
     "warning": "",
     "wiki_url": "http://code.google.com/p/blender-to-xna/",
     "tracker_url": "http://code.google.com/p/blender-to-xna/",
@@ -42,7 +42,8 @@ import bpy
 try:
     init_data
     # Add any classes here to reload if necessary
-    reload(export_xna)
+    reload(export_xna_action)
+    reload(export_xna_fbx)
 except:
     # Add any classes here to match above
     from io_export_xna import export_xna
