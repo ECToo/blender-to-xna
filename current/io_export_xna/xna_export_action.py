@@ -144,7 +144,7 @@ def export_action(filepath, framesPerSecond, allActions):
                     
                     # Get every pose bone in the frame 
                     # the pose bones in the armature store the rotations etc. for the animations
-                    # http://www.blender.org/documentation/250PythonDoc/bpy.types.PoseBone.html#bpy.types.PoseBone
+                    # http://www.blender.org/documentation/250PythonDoc/bpy.types.PoseBone.html
                     # poseBones = arm_obj.pose.bones, returns all the bones ideally we would like a function that only
                     # returns the bones used in this action
                     poseBones = arm_obj.pose.bones
