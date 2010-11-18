@@ -286,24 +286,28 @@ header_comment = \
 
 '''
 
-# Called from the user interface script  __init__.py
+# Start here
+# Called from the user interface
 # This func can be called with just the filepath
 def save(operator, context, filepath="",
-        GLOBAL_MATRIX =				None,
         EXP_OBS_SELECTED =			True,
-        EXP_MESH =					True,
         EXP_MESH_APPLY_MOD =		True,
-        EXP_ARMATURE =				True,
-        EXP_LAMP =					True,
-        EXP_CAMERA =				True,
-        EXP_EMPTY =					True,
         EXP_IMAGE_COPY =			False,
-        ANIM_ENABLE =				True,
         ANIM_OPTIMIZE =				True,
         ANIM_OPTIMIZE_PRECISSION =	6,
-        ANIM_ACTION_ALL =			False,
     ):
 
+    # Always export just one animation
+    ANIM_ENABLE = True
+    ANIM_ACTION_ALL = False
+    # Remove these eventually as they are not applicable to XNA
+    EXP_LAMP = False
+    EXP_CAMERA = False
+    # We always need the following if present
+    EXP_MESH =					True,
+    EXP_ARMATURE =				True,
+    EXP_EMPTY =					True,
+    
     # testing
     mtx_x90		= Matrix.Rotation( math.pi/2.0, 3, 'X') # used for lamp and camera rotations only
     #mtx4_z90	= Matrix.Rotation( math.pi/2.0, 4, 'Z')
@@ -2916,8 +2920,8 @@ from io_utils import ExportHelper
 # io_utils is in the user folder .../2.55/scripts/modules 
 
 class FBXExporter(bpy.types.Operator, ExportHelper):
-    '''Selection to an ASCII Autodesk FBX'''
-    bl_idname = "export_scene.fbx"
+    '''Export the model with skinning data to an ASCII Autodesk FBX for import in to XNA'''
+    bl_idname = "export_xnafbx.fbx"
     bl_label = "XNA FBX Export"
 
     filename_ext = ".fbx"
@@ -2926,28 +2930,12 @@ class FBXExporter(bpy.types.Operator, ExportHelper):
     # to the class instance from the operator settings before calling.
 
 # for testing select all objects
-    EXP_OBS_SELECTED = BoolProperty(name="Selected Objects", description="Export selected objects on visible layers", default=False)
-    #TX_SCALE = FloatProperty(name="Scale", description="Scale all data, (Note! some imports dont support scaled armatures)", min=0.01, max=1000.0, soft_min=0.01, soft_max=1000.0, default=1.0)
-# Rotation is unlikely to work so turned off for the time being.
-    #TX_XROT90 = BoolProperty(name="Rot X90", description="Rotate all objects 90 degrees about the X axis", default=False)
-    #TX_YROT90 = BoolProperty(name="Rot Y90", description="Rotate all objects 90 degrees about the Y axis", default=False)
-    #TX_ZROT90 = BoolProperty(name="Rot Z90", description="Rotate all objects 90 degrees about the Z axis", default=False)
-    EXP_EMPTY = BoolProperty(name="Empties", description="Export empty objects", default=True)
-# Cameras and lamps are of no use to XNA so are turned off by default
-    EXP_CAMERA = BoolProperty(name="Cameras", description="Export camera objects", default=False)
-    EXP_LAMP = BoolProperty(name="Lamps", description="Export lamp objects", default=False)
-    EXP_ARMATURE = BoolProperty(name="Armatures", description="Export armature objects", default=True)
-    EXP_MESH = BoolProperty(name="Meshes", description="Export mesh objects", default=True)
-    EXP_MESH_APPLY_MOD = BoolProperty(name="Modifiers", description="Apply modifiers to mesh objects", default=True)
-# HQ normals are just something else to worry about so turned off until we can get the model working
-    EXP_MESH_HQ_NORMALS = BoolProperty(name="HQ Normals", description="Generate high quality normals", default=False)
-    EXP_IMAGE_COPY = BoolProperty(name="Copy Image Files", description="Copy image files to the destination path", default=False)
-    # armature animation
-    ANIM_ENABLE = BoolProperty(name="Enable Animation", description="Export keyframe animation", default=True)
+    selectedObjects = BoolProperty(name="Selected Objects", description="Export selected objects on visible layers", default=False)
+    applyModifiers = BoolProperty(name="Modifiers", description="Apply modifiers to mesh objects", default=True)
+    copyImages = BoolProperty(name="Copy Image Files", description="Copy image files to the destination path", default=False)
 # Optimising Keyframes are another thing we don't need to worry about yet    
-    ANIM_OPTIMIZE = BoolProperty(name="Optimize Keyframes", description="Remove double keyframes", default=False)
-    ANIM_OPTIMIZE_PRECISSION = FloatProperty(name="Precision", description="Tolerence for comparing double keyframes (higher for greater accuracy)", min=1, max=16, soft_min=1, soft_max=16, default=6.0)
-    ANIM_ACTION_ALL = BoolProperty(name="All Actions", description="Use all actions for armatures, if false, use current action", default=False)
+    optimiseFrames = BoolProperty(name="Optimize Keyframes", description="Remove double keyframes", default=False)
+    optimisePrecission = FloatProperty(name="Precision", description="Tolerence for comparing double keyframes (higher for greater accuracy)", min=1, max=16, soft_min=1, soft_max=16, default=6.0)
 
     def execute(self, context):
         import math
@@ -2969,23 +2957,13 @@ class FBXExporter(bpy.types.Operator, ExportHelper):
         if self.TX_ZROT90:
             GLOBAL_MATRIX = mtx4_z90n * GLOBAL_MATRIX
         '''
-        
-        
 
         return save(self, context, self.filepath,
-            GLOBAL_MATRIX=GLOBAL_MATRIX,
-            EXP_OBS_SELECTED=self.EXP_OBS_SELECTED,
-            EXP_MESH=self.EXP_MESH,
-            EXP_MESH_APPLY_MOD=self.EXP_MESH_APPLY_MOD,
-            EXP_ARMATURE=self.EXP_ARMATURE,
-            EXP_LAMP=self.EXP_LAMP,
-            EXP_CAMERA=self.EXP_CAMERA,
-            EXP_EMPTY=self.EXP_EMPTY,
-            EXP_IMAGE_COPY=self.EXP_IMAGE_COPY,
-            ANIM_ENABLE=self.ANIM_ENABLE,
-            ANIM_OPTIMIZE=self.ANIM_OPTIMIZE,
-            ANIM_OPTIMIZE_PRECISSION=self.ANIM_OPTIMIZE_PRECISSION,
-            ANIM_ACTION_ALL=self.ANIM_ACTION_ALL,
+            self.selectedObjects,
+            self.applyModifiers,
+            self.copyImages,
+            self.optimiseFrames,
+            self.optimisePrecission,
             )
 
 # package manages registering (__init__.py)
