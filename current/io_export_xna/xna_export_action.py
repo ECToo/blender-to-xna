@@ -87,7 +87,7 @@ Execute this script from the "File->Export" menu.
 import bpy
     
 
-def export_xna(filepath, framesPerSecond, allActions):
+def export_action(filepath, framesPerSecond, allActions):
 
     print ("Export animation(s) to file: {0}".format(filepath))
     
@@ -185,9 +185,9 @@ from bpy.props import *
 
 # Starts here
 # Display the user interface
-class XNAExporter(bpy.types.Operator):
-    '''Save XNA compatible animations'''
-    bl_idname = "export_xna.action"
+class ActionExporter(bpy.types.Operator):
+    '''Save actions compatible with XNA'''
+    bl_idname = "xna_export_action.action"
     bl_label = "XNA Export Actions"
 
     filename_ext = ".action"
@@ -202,7 +202,7 @@ class XNAExporter(bpy.types.Operator):
     frame_rate = IntProperty(name="Frames per second", description="The frame speed the animations are created for", default=60, min=1, max=960)
 
     def execute(self, context):
-        export_xna(self.filepath, self.frame_rate, self.all_actions)
+        export_action(self.filepath, self.frame_rate, self.all_actions)
         return {'FINISHED'}
 
     def invoke(self, context, event):

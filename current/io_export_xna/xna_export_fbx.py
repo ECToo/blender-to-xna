@@ -289,7 +289,7 @@ header_comment = \
 # Start here
 # Called from the user interface
 # This func can be called with just the filepath
-def save(operator, context, filepath="",
+def export_fbx(operator, context, filepath="",
         EXP_OBS_SELECTED =			True,
         EXP_MESH_APPLY_MOD =		True,
         EXP_IMAGE_COPY =			False,
@@ -2921,7 +2921,7 @@ from io_utils import ExportHelper
 
 class FBXExporter(bpy.types.Operator, ExportHelper):
     '''Export the model with skinning data to an ASCII Autodesk FBX for import in to XNA'''
-    bl_idname = "export_xnafbx.fbx"
+    bl_idname = "xna_export_fbx.fbx"
     bl_label = "XNA FBX Export"
 
     filename_ext = ".fbx"
@@ -2958,7 +2958,7 @@ class FBXExporter(bpy.types.Operator, ExportHelper):
             GLOBAL_MATRIX = mtx4_z90n * GLOBAL_MATRIX
         '''
 
-        return save(self, context, self.filepath,
+        return export_fbx(self, context, self.filepath,
             self.selectedObjects,
             self.applyModifiers,
             self.copyImages,
