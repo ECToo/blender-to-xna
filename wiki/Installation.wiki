@@ -2,15 +2,11 @@
 #labels Phase-Deploy
 = Introduction =
 
-There are various scripts provided and they should be installed in their respective folders.  Be careful if you rename anything because class and folder names may be included in the scripts.
+There are various scripts provided and they should be installed in the appropriate folders.  Be careful if you rename anything because class and folder names may be included in the scripts.
 
 = Location =
 
-The first attempts overwrite the FBX exporter which ships with Blender 2.5x beta in the folder "$SCRIPTS\op\io_scene_fbx".
-
-All other scripts should be installed in the 'addons' folder within new folders.
-
-They are script packages not individual scripts.  The package should be in a sub folder of the 'addons' folder.
+The scripts are included in one package which should be installed in a sub folder of the 'addons' folder.  The folder is the name of the package "io_export_xna"
 
 Depending on the settings used while installing Blender the scripts may be in different locations.  On Windows if you accepted the default the scripts should be in the users application data folder:
 
@@ -25,11 +21,11 @@ The AppData folder is usually hidden.
 = Installation =
 
 Make sure you have exited Blender.
-You must delete the compiled Python files from the install folder otherwise Blender will use the old scripts.  The compiled files are the ones ending .pyc.
-You can just delete all the files in that folder as you are about to replace them anyway.  
+If you are re-installing you must delete the compiled Python files from the install folder otherwise Blender will use the old scripts.  The compiled files are the ones ending .pyc.
+You can just delete all the files in the package folder as you are about to replace them anyway.  
 
-Copy all the script files in to the install folder.  Typically that is one '__init__.py' file and one or more class files, such as 'export_xxx.py'.
+Copy all the script files in to the install folder.  Typically that is one '__init__.py' file and one or more class files, such as 'xna_export_xxx.py'.
 
-Start Blender and bring up the File->Preferences menu.  Select the 'Addons' tab, find the new script from the list and enable it by puting a tick in the small box.
+Start Blender and bring up the File->Preferences menu.  Select the 'Addons' tab, find the new script from the list and enable it by puting a tick in the small box.  If you want that to start every time you start Blender you will need to press 'Save Default'.  If you have a model file open that also gets saved as part of the default!
 
 If the script is an export script it will then be available on the File->Export menu.
