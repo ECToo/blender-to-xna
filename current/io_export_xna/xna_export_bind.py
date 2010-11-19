@@ -27,25 +27,14 @@
 # that work with XNA 4.0 this is an alternate solution using the keyframe
 # format from the XNA skinning sample.
 # --------------------------------------------------------------------------
-# * File format *
+# * Notes *
 # --------------------------------------------------------------------------
-# First line:
-# Number of bones in the armature (space) duration of the animation loop
-# BoneID (space) FrameTime |(pipe) Transform matrix (space separated numbers)
+# - The floating point values in XNA Matrices are only to 7 decimal places
 # --------------------------------------------------------------------------
-# ** Limitations **
-# --------------------------------------------------------------------------
-# --------------------------------------------------------------------------
-
 
 # This script uses spaces for indents NOT tabs.
 # Remember that there is a scripting console built in to Blender 2.5x
 # See also: Help -> Operator Cheat Sheet from within Blender 2.5x
-
-# --------------------------------------------------------------------------
-# *** TASKS ***
-# --------------------------------------------------------------------------
-# --------------------------------------------------------------------------
 
 
 # Descriptions
@@ -90,10 +79,10 @@ def export_bind(filepath):
             
             for poseBone in poseBones:
                 bone_obj = poseBone.bone
-                parent_obj = poseBone.parent
+                #parent_obj = poseBone.parent
             
                 print ("Bone name: {0}".format(bone_obj.name))
-                print ("Parent name: {0}".format(parent_obj.name))
+                #print ("Parent name: {0}".format(parent_obj.name))
             
                 # Save the local matrix
                 # This should be the position relative to the object origin
@@ -106,13 +95,16 @@ def export_bind(filepath):
                 rowTwo = "{0} {1} {2} {3}".format(bone_obj.matrix_local[1][0], bone_obj.matrix_local[1][1], bone_obj.matrix_local[1][2], bone_obj.matrix_local[1][3])
                 rowThree = "{0} {1} {2} {3}".format(bone_obj.matrix_local[2][0], bone_obj.matrix_local[2][1], bone_obj.matrix_local[2][2], bone_obj.matrix_local[2][3])
                 rowFour = "{0} {1} {2} {3}".format(bone_obj.matrix_local[3][0], bone_obj.matrix_local[3][1], bone_obj.matrix_local[3][2], bone_obj.matrix_local[3][3])
-                resultFrame = "{0} [ {1} ] {2} {3} {4} {5}".format(bone_obj.name, parent_obj.name, rowOne, rowTwo, rowThree, rowFour)
+                #resultFrame = "{0} [ {1} ] {2} {3} {4} {5}".format(bone_obj.name, parent_obj.name, rowOne, rowTwo, rowThree, rowFour)
+                resultFrame = "{0} | {1} {2} {3} {4}".format(bone_obj.name, rowOne, rowTwo, rowThree, rowFour)
                 results.append(resultFrame)
 
                 # write the frames to a file
                 file = open(filepath, "w")
                 file.write("Bone count: {0}\n".format(boneCount))
-                file.write("Bone [ Parent] Local matrix relative to the armature: {0}\n".format(arm_obj.name))
+                #file.write("Bone [ Parent] Local matrix relative to the armature: {0}\n".format(arm_obj.name))
+                file.write("Bone | Local matrix relative to the armature: {0}\n".format(arm_obj.name))
+                file.write("================================================================================\n")
                 for item in results:
                     file.write("{0}\n".format(item))
                 file.close()
