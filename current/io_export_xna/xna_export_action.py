@@ -68,6 +68,29 @@
 # Done - Save it all to a text file
 # --------------------------------------------------------------------------
 
+# --------------------------------------------------------------------------
+# Links
+# --------------------------------------------------------------------------
+# Export keyframe calculation
+# http://stackoverflow.com/questions/1273588/exporting-keyframes-in-blender-python
+# The channel data should be applied on top of the bind pose matrix.
+# The complete formula is the following:
+# Mr = Ms * B0*P0 * B1*P1 ... Bn*Pn
+# where:
+# Mr = result matrix for a bone 'n'
+# Ms = skeleton->world matrix
+# Bi = bind pose matrix for bone 'i'
+# Pi = pose actual matrix constructed from stored channels (that you are exporting)
+# 'n-1' is a parent bone for 'n', 'n-2' is parent of 'n-1', ... , '0' is a parent of '1'
+#
+# Old but useful information on how the bine pose is stored
+# http://www.blender.org/forum/viewtopic.php?p=49096&highlight=&sid=164bbb6e5435d5a9cbe22dfa2ed91243
+#
+# Useful discussion about bind pose and inverse bind pose matrices
+# http://www.gamedev.net/community/forums/topic.asp?topic_id=571044
+#
+# --------------------------------------------------------------------------
+
 
 # Descriptions
 __author__ = ["John C Brown"]
@@ -85,9 +108,56 @@ Execute this script from the "File->Export" menu.
 """
 
 import bpy
-    
+from mathutils import Matrix
 
-def export_action(filepath, framesPerSecond, allActions):
+IdentityMatrix = Matrix([1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1])   # Identity
+
+class bind_bone:
+    def __init__(self):
+        self.Name = ""
+        self.Bind_Matrix = Matrix()   # Identity
+
+class bind_bones:
+    def __init__(self):
+        self.binds = []
+    
+    def addpose(self, name, bind_matrix):
+        bBone = bind_bone()
+        bBone.Name = name
+        bBone.Bind_Matrix = bind_matrix
+        self.binds.append(bBone)
+        
+    def get(self, name):
+        for bBone in self.binds:
+            if bBone.Name == name:
+                return bBone.Bind_Matrix
+        #return Matrix(IdentityMatrix)
+
+# Calculate the bind pose
+# I don't think this works!!!!
+def calc_bind_pose(arm_obj):
+    
+    binds = bind_bones()
+    poseBones = arm_obj.pose.bones
+    
+    for poseBone in poseBones:
+        matrix_bind = Matrix()
+        if poseBone.parent:
+            # add the local transformation to the cumulative of the parents
+            parent_matrix = Matrix(binds.get(poseBone.parent.bone.name))
+            matrix_bind = parent_matrix * poseBone.bone.matrix_local
+            print("{0} -> Parent: {1}".format(poseBone.bone.name, poseBone.parent.bone.name))
+            binds.addpose(poseBone.bone.name, matrix_bind)
+        else:
+            matrix_bind = Matrix(IdentityMatrix)
+            print("{0} -> Parent: root".format(poseBone.bone.name))
+            binds.addpose(poseBone.bone.name, matrix_bind)
+        
+    # Loop pose bones
+    return binds
+    
+# Format type is used while testing to output different information
+def export_action(filepath, framesPerSecond, allActions, formatType):
 
     print ("Export animation(s) to file: {0}".format(filepath))
     
@@ -131,6 +201,10 @@ def export_action(filepath, framesPerSecond, allActions):
                 boneCount = len(arm_obj.pose.bones)
                 print ("Number of bones: {0}".format(boneCount))
                 print ("Total clip duration (ticks): {0:.0f}".format(totalClipTime))
+                
+                # Calculate the bind pose
+                bindPose = calc_bind_pose(arm_obj)
+                print ("Number of bones in the bind pose: {0}".format(len(bindPose.binds)))
         
                 # Loop through all the frames starting with the first one in the selected action
                 # This gets every frame including those blended from inserted frames
@@ -155,23 +229,40 @@ def export_action(filepath, framesPerSecond, allActions):
                     # The pose bones contain the rotation, location and scale and other settings in various formats
                     # the one we are most likely to need is .matrix_local (but this is still only beta in the 2.5x API)
                     # matrix_local is a 4x4 matrix.
-                    # TODO: is matrix_local relative to the parent bone or the inverse (e.g. the parent relative to the child)
                     for poseBone in poseBones:
                         # Save the local matrix
                         # Split in to four rows just because it is tidier to read and therefore easier to debug
                         # Format properties: http://www.python.org/dev/peps/pep-3101/
                         # e.g. {0:.0f} displays a floating point number with a fixed size with 0 decimal places
                         # if the f for fixed is omitted then small numbers are displayed using the exponential 0.000-E7 notation
-                        rowOne = "{0} {1} {2} {3}".format(poseBone.matrix_local[0][0], poseBone.matrix_local[0][1], poseBone.matrix_local[0][2], poseBone.matrix_local[0][3])
-                        rowTwo = "{0} {1} {2} {3}".format(poseBone.matrix_local[1][0], poseBone.matrix_local[1][1], poseBone.matrix_local[1][2], poseBone.matrix_local[1][3])
-                        rowThree = "{0} {1} {2} {3}".format(poseBone.matrix_local[2][0], poseBone.matrix_local[2][1], poseBone.matrix_local[2][2], poseBone.matrix_local[2][3])
-                        rowFour = "{0} {1} {2} {3}".format(poseBone.matrix_local[3][0], poseBone.matrix_local[3][1], poseBone.matrix_local[3][2], poseBone.matrix_local[3][3])
+                        boneMatrix = Matrix(poseBone.matrix_local)
+                        if formatType == 2:
+                            # The bind pose is local matrix of the bone associated with the pose bone
+                            # Probably needs to be the cumulative of all the parent matrices
+                            #       Add a calculation to work out the bind pose of each bone
+                            #boneMatrix = boneMatrix * poseBone.bone.matrix_local
+                            boneMatrix = boneMatrix * bindPose.get(poseBone.bone.name)
+                        elif formatType == 3:
+                            # Deliberate mistake with the sum reversed just used for testing
+                            boneMatrix = poseBone.bone.matrix_local * boneMatrix
+                        elif formatType == 4:
+                            # Bind pose only used for testing
+                            #boneMatrix = Matrix(poseBone.bone.matrix_local)
+                            boneMatrix = bindPose.get(poseBone.bone.name)
+                        rowOne = "{0} {1} {2} {3}".format(boneMatrix[0][0], boneMatrix[0][1], boneMatrix[0][2], boneMatrix[0][3])
+                        rowTwo = "{0} {1} {2} {3}".format(boneMatrix[1][0], boneMatrix[1][1], boneMatrix[1][2], boneMatrix[1][3])
+                        rowThree = "{0} {1} {2} {3}".format(boneMatrix[2][0], boneMatrix[2][1], boneMatrix[2][2], boneMatrix[2][3])
+                        rowFour = "{0} {1} {2} {3}".format(boneMatrix[3][0], boneMatrix[3][1], boneMatrix[3][2], boneMatrix[3][3])
+                        # Bone name, frame time and the transform matrix
                         resultFrame = "{0} {1:.0f}|{2} {3} {4} {5}".format(poseBone.bone.name, thisFrameTime, rowOne, rowTwo, rowThree, rowFour)
                         keyframes.append(resultFrame)
                         #print (resultFrame)
 
                 # write the frames to a file
                 file = open(filepath, "w")
+                # The file format type for use by an importer
+                file.write("{0}\n".format(formatType))
+                # The bone count to check compatibility
                 file.write("{0} {1:.0f}\n".format(boneCount, totalClipTime))
                 for keyframe in keyframes:
                     file.write("{0}\n".format(keyframe))
@@ -200,9 +291,10 @@ class ActionExporter(bpy.types.Operator):
 
     all_actions = BoolProperty(name="All Actions", description="No choice this only Exports the current action", default=False)
     frame_rate = IntProperty(name="Frames per second", description="The frame speed the animations are created for", default=60, min=1, max=960)
+    format_type = IntProperty(name="Type", description="Type 1 = Matrix only, Type 2 = Matrix and bind pose, Type 3 = Deliberate mistake, Type 4 = Bind pose only", default=1, min=1, max=4)
 
     def execute(self, context):
-        export_action(self.filepath, self.frame_rate, self.all_actions)
+        export_action(self.filepath, self.frame_rate, self.all_actions, self.format_type)
         return {'FINISHED'}
 
     def invoke(self, context, event):

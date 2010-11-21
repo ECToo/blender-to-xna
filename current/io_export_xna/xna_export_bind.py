@@ -29,6 +29,7 @@
 # --------------------------------------------------------------------------
 # * Notes *
 # --------------------------------------------------------------------------
+# - This Bind pose is only the individual bones not the cumulative pose
 # - The floating point values in XNA Matrices are only to 7 decimal places
 # --------------------------------------------------------------------------
 
