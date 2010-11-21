@@ -112,11 +112,13 @@ from mathutils import Matrix
 
 IdentityMatrix = Matrix([1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1])   # Identity
 
+# Remove if not used after testing
 class bind_bone:
     def __init__(self):
         self.Name = ""
         self.Bind_Matrix = Matrix()   # Identity
 
+# Remove if not used after testing
 class bind_bones:
     def __init__(self):
         self.binds = []
@@ -133,6 +135,7 @@ class bind_bones:
                 return bBone.Bind_Matrix
         #return Matrix(IdentityMatrix)
 
+# Remove if not used after testing
 # Calculate the bind pose
 # I don't think this works!!!!
 def calc_bind_pose(arm_obj):
@@ -146,11 +149,12 @@ def calc_bind_pose(arm_obj):
             # add the local transformation to the cumulative of the parents
             parent_matrix = Matrix(binds.get(poseBone.parent.bone.name))
             matrix_bind = parent_matrix * poseBone.bone.matrix_local
-            print("{0} -> Parent: {1}".format(poseBone.bone.name, poseBone.parent.bone.name))
+            #print("{0} -> Parent: {1}".format(poseBone.bone.name, poseBone.parent.bone.name))
             binds.addpose(poseBone.bone.name, matrix_bind)
         else:
-            matrix_bind = Matrix(IdentityMatrix)
-            print("{0} -> Parent: root".format(poseBone.bone.name))
+            parent_matrix = Matrix(IdentityMatrix)
+            matrix_bind = parent_matrix * poseBone.bone.matrix_local
+            #print("{0} -> Parent: root".format(poseBone.bone.name))
             binds.addpose(poseBone.bone.name, matrix_bind)
         
     # Loop pose bones
@@ -202,7 +206,7 @@ def export_action(filepath, framesPerSecond, allActions, formatType):
                 print ("Number of bones: {0}".format(boneCount))
                 print ("Total clip duration (ticks): {0:.0f}".format(totalClipTime))
                 
-                # Calculate the bind pose
+                # Calculate the bind pose (Remove if not used after testing)
                 bindPose = calc_bind_pose(arm_obj)
                 print ("Number of bones in the bind pose: {0}".format(len(bindPose.binds)))
         
@@ -231,11 +235,14 @@ def export_action(filepath, framesPerSecond, allActions, formatType):
                     # matrix_local is a 4x4 matrix.
                     for poseBone in poseBones:
                         # Save the local matrix
+                        # Separate matrix variable for use during testing this script
+                        boneMatrix = Matrix(poseBone.matrix_local)
                         # Split in to four rows just because it is tidier to read and therefore easier to debug
                         # Format properties: http://www.python.org/dev/peps/pep-3101/
                         # e.g. {0:.0f} displays a floating point number with a fixed size with 0 decimal places
                         # if the f for fixed is omitted then small numbers are displayed using the exponential 0.000-E7 notation
-                        boneMatrix = Matrix(poseBone.matrix_local)
+                        
+                        # Remove the types when the correct method is found
                         if formatType == 2:
                             # The bind pose is local matrix of the bone associated with the pose bone
                             # Probably needs to be the cumulative of all the parent matrices
