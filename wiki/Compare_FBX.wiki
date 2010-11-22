@@ -1,0 +1,86 @@
+#summary Comparision of the older working FBX with the newer not working one
+#labels Phase-QA
+= Method =
+
+As the files are in different order it was necessary to scan the files side by side
+
+= Results =
+
+In the new version:
+
+ - the armature Skeleton has been deliberately changed to be the root and removed the unnecessary Blend_Root
+
+ Model:
+
+*- The meshes includes Edges, not present in the old FBX file (TODO: remove this)
+        Jacket-Obj, Body-Obj etc.
+
+*- The meshes includes Smoothing, not present in the old FBX file (TODO: remove this from several sections)
+
+ - The layerElementMatrerials of the Body-Obj are different but similar.
+
+ - The Limb's are now called LimbNode.  This was a deliberate change but it might be significant
+
+ - The Limbs are not listed in the same order.
+
+        The new FBX file lists the LimbNodes in armature order, the old one appears to be random.
+
+ - Rounding is slightly difference.  In some cases in the old file the scale was not quite 1.0 but is in the new file
+
+ - The Model Model::R-Collar in both files looks identical!
+
+ Material:
+
+ - The materials in the new file have been given unique names by tagging on the image file name to the end of the mesh name
+
+ - Some of the colour values are slightly different
+
+ Video:
+
+ - Looks the same
+
+ Texture:
+
+ - Looks the same
+
+ Deformer:
+
+ - Listed in a different order (similar to the order the limbs are listed in the model)
+
+ - The data looks the same
+
+ Pose: "Pose::BIND_POSES"
+
+ - Listed in a different order
+
+ - The new one includes an Identity matrix for the meshes but the old one does not include the meshes at all
+
+ - The poses look the same (checked several including Waist and L-Collar)
+
+*- At the end the GlobalSettings are different.  
+
+    Property: "UnitScaleFactor", "double", "",100 in the old it is Property: "UnitScaleFactor", "double", "",1
+
+ Relations:
+
+ - Deliberately changed all the Limbs to LimbNodes
+
+ - Everything else looks the same
+
+ Connections:
+
+ - Deliberately changed the Meshes to connect to the scene not to the armature
+
+ - The list is in a different order
+
+ - Some slight name changes as mentioned above but the links appear the same
+
+ Takes:
+
+ - The new one starts with Patrol2 the old one starts with Stand
+
+ - The new one had the filename changed to Patrol2.tak and the old one keeps Default_Take.tak
+
+ Version 5 settings
+
+ - Look identical
