@@ -2,7 +2,7 @@
 #labels Phase-QA
 = Method =
 
-As the files are in different order it was necessary to scan the files side by side
+As the files are in a different order it was necessary to scan the files side by side
 
 = Results =
 
