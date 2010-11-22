@@ -51,50 +51,21 @@
 # ** Tasks to adjust the output to work with XNA 4.0 ** 
 # --------------------------------------------------------------------------
 #
-# - Move the user interface in to the export_fbx file
-# - Change the title to XNA FBX Model
-# - Remove the options for setting scale and rotation
-# - Set the GLOBAL_MATRIX to identity
-# - Move the script to the export_xna folder
-# - Register the fbx script in the __init__.py script along with export_xna
+# - The first (and only) take in the FBX file should be in the bind pose position
+#       For some reason all other animations work when that is the case!
+# - Find the bind pose settings without relying on a manually created pose.
+#
+# Done - Move the user interface in to the export_fbx file
+# Done - Change the title to XNA FBX Model
+# Done - Remove the options for setting scale and rotation
+# Done - Set the GLOBAL_MATRIX to identity
+# Done - Move the script to the export_xna folder
+# Done - Register the fbx script in the __init__.py script along with export_xna
 #
 # - Remove the lamps and cameras they are unnecessary for XNA
-#
-# - To try:
-#       Reverse the order of the matrix multiplications for the animations
-#       Experimenting in XNA produced similar results to the warped FBX imports
-#       wrong:  bindPose[bone] * frameTransform[bone]
-#       better: frameTransform[bone] * bindPose[bone]
-# - Other areas to look at:
-# - Look at changing the whole way the take information is extracted
-#       Use the local_matrix of the PoseBones instead of the method copied from 2.4x
-# - See line 2055 ish
-#   Add a console message to confirm that the bones get parents
-#   These are necessary for calculating the bone matrices
-# - See where getAnimParRelMatrix(self, frame): is used
-#   it might be that this is where the armature parent position is used in error.
-#   my_ob.getAnimParRelMatrix(frame), my_ob.getAnimParRelMatrixRot(frame)
-#   TODO: if the parent is NOT a bone then return as if no parent
-# - See the Weights transformers at line 1416 
-#    This could affect the whole model.
-# - If the parent of the armature do not take the armature rotation and location
-#   for the bone position.
-#   Everything should be relative to the armature
-# Cannot find - Try setting the parent of the root bone to None for the
-#   purposes of calculating the relative matrices
-#   Perhaps flag the root bone
-#   If the parent is not also a bone is probably the easiest way
-# Cannot find - The arms and hands get distorted but the rest of the animations
-#   look OK.
-#   The difference is that the collar bones and the fingers are not connected
-#   directly to the rest of the armature.
-#   Neither are the legs though so I am not sure why they work!
-# Looks OK - See line 2028 and perhaps need to calculate the rest pose positions
-
 # Done - Remove batch support
 #        This is just to be tidy and to avoid an additional complication 
 # --------------------------------------------------------------------------
-
 
 # --------------------------------------------------------------------------
 # Completed tasks to replicate the Blender 2.4x version of the XNA exporter
@@ -295,6 +266,8 @@ def export_fbx(operator, context, filepath="",
         EXP_IMAGE_COPY =			False,
         ANIM_OPTIMIZE =				True,
         ANIM_OPTIMIZE_PRECISSION =	6,
+        Include_Smoothing =         False,
+        Include_Edges =             False,
     ):
 
     # Always export just one animation
@@ -1165,17 +1138,26 @@ def export_fbx(operator, context, filepath="",
         file.write('\n\t\t}')
         file.write('\n\t}')
 
+    # If the image and the blend file are on different drives the function
+    #   relativePath = os.path.relpath(path1, path2)
+    # will throw an exception when trying to calculate the relative file paths.
+    # To avoid this all output files are assumed to be in the same folder. (JCB)
     def copy_image(image):
+        # The full path to the image file
         fn = bpy.path.abspath(image.filepath)
+        # Just the file name of the image file
         fn_strip = os.path.basename(fn)
-
+        # This assumes that the image file is in the same folder as the FBX file (JCB)
+        rel = fn_strip
+        # Copy the image to the destination folder
         if EXP_IMAGE_COPY:
-            rel = fn_strip
+            # Add the image filename to the output folder as previously calculated
             fn_abs_dest = os.path.join(basepath, fn_strip)
+            # Do not overwrite existing files
             if not os.path.exists(fn_abs_dest):
                 shutil.copy(fn, fn_abs_dest)
-        else:
-            rel = os.path.relpath(fn, basepath)
+        #else:
+        #    rel = os.path.relpath(fn, basepath)
 
         return (rel, fn_strip)
 
@@ -1449,19 +1431,20 @@ def export_fbx(operator, context, filepath="",
                     file.write(',%i,%i' % ed_val)
             i+=1
 
-
-        file.write('\n\t\tEdges: ')
-        i=-1
-        for ed in me.edges:
-                if i==-1:
-                    file.write('%i,%i' % (ed.vertices[0], ed.vertices[1]))
-                    i=0
-                else:
-                    if i==13:
-                        file.write('\n\t\t')
+        # XNA does not need the edges
+        if Include_Edges:
+            file.write('\n\t\tEdges: ')
+            i=-1
+            for ed in me.edges:
+                    if i==-1:
+                        file.write('%i,%i' % (ed.vertices[0], ed.vertices[1]))
                         i=0
-                    file.write(',%i,%i' % (ed.vertices[0], ed.vertices[1]))
-                i+=1
+                    else:
+                        if i==13:
+                            file.write('\n\t\t')
+                            i=0
+                        file.write(',%i,%i' % (ed.vertices[0], ed.vertices[1]))
+                    i+=1
 
         file.write('\n\t\tGeometryVersion: 124')
 
@@ -1485,46 +1468,49 @@ def export_fbx(operator, context, filepath="",
         file.write('\n\t\t}')
 
         # Write Face Smoothing
-        file.write('''
-        LayerElementSmoothing: 0 {
-            Version: 102
-            Name: ""
-            MappingInformationType: "ByPolygon"
-            ReferenceInformationType: "Direct"
-            Smoothing: ''')
+        # XNA does not need the smoothing
+        if Include_Smoothing:
+            file.write('''
+            LayerElementSmoothing: 0 {
+                Version: 102
+                Name: ""
+                MappingInformationType: "ByPolygon"
+                ReferenceInformationType: "Direct"
+                Smoothing: ''')
 
-        i=-1
-        for f in me.faces:
-            if i==-1:
-                file.write('%i' % f.use_smooth);	i=0
-            else:
-                if i==54:
-                    file.write('\n			 ');	i=0
-                file.write(',%i' % f.use_smooth)
-            i+=1
+            i=-1
+            for f in me.faces:
+                if i==-1:
+                    file.write('%i' % f.use_smooth);	i=0
+                else:
+                    if i==54:
+                        file.write('\n			 ');	i=0
+                    file.write(',%i' % f.use_smooth)
+                i+=1
 
-        file.write('\n\t\t}')
+            file.write('\n\t\t}')
 
-        # Write Edge Smoothing
-        file.write('''
-        LayerElementSmoothing: 0 {
-            Version: 101
-            Name: ""
-            MappingInformationType: "ByEdge"
-            ReferenceInformationType: "Direct"
-            Smoothing: ''')
+            # Write Edge Smoothing
+            if Include_Edges:
+                file.write('''
+                LayerElementSmoothing: 0 {
+                    Version: 101
+                    Name: ""
+                    MappingInformationType: "ByEdge"
+                    ReferenceInformationType: "Direct"
+                    Smoothing: ''')
 
-        i=-1
-        for ed in me.edges:
-            if i==-1:
-                file.write('%i' % (ed.use_edge_sharp));	i=0
-            else:
-                if i==54:
-                    file.write('\n			 ');	i=0
-                file.write(',%i' % (ed.use_edge_sharp))
-            i+=1
+                i=-1
+                for ed in me.edges:
+                    if i==-1:
+                        file.write('%i' % (ed.use_edge_sharp));	i=0
+                    else:
+                        if i==54:
+                            file.write('\n			 ');	i=0
+                        file.write(',%i' % (ed.use_edge_sharp))
+                    i+=1
 
-        file.write('\n\t\t}')
+                file.write('\n\t\t}')
 
         # small utility function
         # returns a slice of data depending on number of face verts
@@ -2317,6 +2303,8 @@ Objects:  {''')
 
     # Finish Writing Objects
     # Write global settings
+    # In the original 2.55 version the UnitScaleFactor was 100
+    # for XNA this was changed to 1 (JCB)
     file.write('''
     GlobalSettings:  {
         Version: 1000
@@ -2327,7 +2315,7 @@ Objects:  {''')
             Property: "FrontAxisSign", "int", "",1
             Property: "CoordAxis", "int", "",0
             Property: "CoordAxisSign", "int", "",1
-            Property: "UnitScaleFactor", "double", "",100
+            Property: "UnitScaleFactor", "double", "",1
         }
     }
 ''')
@@ -2933,6 +2921,8 @@ class FBXExporter(bpy.types.Operator, ExportHelper):
     selectedObjects = BoolProperty(name="Selected Objects", description="Export selected objects on visible layers", default=False)
     applyModifiers = BoolProperty(name="Modifiers", description="Apply modifiers to mesh objects", default=True)
     copyImages = BoolProperty(name="Copy Image Files", description="Copy image files to the destination path", default=False)
+    includeSmoothing = BoolProperty(name="Include Smoothing", description="Extra information is added to the FBX file, not necessary for XNA", default=False)
+    includeEdges = BoolProperty(name="Include Edges", description="Extra information is added to the FBX file, not necessary for XNA", default=False)
 # Optimising Keyframes are another thing we don't need to worry about yet    
     optimiseFrames = BoolProperty(name="Optimize Keyframes", description="Remove double keyframes", default=False)
     optimisePrecission = FloatProperty(name="Precision", description="Tolerence for comparing double keyframes (higher for greater accuracy)", min=1, max=16, soft_min=1, soft_max=16, default=6.0)
@@ -2964,6 +2954,8 @@ class FBXExporter(bpy.types.Operator, ExportHelper):
             self.copyImages,
             self.optimiseFrames,
             self.optimisePrecission,
+            self.includeSmoothing,
+            self.includeEdges,
             )
 
 # package manages registering (__init__.py)
