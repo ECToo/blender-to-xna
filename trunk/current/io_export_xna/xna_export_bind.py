@@ -52,6 +52,9 @@
 #   http://www.blender.org/documentation/250PythonDoc/bpy.types.Armature.html?highlight=armature#bpy.types.Armature
 #   look at, pose_position['REST']
 #   That does not work
+# Try:
+# pose_position = 'REST'
+
 
 
 # Descriptions
@@ -121,20 +124,32 @@ def export_bind(filepath, formatType):
 
     print ("Export the bind pose to file: {0}".format(filepath))
     
-    
     # Store each bone transform as a separate line
     results = []
     # Number of bones
     boneCount = 0
 
+    # Set all the armatures in the scene to their rest state
+    # This works but there is still no easy way to get the rest pose bone positions 
+    # Save the previous state to re-instate at the end
+    ob_arms_original_rest = [arm.pose_position for arm in bpy.data.armatures]
+    # Set them all to rest
+    for arm in bpy.data.armatures:
+        arm.pose_position = 'REST'
+    # Update the scene to reflect the change
+    #if ob_arms_original_rest:
+    #    for ob_base in bpy.data.objects:
+    #        if ob_base.type == 'ARMATURE':
+    #            ob_base.update(bpy.context.scene)
+    # This causes the makeDisplayList command to effect the mesh
+    bpy.context.scene.frame_set(bpy.context.scene.frame_current)
+
+    
     # Get the armature (hopefully only one)
     for arm_obj in bpy.context.scene.objects:
         if arm_obj.type == 'ARMATURE':
         
             print ("Armature: {0}".format(arm_obj.name))
-
-            # Set to the REST pose
-            #arm_obj.pose_position['REST']  # does not work
             
             # The pose bones in the armature store the rotations etc. for the animations
             # They also store a link back to the orignal bone to get its rotation etc.
@@ -173,7 +188,8 @@ def export_bind(filepath, formatType):
                 elif formatType == 3:
                     # Use the rest pose
                     #boneMatrix = bone_obj.matrix_local * Matrix(poseBone.matrix_local).invert()
-                    boneMatrix = Matrix(bone_obj.matrix['ARMATURESPACE']).resize4x4()
+                    #boneMatrix = Matrix(bone_obj.matrix['ARMATURESPACE']).resize4x4()
+                    boneMatrix = Matrix(poseBone.matrix_local)
                 rowOne = "{0} {1} {2} {3}".format(boneMatrix[0][0], boneMatrix[0][1], boneMatrix[0][2], boneMatrix[0][3])
                 rowTwo = "{0} {1} {2} {3}".format(boneMatrix[1][0], boneMatrix[1][1], boneMatrix[1][2], boneMatrix[1][3])
                 rowThree = "{0} {1} {2} {3}".format(boneMatrix[2][0], boneMatrix[2][1], boneMatrix[2][2], boneMatrix[2][3])
@@ -188,6 +204,8 @@ def export_bind(filepath, formatType):
             file.write("Bone count: {0}\n".format(boneCount))
             if formatType == 2:
                 file.write("Bone [ Parent] Cumulative with parent matrices relative to the armature: {0}\n".format(arm_obj.name))
+            elif formatType == 3:
+                file.write("Bone [ Parent] Rest matrices relative to the armature: {0}\n".format(arm_obj.name))
             else:
                 file.write("Bone [ Parent] Absolute local matrix relative to the armature: {0}\n".format(arm_obj.name))
                 #file.write("Bone | Local matrix relative to the armature: {0}\n".format(arm_obj.name))
@@ -196,7 +214,7 @@ def export_bind(filepath, formatType):
                 file.write("{0}\n".format(item))
             file.close()
             print("Finished the bind pose for armature: {0}".format(arm_obj.name))
-        
+            
     # Repeat for each armature
     print("** Finished exporting **")
 

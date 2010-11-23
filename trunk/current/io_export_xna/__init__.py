@@ -44,12 +44,12 @@ try:
     # Add any classes here to reload if necessary
     reload(xna_export_action)
     reload(xna_export_fbx)
-    reload(xna_export_bind)
+    #reload(xna_export_bind)
 except:
     # Add any classes here to match above
     from io_export_xna import xna_export_action
     from io_export_xna import xna_export_fbx
-    from io_export_xna import xna_export_bind
+    #from io_export_xna import xna_export_bind
 
 init_data = True
 
@@ -66,23 +66,25 @@ def menu_export_fbx(self, context):
     default_path = os.path.splitext(bpy.data.filepath)[0] + ".fbx"
     self.layout.operator(xna_export_fbx.FBXExporter.bl_idname, text="XNA FBX Model (.fbx)").filepath = default_path
 
+'''
 def menu_export_bind(self, context):
     from io_export_xna import xna_export_bind
     import os
     default_path = os.path.splitext(bpy.data.filepath)[0] + ".pose"
     self.layout.operator(xna_export_bind.BindPoseExporter.bl_idname, text="XNA Bind Pose (.pose)").filepath = default_path
+'''
 
 # Add references to all scripts invoked by this class
 def register():
     bpy.types.INFO_MT_file_export.append(menu_export_action)
     bpy.types.INFO_MT_file_export.append(menu_export_fbx)
-    bpy.types.INFO_MT_file_export.append(menu_export_bind)
+    #bpy.types.INFO_MT_file_export.append(menu_export_bind)
 
 # Add references to all scripts invoked by this class
 def unregister():
     bpy.types.INFO_MT_file_export.remove(menu_export_action)
     bpy.types.INFO_MT_file_export.remove(menu_export_fbx)
-    bpy.types.INFO_MT_file_export.remove(menu_export_bind)
+    #bpy.types.INFO_MT_file_export.remove(menu_export_bind)
 
 if __name__ == "__main__":
     register()
