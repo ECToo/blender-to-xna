@@ -48,6 +48,9 @@
 # - the objects (meshes) must NOT have a scale applied
 # - bone transforms in actions must not use scale, only use Rotation and location
 # - all the objects must have the same centre ideally at the origin, (0, 0, 0)
+# - Animations have to be exported separatelty.
+#       XNA only support importing one animation but to look right the 
+#       animation is always exported in the rest pose postion.  
 # --------------------------------------------------------------------------
 
 # --------------------------------------------------------------------------
@@ -59,6 +62,10 @@
 # --------------------------------------------------------------------------
 # Completed tidy up tasks and other fixes (JCB)
 # --------------------------------------------------------------------------
+# Done - Reset the pose_position back to how it was before the script started
+# Done - For XNA the model only loads correctly if the take is in the bind pose 
+#           position.  I do not know why this is!
+#           This script sets the model to the REST position when starting.
 # Done - Stop the script erroring if the images are on a different drive
 #           to the output
 # Done - Added an option to include smoothing data (default = false)
@@ -74,8 +81,7 @@
 # --------------------------------------------------------------------------
 # Completed tasks to make the output similar to working sample FBX files (JCB)
 # --------------------------------------------------------------------------
-# DONE - This one line being missing is what prevented the model and animations 
-#        loading correctly in XNA.  It was in the original file but commented out!
+# done - Added back this commented out line
 #        It is in the Relations: section of the FBX file.
 #           file.write('\n\tPose: "Pose::BIND_POSES", "BindPose" {\n\t}')
 # Done - Change object_tx()
@@ -2027,6 +2033,10 @@ def export_fbx(operator, context, filepath="",
         if ob_base.dupli_list: ob_base.free_dupli_list()
 
 
+    # For XNA we have to export a take in the bind pose position 
+    # so we do not want to reset the REST position until the end of the script (JCB)
+    # Moved to the end of the script
+    '''
     if EXP_ARMATURE:
         # now we have the meshes, restore the rest arm position
         for i, arm in enumerate(bpy.data.armatures):
@@ -2038,7 +2048,8 @@ def export_fbx(operator, context, filepath="",
                     ob_base.update(scene)
             # This causes the makeDisplayList command to effect the mesh
             scene.frame_set(scene.frame_current)
-
+    '''
+    
     del tmp_ob_type, tmp_objects
 
     # now we have collected all armatures, add bones
@@ -2907,6 +2918,20 @@ Takes:  {''')
     ob_meshes[:] =	[]
     ob_null[:] =	[]
 
+    # Tidy up
+    # Reset the armature pose_positions back to how they were before we started
+    if EXP_ARMATURE:
+        for i, arm in enumerate(bpy.data.armatures):
+            arm.pose_position = ob_arms_orig_rest[i]
+
+        if ob_arms_orig_rest:
+            for ob_base in bpy.data.objects:
+                if ob_base.type == 'ARMATURE':
+                    ob_base.update(scene)
+            # This causes the makeDisplayList command to effect the mesh
+            scene.frame_set(scene.frame_current)
+    
+    
     print('export finished in %.4f sec.' % (time.clock() - start_time))
     return {'FINISHED'}
 
