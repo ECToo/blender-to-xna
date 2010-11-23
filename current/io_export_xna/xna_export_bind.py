@@ -37,6 +37,20 @@
 # Remember that there is a scripting console built in to Blender 2.5x
 # See also: Help -> Operator Cheat Sheet from within Blender 2.5x
 
+# --------------------------------------------------------------------------
+# * Tasks *
+# --------------------------------------------------------------------------
+# Try:
+#   from: 
+#       http://www.sfr-fresh.com/linux/misc/blender-2.49-linux-glibc236-py26-i386.tar.gz:a/blender-2.49-linux-glibc236-py26-i386/.blender/scripts/bpymodules/colladaImEx/translator.py
+#   bindMatrix = Matrix(bBone.matrix["ARMATURESPACE"]).resize4x4().transpose()
+#   I don't think it needs the transpose bit
+#   or
+#   bindMatrix = Matrix(bArmature.bones[vertexGroupName].matrix['ARMATURESPACE']).transpose()
+#   bindMatrix = Matrix(bMeshObject.matrix).transpose() * bindMatrix
+
+
+
 
 # Descriptions
 __author__ = ["John C Brown"]
