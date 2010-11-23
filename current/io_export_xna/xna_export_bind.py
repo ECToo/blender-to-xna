@@ -51,6 +51,7 @@
 # See also:
 #   http://www.blender.org/documentation/250PythonDoc/bpy.types.Armature.html?highlight=armature#bpy.types.Armature
 #   look at, pose_position['REST']
+#   That does not work
 
 
 # Descriptions
@@ -132,6 +133,9 @@ def export_bind(filepath, formatType):
         
             print ("Armature: {0}".format(arm_obj.name))
 
+            # Set to the REST pose
+            #arm_obj.pose_position['REST']  # does not work
+            
             # The pose bones in the armature store the rotations etc. for the animations
             # They also store a link back to the orignal bone to get its rotation etc.
             # http://www.blender.org/documentation/250PythonDoc/bpy.types.PoseBone.html
@@ -164,8 +168,12 @@ def export_bind(filepath, formatType):
                 # e.g. {0:.0f} displays a floating point number with a fixed size with 0 decimal places
                 # if the f for fixed is omitted then small numbers are displayed using the exponential 0.000-E7 notation
                 if formatType == 2:
-                    # Calculate the result aas the sum of the parent matrices
+                    # Calculate the result as the sum of the parent matrices
                     boneMatrix = bindPose.get(poseBone.bone.name)
+                elif formatType == 3:
+                    # Use the rest pose
+                    #boneMatrix = bone_obj.matrix_local * Matrix(poseBone.matrix_local).invert()
+                    boneMatrix = Matrix(bone_obj.matrix['ARMATURESPACE']).resize4x4()
                 rowOne = "{0} {1} {2} {3}".format(boneMatrix[0][0], boneMatrix[0][1], boneMatrix[0][2], boneMatrix[0][3])
                 rowTwo = "{0} {1} {2} {3}".format(boneMatrix[1][0], boneMatrix[1][1], boneMatrix[1][2], boneMatrix[1][3])
                 rowThree = "{0} {1} {2} {3}".format(boneMatrix[2][0], boneMatrix[2][1], boneMatrix[2][2], boneMatrix[2][3])
@@ -211,7 +219,7 @@ class BindPoseExporter(bpy.types.Operator):
 
     #all_actions = BoolProperty(name="All Actions", description="No choice this only Exports the current action", default=False)
     #frame_rate = IntProperty(name="Frames per second", description="The frame speed the animations are created for", default=60, min=1, max=960)
-    format_type = IntProperty(name="Type", description="Type 1 = Absolute Matrix, Type 2 = Cumulative from parents Matrix", default=1, min=1, max=2)
+    format_type = IntProperty(name="Type", description="Type 1 = Absolute Matrix, Type 2 = Cumulative from parents Matrix, Type 3 = Rest pose", default=3, min=1, max=3)
 
     
     def execute(self, context):
