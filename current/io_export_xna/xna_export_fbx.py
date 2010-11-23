@@ -1,25 +1,27 @@
-# ##### BEGIN GPL LICENSE BLOCK #####
+# --------------------------------------------------------------------------
+# ***** BEGIN GPL LICENSE BLOCK *****
 #
-#  This program is free software; you can redistribute it and/or
-#  modify it under the terms of the GNU General Public License
-#  as published by the Free Software Foundation; either version 2
-#  of the License, or (at your option) any later version.
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
 #
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software Foundation,
-#  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+# See the GNU General Public License on the GNU web site for full
+# details: http://www.gnu.org/licenses/gpl.html
 #
-# ##### END GPL LICENSE BLOCK #####
+# ***** END GPL LICENCE BLOCK *****
+# --------------------------------------------------------------------------
+# Blender to XNA
+# --------------------------------------------------------------------------
+# Project Home:
+# http://code.google.com/p/blender-to-xna/
+# --------------------------------------------------------------------------
 
 # <pep8 compliant>
-
-# Script copyright (C) Campbell Barton
-
 # This script uses spaces for indents NOT tabs.
 
 # --------------------------------------------------------------------------
@@ -34,7 +36,8 @@
 # http://blenderartists.org/forum/showthread.php/119783-XNA-.fbx-Exporter(s)
 # --------------------------------------------------------------------------
 # John C Brown (JCBDigger @MistyManor) http://games.DiscoverThat.co.uk
-# Attempt to make a 2.5x script work with XNA 4.0
+# Make a 2.5x script work with XNA 4.0
+# http://code.google.com/p/blender-to-xna/
 # November 2010
 # --------------------------------------------------------------------------
 
@@ -48,38 +51,33 @@
 # --------------------------------------------------------------------------
 
 # --------------------------------------------------------------------------
-# ** Tasks to adjust the output to work with XNA 4.0 ** 
+# ** TODO ** 
 # --------------------------------------------------------------------------
-#
-# - The animations work if the FBX file is exported with
-#       the first (and only) take in the FBX file being in the bind pose position
-#       For some reason all other animations work when that is the case!
-# - Find the bind pose settings without relying on a manually created pose.
-#
-# - In the sample Dude.fbx file that I have there is a section called Pose:
-#       Add that section in to this exporter.  It is after all the Deformer 
-#       lines in the Relations: section
-#       Pose::skinCluster3
-#       then each bone and mesh has its own PoseNode section
-#
+# - Remove the lamps and cameras they are unnecessary for XNA
+# --------------------------------------------------------------------------
+ 
+# --------------------------------------------------------------------------
+# Completed tidy up tasks and other fixes (JCB)
+# --------------------------------------------------------------------------
+# Done - Stop the script erroring if the images are on a different drive
+#           to the output
+# Done - Added an option to include smoothing data (default = false)
+# Done - Added an option to include edge data (default = false)
 # Done - Move the user interface in to the export_fbx file
 # Done - Change the title to XNA FBX Model
 # Done - Remove the options for setting scale and rotation
 # Done - Set the GLOBAL_MATRIX to identity
 # Done - Move the script to the export_xna folder
 # Done - Register the fbx script in the __init__.py script along with export_xna
-#
-# - Remove the lamps and cameras they are unnecessary for XNA
 # Done - Remove batch support
 #        This is just to be tidy and to avoid an additional complication 
 # --------------------------------------------------------------------------
-
+# Completed tasks to make the output similar to working sample FBX files (JCB)
 # --------------------------------------------------------------------------
-# Completed tasks to replicate the Blender 2.4x version of the XNA exporter
-# --------------------------------------------------------------------------
-# As far as I can tell the following made the output similar to the 
-# Blender 2.4x version of the XNA FBX exporter.
-# The results are still wrong in XNA 4.0
+# DONE - This one line being missing is what prevented the model and animations 
+#        loading correctly in XNA.  It was in the original file but commented out!
+#        It is in the Relations: section of the FBX file.
+#           file.write('\n\tPose: "Pose::BIND_POSES", "BindPose" {\n\t}')
 # Done - Change object_tx()
 #             Remove the rotation applied to the armature
 # Done - Change the takes so they use the same code as the 2.4x XNA FBX script
@@ -99,12 +97,33 @@
 # Done OK - Change 'Limb' to 'LimbNode'
 # Done OK - Make the armature a LimbNode instead of a null
 # --------------------------------------------------------------------------
+# Prior tasks (Unknown author)
+# --------------------------------------------------------------------------
+# All line numbers correspond to original export_fbx.py (under release/scripts)
+# - Draw.PupMenu alternative in 2.5?, temporarily replaced PupMenu with print
+# - get rid of bpy.path.clean_name somehow
+# + fixed: isinstance(inst, bpy.types.*) doesn't work on RNA objects: line 565
+# + get rid of BPyObject_getObjectArmature, move it in RNA?
+# - BATCH_ENABLE and BATCH_GROUP options: line 327
+# - implement all BPyMesh_* used here with RNA
+# - getDerivedObjects is not fully replicated with .dupli* funcs
+# - talk to Campbell, this code won't work? lines 1867-1875
+# - don't know what those colbits are, do we need them? they're said to be deprecated in DNA_object_types.h: 1886-1893
+# - no hq normals: 1900-1901
+# --------------------------------------------------------------------------
+# Incomplete (Unknown author)
+# --------------------------------------------------------------------------
+# - bpy.data.remove_scene: line 366
+# - bpy.sys.time move to bpy.sys.util?
+# - new scene creation, activation: lines 327-342, 368
+# - uses bpy.path.abspath, *.relpath - replace at least relpath
+# --------------------------------------------------------------------------
 
 
 """
-This script is an exporter to the FBX file format.
+This script is an exporter to the FBX file format suitable for use with Microsoft XNA.
 
-http://wiki.blender.org/index.php/Scripts/Manual/Export/autodesk_fbx
+http://code.google.com/p/blender-to-xna/
 """
 
 import os
@@ -149,7 +168,7 @@ def increment_string(t):
 
 
 # TODO - Disallow the name 'Scene' - it will bugger things up.
-#        'Blend_Root' is no longer used so it does not matter
+#        'Blend_Root' is no longer used so it does not matter (JCB)
 def sane_name(data, dct):
     #if not data: return None
 
@@ -277,13 +296,13 @@ def export_fbx(operator, context, filepath="",
         Include_Edges =             False,
     ):
 
-    # Always export just one animation
+    # Always export just one animation (JCB)
     ANIM_ENABLE = True
     ANIM_ACTION_ALL = False
-    # Remove these eventually as they are not applicable to XNA
+    # Remove these eventually as they are not applicable to XNA (JCB)
     EXP_LAMP = False
     EXP_CAMERA = False
-    # We always need the following if present
+    # We always need the following for XNA if present (JCB)
     EXP_MESH =					True,
     EXP_ARMATURE =				True,
     EXP_EMPTY =					True,
@@ -299,6 +318,8 @@ def export_fbx(operator, context, filepath="",
 
     # Create a new 4x4 identity matrix (JCB)
     # http://www.blender.org/documentation/249PythonDoc/Mathutils.Matrix-class.html
+    # There is probably a built in function to get the Identity matrix but I 
+    # could not find it in the documentation quickly enough.
     GLOBAL_MATRIX = Matrix([1,0,0,0], [0,1,0,0], [0,0,1,0], [0,0,0,1])
     
     if bpy.ops.object.mode_set.poll():
@@ -2400,7 +2421,9 @@ Relations:  {''')
             file.write('\n\tDeformer: "SubDeformer::Cluster %s %s", "Cluster" {\n\t}' % (fbxMeshObName, my_bone.fbxName))
 
     # This should be at the end
-    # file.write('\n\tPose: "Pose::BIND_POSES", "BindPose" {\n\t}')
+    # Added this back (JCB)
+    # It was this one line being missing that prevented the model and animations loading correctly in XNA
+    file.write('\n\tPose: "Pose::BIND_POSES", "BindPose" {\n\t}')
 
     for groupname, group in groups:
         file.write('\n\tGroupSelection: "GroupSelection::%s", "Default" {\n\t}' % groupname)
@@ -2888,24 +2911,6 @@ Takes:  {''')
     return {'FINISHED'}
 
 
-# NOTES (all line numbers correspond to original export_fbx.py (under release/scripts)
-# - Draw.PupMenu alternative in 2.5?, temporarily replaced PupMenu with print
-# - get rid of bpy.path.clean_name somehow
-# + fixed: isinstance(inst, bpy.types.*) doesn't work on RNA objects: line 565
-# + get rid of BPyObject_getObjectArmature, move it in RNA?
-# - BATCH_ENABLE and BATCH_GROUP options: line 327
-# - implement all BPyMesh_* used here with RNA
-# - getDerivedObjects is not fully replicated with .dupli* funcs
-# - talk to Campbell, this code won't work? lines 1867-1875
-# - don't know what those colbits are, do we need them? they're said to be deprecated in DNA_object_types.h: 1886-1893
-# - no hq normals: 1900-1901
-
-# TODO
-
-# - bpy.data.remove_scene: line 366
-# - bpy.sys.time move to bpy.sys.util?
-# - new scene creation, activation: lines 327-342, 368
-# - uses bpy.path.abspath, *.relpath - replace at least relpath
 
 # ** User interface
 
