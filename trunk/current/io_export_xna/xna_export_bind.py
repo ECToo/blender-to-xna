@@ -48,8 +48,9 @@
 #   or
 #   bindMatrix = Matrix(bArmature.bones[vertexGroupName].matrix['ARMATURESPACE']).transpose()
 #   bindMatrix = Matrix(bMeshObject.matrix).transpose() * bindMatrix
-
-
+# See also:
+#   http://www.blender.org/documentation/250PythonDoc/bpy.types.Armature.html?highlight=armature#bpy.types.Armature
+#   look at, pose_position['REST']
 
 
 # Descriptions
