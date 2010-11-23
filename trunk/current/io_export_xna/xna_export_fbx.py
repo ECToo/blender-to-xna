@@ -51,9 +51,16 @@
 # ** Tasks to adjust the output to work with XNA 4.0 ** 
 # --------------------------------------------------------------------------
 #
-# - The first (and only) take in the FBX file should be in the bind pose position
+# - The animations work if the FBX file is exported with
+#       the first (and only) take in the FBX file being in the bind pose position
 #       For some reason all other animations work when that is the case!
 # - Find the bind pose settings without relying on a manually created pose.
+#
+# - In the sample Dude.fbx file that I have there is a section called Pose:
+#       Add that section in to this exporter.  It is after all the Deformer 
+#       lines in the Relations: section
+#       Pose::skinCluster3
+#       then each bone and mesh has its own PoseNode section
 #
 # Done - Move the user interface in to the export_fbx file
 # Done - Change the title to XNA FBX Model
