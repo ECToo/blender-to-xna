@@ -47,11 +47,9 @@
 # --------------------------------------------------------------------------
 # *** TASKS ***
 # --------------------------------------------------------------------------
-# - Work out the file name based on the action name (if necessary)
-#     Add the action name as a suffix to the filename (default)
-#       Action as a filename suffix (filename-action.clip)
-# - Once the animations work
-#   - Round floating point number to 7 or 8 decimal places which should be acurate 
+# - Export multiple actions in to a single file with the names of each 
+#       action included in the one file
+# - Round floating point number to 7 or 8 decimal places which should be accurate 
 #       enough for our needs (perhaps try as low as 6 decimal places)
 #       Try {0:9f} to have a field size of 9 rather than simply 8 decimal places
 # Done - Change the importer for XNA to accept bone names and convert to their index
@@ -110,58 +108,10 @@ Execute this script from the "File->Export" menu.
 import bpy
 from mathutils import Matrix
 
-IdentityMatrix = Matrix([1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1])   # Identity
-
-# Remove if not used after testing
-class bind_bone:
-    def __init__(self):
-        self.Name = ""
-        self.Bind_Matrix = Matrix()   # Identity
-
-# Remove if not used after testing
-class bind_bones:
-    def __init__(self):
-        self.binds = []
-    
-    def addpose(self, name, bind_matrix):
-        bBone = bind_bone()
-        bBone.Name = name
-        bBone.Bind_Matrix = bind_matrix
-        self.binds.append(bBone)
-        
-    def get(self, name):
-        for bBone in self.binds:
-            if bBone.Name == name:
-                return bBone.Bind_Matrix
-        #return Matrix(IdentityMatrix)
-
-# Remove if not used after testing
-# Calculate the bind pose
-# I don't think this works!!!!
-def calc_bind_pose(arm_obj):
-    
-    binds = bind_bones()
-    poseBones = arm_obj.pose.bones
-    
-    for poseBone in poseBones:
-        matrix_bind = Matrix()
-        if poseBone.parent:
-            # add the local transformation to the cumulative of the parents
-            parent_matrix = Matrix(binds.get(poseBone.parent.bone.name))
-            matrix_bind = parent_matrix * poseBone.bone.matrix_local
-            #print("{0} -> Parent: {1}".format(poseBone.bone.name, poseBone.parent.bone.name))
-            binds.addpose(poseBone.bone.name, matrix_bind)
-        else:
-            parent_matrix = Matrix(IdentityMatrix)
-            matrix_bind = parent_matrix * poseBone.bone.matrix_local
-            #print("{0} -> Parent: root".format(poseBone.bone.name))
-            binds.addpose(poseBone.bone.name, matrix_bind)
-        
-    # Loop pose bones
-    return binds
+#IdentityMatrix = Matrix([1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1])   # Identity
     
 # Format type is used while testing to output different information
-def export_action(filepath, framesPerSecond, allActions, formatType):
+def export_action(filepath, framesPerSecond, allActions):
 
     print ("Export animation(s) to file: {0}".format(filepath))
     
@@ -172,29 +122,54 @@ def export_action(filepath, framesPerSecond, allActions, formatType):
     # accuracy but it is unlikely to make any noticable difference to the resulting animation
     frameTime = 10000000.0 / framesPerSecond
     
+    # Hold the actions to be exported
+    theActions = []
     # Store each keyframe bone transform as a separate line
     # File format:
     # BoneID FrameTime | Transform matrix
     keyframes = []
     # Number of bones
     boneCount = 0
-    # At the moment this only exports the current animation
-    currentAction = None
     
-    # Get the armature (hopefully only one)
+    # Backup the original pose position values so we can re-instate them at the end
+    ob_arms_orig_rest = [arm.pose_position for arm in bpy.data.armatures]
+    originalAction = None
+    # set every armature to pose
+    for arm in bpy.data.armatures:
+        arm.pose_position = 'POSE'
+
+    if ob_arms_orig_rest:
+        for ob_base in bpy.data.objects:
+            if ob_base.type == 'ARMATURE':
+                ob_base.update(bpy.context.scene)
+
+        # This causes the makeDisplayList command to effect the mesh
+        bpy.context.scene.frame_set(bpy.context.scene.frame_current)
+
+    
+    # Get the armature (usualy only one for models exported to XNA)
     for arm_obj in bpy.context.scene.objects:
         if arm_obj.type == 'ARMATURE':
-        
             print ("Armature: {0}".format(arm_obj.name))
             
-            # get the current action
+            # get the current action or all actions
             if arm_obj.animation_data:
-                if not currentAction:
-                    currentAction =	arm_obj.animation_data.action
+                # Save the action so we can re-instate it at the end
+                originalAction = arm_obj.animation_data.action
+                if allActions:
+                    theActions = bpy.data.actions[:]
+                else:
+                    theActions.append(arm_obj.animation_data.action)
 
             # http://www.blender.org/documentation/250PythonDoc/bpy.types.Action.html
-            if currentAction:
-                print ("Action: {0}".format(currentAction.name))
+            for currentAction in theActions:
+                # Set the current action for poses
+                arm_obj.animation_data.action = currentAction
+                print ("Action: {0}-{1}".format(arm_obj.name, currentAction.name))
+                # Add to the array to be added to the file
+                # The action name starting with an equals symbol used to identify the start of a new animation
+                # The action name is prefixed by the armature name to make it a unique name
+                keyframes.append("={0}-{1}".format(arm_obj.name, currentAction.name))
                 frameStart = int(currentAction.frame_range[0])
                 frameEnd = int(currentAction.frame_range[1])
                 frameCount = int(frameEnd - frameStart + 1)
@@ -205,10 +180,9 @@ def export_action(filepath, framesPerSecond, allActions, formatType):
                 boneCount = len(arm_obj.pose.bones)
                 print ("Number of bones: {0}".format(boneCount))
                 print ("Total clip duration (ticks): {0:.0f}".format(totalClipTime))
-                
-                # Calculate the bind pose (Remove if not used after testing)
-                bindPose = calc_bind_pose(arm_obj)
-                print ("Number of bones in the bind pose: {0}".format(len(bindPose.binds)))
+                # Add to the array to be added to the file
+                # The bone count to check compatibility and the total clip time
+                keyframes.append("{0} {1:.0f}".format(boneCount, totalClipTime))
         
                 # Loop through all the frames starting with the first one in the selected action
                 # This gets every frame including those blended from inserted frames
@@ -241,21 +215,6 @@ def export_action(filepath, framesPerSecond, allActions, formatType):
                         # Format properties: http://www.python.org/dev/peps/pep-3101/
                         # e.g. {0:.0f} displays a floating point number with a fixed size with 0 decimal places
                         # if the f for fixed is omitted then small numbers are displayed using the exponential 0.000-E7 notation
-                        
-                        # Remove the types when the correct method is found
-                        if formatType == 2:
-                            # The bind pose is local matrix of the bone associated with the pose bone
-                            # Probably needs to be the cumulative of all the parent matrices
-                            #       Add a calculation to work out the bind pose of each bone
-                            #boneMatrix = boneMatrix * poseBone.bone.matrix_local
-                            boneMatrix = boneMatrix * bindPose.get(poseBone.bone.name)
-                        elif formatType == 3:
-                            # Deliberate mistake with the sum reversed just used for testing
-                            boneMatrix = poseBone.bone.matrix_local * boneMatrix
-                        elif formatType == 4:
-                            # Bind pose only used for testing
-                            #boneMatrix = Matrix(poseBone.bone.matrix_local)
-                            boneMatrix = bindPose.get(poseBone.bone.name)
                         rowOne = "{0} {1} {2} {3}".format(boneMatrix[0][0], boneMatrix[0][1], boneMatrix[0][2], boneMatrix[0][3])
                         rowTwo = "{0} {1} {2} {3}".format(boneMatrix[1][0], boneMatrix[1][1], boneMatrix[1][2], boneMatrix[1][3])
                         rowThree = "{0} {1} {2} {3}".format(boneMatrix[2][0], boneMatrix[2][1], boneMatrix[2][2], boneMatrix[2][3])
@@ -265,18 +224,33 @@ def export_action(filepath, framesPerSecond, allActions, formatType):
                         keyframes.append(resultFrame)
                         #print (resultFrame)
 
-                # write the frames to a file
-                file = open(filepath, "w")
-                # The file format type for use by an importer
-                file.write("{0}\n".format(formatType))
-                # The bone count to check compatibility
-                file.write("{0} {1:.0f}\n".format(boneCount, totalClipTime))
-                for keyframe in keyframes:
-                    file.write("{0}\n".format(keyframe))
-                file.close()
-                print("Finished the action: {0}, for armature: {1}".format(currentAction.name, arm_obj.name))
-        
+                print("Finished the action: {0}-{1}".format(arm_obj.name, currentAction.name))
+            # Repeat for each action
+            # Tidy up
+            arm_obj.animation_data.action = originalAction
+        # Save the action separately for each armature
+        originalAction = None
     # Repeat for each armature
+
+    # Write everything to the file
+    if len(keyframes) > 2:
+        file = open(filepath, "w")
+        for keyframe in keyframes:
+            file.write("{0}\n".format(keyframe))
+        file.close()
+    
+    # Tidy up
+    # Reset the armature pose_positions back to how they were before we started
+    for i, arm in enumerate(bpy.data.armatures):
+        arm.pose_position = ob_arms_orig_rest[i]
+
+    if ob_arms_orig_rest:
+        for ob_base in bpy.data.objects:
+            if ob_base.type == 'ARMATURE':
+                ob_base.update(bpy.context.scene)
+        # This causes the makeDisplayList command to effect the mesh
+        bpy.context.scene.frame_set(bpy.context.scene.frame_current)
+
     print("** Finished exporting to XNA **")
 
 from bpy.props import *
@@ -296,12 +270,11 @@ class ActionExporter(bpy.types.Operator):
     filepath = StringProperty(name="File Path", description="Filepath used for exporting the file", maxlen= 1024, default= "", subtype='FILE_PATH')
     check_existing = BoolProperty(name="Check Existing", description="Check and warn on overwriting existing files", default=True, options={'HIDDEN'})
 
-    all_actions = BoolProperty(name="All Actions", description="No choice this only Exports the current action", default=False)
+    all_actions = BoolProperty(name="All Actions", description="Export the current action or all actions", default=True)
     frame_rate = IntProperty(name="Frames per second", description="The frame speed the animations are created for", default=60, min=1, max=960)
-    format_type = IntProperty(name="Type", description="Type 1 = Matrix only, Type 2 = Matrix and bind pose, Type 3 = Deliberate mistake, Type 4 = Bind pose only", default=1, min=1, max=4)
 
     def execute(self, context):
-        export_action(self.filepath, self.frame_rate, self.all_actions, self.format_type)
+        export_action(self.filepath, self.frame_rate, self.all_actions)
         return {'FINISHED'}
 
     def invoke(self, context, event):

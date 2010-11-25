@@ -48,20 +48,32 @@
 # - the objects (meshes) must NOT have a scale applied
 # - bone transforms in actions must not use scale, only use Rotation and location
 # - all the objects must have the same centre ideally at the origin, (0, 0, 0)
-# - Animations have to be exported separatelty.
-#       XNA only support importing one animation but to look right the 
-#       animation is always exported in the rest pose postion.  
+# - Animations have to be exported separately.
+#       XNA only support importing one animation but to look right that one 
+#       animation has to be exported in the rest pose postion.  
+#       I do not know why!
 # --------------------------------------------------------------------------
 
 # --------------------------------------------------------------------------
 # ** TODO ** 
 # --------------------------------------------------------------------------
+# - Reduce the frames used in the Rest pose take to the minimum
 # - Remove the lamps and cameras they are unnecessary for XNA
+# - Remove Optimise Keyframes
+# --------------------------------------------------------------------------
+
+
+# --------------------------------------------------------------------------
+# ** Ideas for others **
+# --------------------------------------------------------------------------
+# - Find a way to export the model without the take being in the rest position
+# - Use the Free AutoDesk FBX SDK which support Python
 # --------------------------------------------------------------------------
  
 # --------------------------------------------------------------------------
 # Completed tidy up tasks and other fixes (JCB)
 # --------------------------------------------------------------------------
+# Done - Disable the keyframe optimise options
 # Done - Reset the pose_position back to how it was before the script started
 # Done - For XNA the model only loads correctly if the take is in the bind pose 
 #           position.  I do not know why this is!
@@ -296,8 +308,6 @@ def export_fbx(operator, context, filepath="",
         EXP_OBS_SELECTED =			True,
         EXP_MESH_APPLY_MOD =		True,
         EXP_IMAGE_COPY =			False,
-        ANIM_OPTIMIZE =				True,
-        ANIM_OPTIMIZE_PRECISSION =	6,
         Include_Smoothing =         False,
         Include_Edges =             False,
     ):
@@ -308,10 +318,12 @@ def export_fbx(operator, context, filepath="",
     # Remove these eventually as they are not applicable to XNA (JCB)
     EXP_LAMP = False
     EXP_CAMERA = False
+    ANIM_OPTIMIZE = False
+    ANIM_OPTIMIZE_PRECISSION = 6
     # We always need the following for XNA if present (JCB)
-    EXP_MESH =					True,
-    EXP_ARMATURE =				True,
-    EXP_EMPTY =					True,
+    EXP_MESH = True,
+    EXP_ARMATURE = True,
+    EXP_EMPTY = True,
     
     # testing
     mtx_x90		= Matrix.Rotation( math.pi/2.0, 3, 'X') # used for lamp and camera rotations only
@@ -2955,14 +2967,11 @@ class FBXExporter(bpy.types.Operator, ExportHelper):
     # to the class instance from the operator settings before calling.
 
 # for testing select all objects
-    selectedObjects = BoolProperty(name="Selected Objects", description="Export selected objects on visible layers", default=False)
+    selectedObjects = BoolProperty(name="Selected Objects", description="Export only selected objects on visible layers", default=False)
     applyModifiers = BoolProperty(name="Modifiers", description="Apply modifiers to mesh objects", default=True)
     copyImages = BoolProperty(name="Copy Image Files", description="Copy image files to the destination path", default=False)
-    includeSmoothing = BoolProperty(name="Include Smoothing", description="Extra information is added to the FBX file, not necessary for XNA", default=False)
-    includeEdges = BoolProperty(name="Include Edges", description="Extra information is added to the FBX file, not necessary for XNA", default=False)
-# Optimising Keyframes are another thing we don't need to worry about yet    
-    optimiseFrames = BoolProperty(name="Optimize Keyframes", description="Remove double keyframes", default=False)
-    optimisePrecission = FloatProperty(name="Precision", description="Tolerence for comparing double keyframes (higher for greater accuracy)", min=1, max=16, soft_min=1, soft_max=16, default=6.0)
+    includeSmoothing = BoolProperty(name="Include Smoothing", description="Additional detail is added to the FBX file", default=False)
+    includeEdges = BoolProperty(name="Include Edges", description="Additional detail is added to the FBX file", default=False)
 
     def execute(self, context):
         import math
@@ -2989,8 +2998,6 @@ class FBXExporter(bpy.types.Operator, ExportHelper):
             self.selectedObjects,
             self.applyModifiers,
             self.copyImages,
-            self.optimiseFrames,
-            self.optimisePrecission,
             self.includeSmoothing,
             self.includeEdges,
             )
