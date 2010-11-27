@@ -306,10 +306,6 @@ header_comment = \
 # This func can be called with just the filepath
 def export_fbx(operator, context, filepath="",
         EXP_OBS_SELECTED =			True,
-        EXP_MESH_APPLY_MOD =		True,
-        EXP_IMAGE_COPY =			False,
-        Include_Smoothing =         False,
-        Include_Edges =             False,
     ):
 
     # Always export just one animation (JCB)
@@ -320,13 +316,18 @@ def export_fbx(operator, context, filepath="",
     EXP_CAMERA = False
     ANIM_OPTIMIZE = False
     ANIM_OPTIMIZE_PRECISSION = 6
-    # We always need the following for XNA if present (JCB)
-    EXP_MESH = True,
+    # We only need the armature for animations (JCB)
+    EXP_MESH = False,
     EXP_ARMATURE = True,
-    EXP_EMPTY = True,
+    EXP_EMPTY = False,
+    Include_Smoothing = False
+    Include_Edges = False
+    EXP_MESH_APPLY_MOD = True
+    EXP_IMAGE_COPY = False
     
     # testing
     mtx_x90		= Matrix.Rotation( math.pi/2.0, 3, 'X') # used for lamp and camera rotations only
+    # For some reason animations need rotating
     #mtx4_z90	= Matrix.Rotation( math.pi/2.0, 4, 'Z')
 
     '''
@@ -428,7 +429,8 @@ def export_fbx(operator, context, filepath="",
 
         def getAnimParRelMatrix(self, frame):
             #arm_mat = self.fbxArm.matrixWorld
-            #arm_mat = self.fbxArm.parRelMatrix()
+            # Testing XNA
+            arm_mat = self.fbxArm.parRelMatrix()
             # XNA test
             # None of the things called here appear to have a parent!
             #return (self.parent.getPoseMatrix(frame)).invert() * ((self.getPoseMatrix(frame)))
@@ -438,18 +440,20 @@ def export_fbx(operator, context, filepath="",
                 #return self.getPoseMatrix(frame) * mtx4_z90
                 # XNA
                 return self.getPoseMatrix(frame)
+                #return self.getPoseMatrix(frame) * arm_mat
             else:
                 # XNA check to see if the parent is a bone
                 #if isinstance(self.parent, bpy.types.Bone):
                 #    #return (mtx4_z90 * ((self.getPoseMatrix(frame) * arm_mat)))  *  (mtx4_z90 * (self.parent.getPoseMatrix(frame) * arm_mat)).invert()
-                #    #return (self.parent.getPoseMatrix(frame) * mtx4_z90).invert() * ((self.getPoseMatrix(frame)) * mtx4_z90)
+                #return (self.parent.getPoseMatrix(frame) * mtx4_z90).invert() * ((self.getPoseMatrix(frame)) * mtx4_z90)
                 #    # XNA
                 return (self.parent.getPoseMatrix(frame)).invert() * ((self.getPoseMatrix(frame)))
+                #return (self.parent.getPoseMatrix(frame) * arm_mat).invert() * ((self.getPoseMatrix(frame) * arm_mat))
                 #else:
                 #    return self.getPoseMatrix(frame)
             
 
-        # we need thes because cameras and lights modified rotations
+        # we need these because cameras and lights modified rotations
         def getAnimParRelMatrixRot(self, frame):
             return self.getAnimParRelMatrix(frame)
 
@@ -2045,14 +2049,11 @@ def export_fbx(operator, context, filepath="",
         if ob_base.dupli_list: ob_base.free_dupli_list()
 
 
-    # For XNA we have to export a take in the bind pose position 
-    # so we do not want to reset the REST position until the end of the script (JCB)
-    # Moved to the end of the script
-    '''
+    # To export animations the armature must be in the POSE position not the REST position (JCB)
     if EXP_ARMATURE:
-        # now we have the meshes, restore the rest arm position
-        for i, arm in enumerate(bpy.data.armatures):
-            arm.pose_position = ob_arms_orig_rest[i]
+        # Set all the armatures to POSE postion
+        for arm in bpy.data.armatures:
+            arm.pose_position = 'POSE'
 
         if ob_arms_orig_rest:
             for ob_base in bpy.data.objects:
@@ -2060,7 +2061,6 @@ def export_fbx(operator, context, filepath="",
                     ob_base.update(scene)
             # This causes the makeDisplayList command to effect the mesh
             scene.frame_set(scene.frame_current)
-    '''
     
     del tmp_ob_type, tmp_objects
 
@@ -2957,8 +2957,8 @@ from io_utils import ExportHelper
 # io_utils is in the user folder .../2.55/scripts/modules 
 
 class FBXExporter(bpy.types.Operator, ExportHelper):
-    '''Export the model with skinning data to an ASCII Autodesk FBX for import in to XNA'''
-    bl_idname = "xna_export_fbx.fbx"
+    '''Export animation data to an ASCII Autodesk FBX for import in to XNA'''
+    bl_idname = "xna_fbx_takes.fbx"
     bl_label = "XNA FBX Export"
 
     filename_ext = ".fbx"
@@ -2968,10 +2968,6 @@ class FBXExporter(bpy.types.Operator, ExportHelper):
 
 # for testing select all objects
     selectedObjects = BoolProperty(name="Selected Objects", description="Export only selected objects on visible layers", default=False)
-    applyModifiers = BoolProperty(name="Modifiers", description="Apply modifiers to mesh objects", default=True)
-    copyImages = BoolProperty(name="Copy Image Files", description="Copy image files to the destination path", default=False)
-    includeSmoothing = BoolProperty(name="Include Smoothing", description="Additional detail is added to the FBX file", default=False)
-    includeEdges = BoolProperty(name="Include Edges", description="Additional detail is added to the FBX file", default=False)
 
     def execute(self, context):
         import math
@@ -2996,10 +2992,6 @@ class FBXExporter(bpy.types.Operator, ExportHelper):
 
         return export_fbx(self, context, self.filepath,
             self.selectedObjects,
-            self.applyModifiers,
-            self.copyImages,
-            self.includeSmoothing,
-            self.includeEdges,
             )
 
 # package manages registering (__init__.py)

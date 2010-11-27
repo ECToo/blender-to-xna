@@ -43,13 +43,13 @@ try:
     init_data
     # Add any classes here to reload if necessary
     reload(xna_export_action)
-    reload(xna_export_fbx)
-    #reload(xna_export_bind)
+    reload(xna_fbx_model)
+    reload(xna_fbx_takes)
 except:
     # Add any classes here to match above
     from io_export_xna import xna_export_action
-    from io_export_xna import xna_export_fbx
-    #from io_export_xna import xna_export_bind
+    from io_export_xna import xna_fbx_model
+    from io_export_xna import xna_fbx_takes
 
 init_data = True
 
@@ -60,31 +60,38 @@ def menu_export_action(self, context):
     default_path = os.path.splitext(bpy.data.filepath)[0] + ".action"
     self.layout.operator(xna_export_action.ActionExporter.bl_idname, text="XNA Keyframes (.action)").filepath = default_path
 
-def menu_export_fbx(self, context):
-    from io_export_xna import xna_export_fbx
+def menu_export_fbx_model(self, context):
+    from io_export_xna import xna_fbx_model
     import os
     default_path = os.path.splitext(bpy.data.filepath)[0] + ".fbx"
-    self.layout.operator(xna_export_fbx.FBXExporter.bl_idname, text="XNA FBX Model (.fbx)").filepath = default_path
+    self.layout.operator(xna_fbx_model.FBXExporter.bl_idname, text="XNA FBX Model (.fbx)").filepath = default_path
 
-'''
-def menu_export_bind(self, context):
-    from io_export_xna import xna_export_bind
+def menu_export_fbx_takes(self, context):
+    from io_export_xna import xna_fbx_takes
     import os
-    default_path = os.path.splitext(bpy.data.filepath)[0] + ".pose"
-    self.layout.operator(xna_export_bind.BindPoseExporter.bl_idname, text="XNA Bind Pose (.pose)").filepath = default_path
-'''
+    # get the current action name
+    currentAction = ""
+    for arm_obj in bpy.context.scene.objects:
+        if arm_obj.type == 'ARMATURE':
+            if arm_obj.animation_data:
+                if currentAction == "":
+                    currentAction = arm_obj.animation_data.action.name
+    
+    default_path = os.path.splitext(bpy.data.filepath)[0] + "-" + currentAction + ".fbx"
+    self.layout.operator(xna_fbx_takes.FBXExporter.bl_idname, text="XNA FBX Animations (.fbx)").filepath = default_path
+    
 
 # Add references to all scripts invoked by this class
 def register():
     bpy.types.INFO_MT_file_export.append(menu_export_action)
-    bpy.types.INFO_MT_file_export.append(menu_export_fbx)
-    #bpy.types.INFO_MT_file_export.append(menu_export_bind)
+    bpy.types.INFO_MT_file_export.append(menu_export_fbx_model)
+    bpy.types.INFO_MT_file_export.append(menu_export_fbx_takes)
 
 # Add references to all scripts invoked by this class
 def unregister():
     bpy.types.INFO_MT_file_export.remove(menu_export_action)
-    bpy.types.INFO_MT_file_export.remove(menu_export_fbx)
-    #bpy.types.INFO_MT_file_export.remove(menu_export_bind)
+    bpy.types.INFO_MT_file_export.remove(menu_export_fbx_model)
+    bpy.types.INFO_MT_file_export.remove(menu_export_fbx_takes)
 
 if __name__ == "__main__":
     register()
