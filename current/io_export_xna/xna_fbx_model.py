@@ -57,7 +57,6 @@
 # --------------------------------------------------------------------------
 # ** TODO ** 
 # --------------------------------------------------------------------------
-# - Reduce the frames used in the Rest pose take to the minimum
 # - Remove the lamps and cameras they are unnecessary for XNA
 # - Remove Optimise Keyframes
 # --------------------------------------------------------------------------
@@ -73,6 +72,7 @@
 # --------------------------------------------------------------------------
 # Completed tidy up tasks and other fixes (JCB)
 # --------------------------------------------------------------------------
+# Done - Reduce the frames used in the Rest pose take to the minimum
 # Done - Disable the keyframe optimise options
 # Done - Reset the pose_position back to how it was before the script started
 # Done - For XNA the model only loads correctly if the take is in the bind pose 
@@ -2639,7 +2639,8 @@ Connections:  {''')
 Takes:  {''')
 
         if blenActionDefault:
-            file.write('\n\tCurrent: "%s"' % sane_takename(blenActionDefault))
+            #file.write('\n\tCurrent: "%s"' % sane_takename(blenActionDefault))
+            file.write('\n\tCurrent: "Rest Pose"')
         else:
             file.write('\n\tCurrent: "Default Take"')
 
@@ -2661,13 +2662,18 @@ Takes:  {''')
             else:
                 # use existing name
                 if blenAction == blenActionDefault: # have we already got the name
-                    file.write('\n\tTake: "%s" {' % sane_name_mapping_take[blenAction.name])
+                    #file.write('\n\tTake: "%s" {' % sane_name_mapping_take[blenAction.name])
+                    file.write('\n\tTake: "Rest_Pose" {')
                 else:
-                    file.write('\n\tTake: "%s" {' % sane_takename(blenAction))
+                    #file.write('\n\tTake: "%s" {' % sane_takename(blenAction))
+                    file.write('\n\tTake: "Rest_Pose" {')
 
                 act_start, act_end = blenAction.frame_range
                 act_start = int(act_start)
-                act_end = int(act_end)
+                #act_end = int(act_end)
+                # XNA
+                # For the rest pose we only need one frame
+                act_end = int(act_start)
 
                 # Set the action active
                 for my_bone in ob_arms:
@@ -2677,7 +2683,8 @@ Takes:  {''')
                 # scene.update(1)
 
             #file.write('\n\t\tFileName: "Default_Take.tak"') # ??? - not sure why this is needed
-            file.write('\n\t\tFileName: "%s.tak"' % sane_name_mapping_take[blenAction.name]) # ??? - not sure why this is needed
+            #file.write('\n\t\tFileName: "%s.tak"' % sane_name_mapping_take[blenAction.name]) # ??? - not sure why this is needed
+            file.write('\n\t\tFileName: "Rest_Pose.tak"') # ??? - not sure why this is needed
             file.write('\n\t\tLocalTime: %i,%i' % (fbx_time(act_start-1), fbx_time(act_end-1))) # ??? - not sure why this is needed
             file.write('\n\t\tReferenceTime: %i,%i' % (fbx_time(act_start-1), fbx_time(act_end-1))) # ??? - not sure why this is needed
 
@@ -2726,6 +2733,7 @@ Takes:  {''')
                         file.write('\n\t\t\tChannel: "Transform" {')
 
                         context_bone_anim_mats = [ (my_ob.getAnimParRelMatrix(frame), my_ob.getAnimParRelMatrixRot(frame)) for frame in range(act_start, act_end+1) ]
+                        
 
                         # ----------------
                         # ----------------
