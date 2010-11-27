@@ -57,7 +57,10 @@
 # --------------------------------------------------------------------------
 # ** TODO ** 
 # --------------------------------------------------------------------------
-# - Reduce the frames used in the Rest pose take to the minimum
+# - Using FBX the moel is still at an odd angle in XNA
+#   Try creating __pose_bone.matrix while the model is in the rest
+#       position then apply to the take while the take is in the 
+#       pose position!
 # - Remove the lamps and cameras they are unnecessary for XNA
 # - Remove Optimise Keyframes
 # --------------------------------------------------------------------------
@@ -66,7 +69,10 @@
 # --------------------------------------------------------------------------
 # ** Ideas for others **
 # --------------------------------------------------------------------------
+
+
 # - Find a way to export the model without the take being in the rest position
+
 # - Use the Free AutoDesk FBX SDK which support Python
 # --------------------------------------------------------------------------
  
@@ -317,18 +323,18 @@ def export_fbx(operator, context, filepath="",
     ANIM_OPTIMIZE = False
     ANIM_OPTIMIZE_PRECISSION = 6
     # We only need the armature for animations (JCB)
-    EXP_MESH = False,
+    EXP_MESH = True,
     EXP_ARMATURE = True,
-    EXP_EMPTY = False,
+    EXP_EMPTY = True,
     Include_Smoothing = False
     Include_Edges = False
     EXP_MESH_APPLY_MOD = True
     EXP_IMAGE_COPY = False
     
     # testing
-    mtx_x90		= Matrix.Rotation( math.pi/2.0, 3, 'X') # used for lamp and camera rotations only
+    mtx_x90 = Matrix.Rotation( math.pi/2.0, 3, 'X') # used for lamp and camera rotations only
     # For some reason animations need rotating
-    #mtx4_z90	= Matrix.Rotation( math.pi/2.0, 4, 'Z')
+    #mtx4_z90 = Matrix.Rotation( math.pi/2.0, 4, 'Z')
 
     '''
     if GLOBAL_MATRIX is None:
@@ -430,7 +436,7 @@ def export_fbx(operator, context, filepath="",
         def getAnimParRelMatrix(self, frame):
             #arm_mat = self.fbxArm.matrixWorld
             # Testing XNA
-            arm_mat = self.fbxArm.parRelMatrix()
+            #arm_mat = self.fbxArm.parRelMatrix()
             # XNA test
             # None of the things called here appear to have a parent!
             #return (self.parent.getPoseMatrix(frame)).invert() * ((self.getPoseMatrix(frame)))
@@ -470,7 +476,8 @@ def export_fbx(operator, context, filepath="",
             self.fbxParent = None # set later on IF the parent is in the selection.
             if matrixWorld:		self.matrixWorld = GLOBAL_MATRIX * matrixWorld
             else:				self.matrixWorld = GLOBAL_MATRIX * ob.matrix_world
-# 			else:				self.matrixWorld = ob.matrixWorld * GLOBAL_MATRIX
+            #else:				self.matrixWorld = ob.matrixWorld * GLOBAL_MATRIX
+            #self.matrixWorld = GLOBAL_MATRIX    # XNA
             self.__anim_poselist = {} # we should only access this
 
         def parRelMatrix(self):
@@ -2048,7 +2055,6 @@ def export_fbx(operator, context, filepath="",
         # not forgetting to free dupli_list
         if ob_base.dupli_list: ob_base.free_dupli_list()
 
-
     # To export animations the armature must be in the POSE position not the REST position (JCB)
     if EXP_ARMATURE:
         # Set all the armatures to POSE postion
@@ -2061,7 +2067,7 @@ def export_fbx(operator, context, filepath="",
                     ob_base.update(scene)
             # This causes the makeDisplayList command to effect the mesh
             scene.frame_set(scene.frame_current)
-    
+
     del tmp_ob_type, tmp_objects
 
     # now we have collected all armatures, add bones
@@ -2333,6 +2339,7 @@ Objects:  {''')
     # Write pose's really weired, only needed when an armature and mesh are used together
     # each by themselves dont need pose data. for now only pose meshes and bones
 
+
     file.write('''
     Pose: "Pose::BIND_POSES", "BindPose" {
         Type: "BindPose"
@@ -2341,7 +2348,6 @@ Objects:  {''')
         }
         NbPoseNodes: ''')
     file.write(str(len(pose_items)))
-
 
     for fbxName, matrix in pose_items:
         file.write('\n\t\tPoseNode:  {')
