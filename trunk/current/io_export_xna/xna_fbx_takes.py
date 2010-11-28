@@ -57,10 +57,8 @@
 # --------------------------------------------------------------------------
 # ** TODO ** 
 # --------------------------------------------------------------------------
-# - Using FBX the moel is still at an odd angle in XNA
-#   Try creating __pose_bone.matrix while the model is in the rest
-#       position then apply to the take while the take is in the 
-#       pose position!
+# - Export without the MESH and textures
+#       Just export the bones, armature and take(s)
 # - Remove the lamps and cameras they are unnecessary for XNA
 # - Remove Optimise Keyframes
 # --------------------------------------------------------------------------
@@ -69,16 +67,16 @@
 # --------------------------------------------------------------------------
 # ** Ideas for others **
 # --------------------------------------------------------------------------
-
-
 # - Find a way to export the model without the take being in the rest position
-
 # - Use the Free AutoDesk FBX SDK which support Python
 # --------------------------------------------------------------------------
  
 # --------------------------------------------------------------------------
 # Completed tidy up tasks and other fixes (JCB)
 # --------------------------------------------------------------------------
+# Done - The Armature MUST be the root LimbNode
+#       This being null instead of LimbNode is what caused the leaning of 
+#       the animations!
 # Done - Disable the keyframe optimise options
 # Done - Reset the pose_position back to how it was before the script started
 # Done - For XNA the model only loads correctly if the take is in the bind pose 
@@ -764,7 +762,7 @@ def export_fbx(operator, context, filepath="",
             ((my_bone.blenBone.head['ARMATURESPACE'] - my_bone.blenBone.tail['ARMATURESPACE']) * my_bone.fbxArm.parRelMatrix()).length)
         '''
 
-        # JCB: Changing th length of the following made no difference
+        # Changing the length of the following made no difference (JCB)
         file.write('\n\t\t\tProperty: "LimbLength", "double", "",%.6f' %
                    (my_bone.blenBone.head_local - my_bone.blenBone.tail_local).length)
 # 			(my_bone.blenBone.head['ARMATURESPACE'] - my_bone.blenBone.tail['ARMATURESPACE']).length)
@@ -780,6 +778,38 @@ def export_fbx(operator, context, filepath="",
         file.write('\n\t\tTypeFlags: "Skeleton"')
         file.write('\n\t}')
 
+    # Added a specific Object: section for armatures (JCB)
+    # Similar to write_null()
+    # matrixOnly is not used at the moment
+    def write_armature(my_arm = None, fbxName = None, matrixOnly = None):
+        # ob can be null
+        if not fbxName: fbxName = my_arm.fbxName
+
+        # Armatures must be LimbNodes for animations to transform correctly in XNA (JCB)
+        file.write('\n\tModel: "Model::%s", "LimbNode" {' % fbxName)
+        file.write('\n\t\tVersion: 232')
+
+        # only use this for the root matrix at the moment
+        if matrixOnly:
+            poseMatrix = write_object_props(None, None, matrixOnly)[3]
+
+        else: # all other Null's
+            if my_arm:		poseMatrix = write_object_props(my_arm.blenObject, None, my_arm.parRelMatrix())[3]
+            else:			poseMatrix = write_object_props()[3]
+
+        pose_items.append((fbxName, poseMatrix))
+
+        # If necessary add the other bone properties here (JCB)
+        file.write('''
+        }
+        MultiLayer: 0
+        MultiTake: 1
+        Shading: Y
+        Culling: "CullingOff"
+        TypeFlags: "Skeleton"
+    }''')
+        
+        
     def write_camera_switch():
         file.write('''
     Model: "Model::Camera Switcher", "CameraSwitcher" {
@@ -2286,7 +2316,7 @@ Objects:  {''')
         write_null(my_null)
 
     for my_arm in ob_arms:
-        write_null(my_arm)
+        write_armature(my_arm)
 
     for my_cam in ob_cameras:
         write_camera(my_cam)
