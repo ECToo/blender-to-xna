@@ -1,4 +1,4 @@
-#summary Model and animations now export using FBX
+#summary Model and animations now export using FBX from Blender 2.55
 #labels Phase-Design,Featured
 = Process =
 
