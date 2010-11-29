@@ -42,24 +42,16 @@ import bpy
 try:
     init_data
     # Add any classes here to reload if necessary
-    reload(xna_export_action)
     reload(xna_fbx_model)
     reload(xna_fbx_takes)
 except:
     # Add any classes here to match above
-    from io_export_xna import xna_export_action
     from io_export_xna import xna_fbx_model
     from io_export_xna import xna_fbx_takes
 
 init_data = True
 
 # Add each additional script in a simlar block to this
-def menu_export_action(self, context):
-    from io_export_xna import xna_export_action
-    import os
-    default_path = os.path.splitext(bpy.data.filepath)[0] + ".action"
-    self.layout.operator(xna_export_action.ActionExporter.bl_idname, text="XNA Keyframes (.action)").filepath = default_path
-
 def menu_export_fbx_model(self, context):
     from io_export_xna import xna_fbx_model
     import os
@@ -83,13 +75,11 @@ def menu_export_fbx_takes(self, context):
 
 # Add references to all scripts invoked by this class
 def register():
-    bpy.types.INFO_MT_file_export.append(menu_export_action)
     bpy.types.INFO_MT_file_export.append(menu_export_fbx_model)
     bpy.types.INFO_MT_file_export.append(menu_export_fbx_takes)
 
 # Add references to all scripts invoked by this class
 def unregister():
-    bpy.types.INFO_MT_file_export.remove(menu_export_action)
     bpy.types.INFO_MT_file_export.remove(menu_export_fbx_model)
     bpy.types.INFO_MT_file_export.remove(menu_export_fbx_takes)
 
