@@ -26,3 +26,7 @@ http://wiki.blender.org/index.php/Extensions:2.5/Py/Scripts/File_I-O/DirectX_Exp
 
 The discussion thread for it:
 http://forum.thegamecreators.com/?m=forum_view&t=166987&b=3
+
+I worked out the file format syntax for FBX by looking at the Sample Dude model provided by Microsoft in the Skinned model sample:
+
+http://create.msdn.com/en-US/education/catalog/sample/skinned_model
