@@ -2,7 +2,11 @@
 #labels Phase-QA
 = Method =
 
-As the files are in a different order it was necessary to scan the files side by side
+There was a working method to export from Blender 2.49b to XNA 3.1 but that does not work for XNA 4.0 unless you use an XNA 3.1 application to create the files for use in XNA 4.0.
+
+AS files created using the XNA 3.1 FBX importer still work with XNA 4.0 I decided to compare the file outputs to see what has changed.
+
+As the files are in a different order it was necessary to scan the files side by side.
 
 = Results =
 
@@ -84,3 +88,9 @@ In the new version:
  Version 5 settings
 
  - Look identical
+
+== Final Fix ==
+
+The trouble with scanning by eye is it is easy to miss something.  When I was looking for something else I came across a difference I had not noticed before.
+
+The Object for the armature was set as a 'Null' but the sample dude.fbx had this as a 'LimbNode'.  Changing that fixed the animations!
