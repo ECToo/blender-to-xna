@@ -3,7 +3,7 @@
 
 = Introduction =
 
-The scripts will be based on work originally created by others.  This page acknowledges and thanks those others for their work.
+The scripts are based in part on work originally created by others.  This page acknowledges and thanks those others for their work.
 
 = Thanks =
 
