@@ -29,7 +29,7 @@ bl_addon_info = {
     "version": (1,0),
     "blender": (2, 5, 5),
     "api": 32738,
-    "location": "File > Export > XNA Keyframes and XNA FBX model",
+    "location": "File > Export > XNA FBX Animated Model",
     "description": "Export the model and animations for use in XNA",
     "warning": "",
     "wiki_url": "http://code.google.com/p/blender-to-xna/",
@@ -42,24 +42,22 @@ import bpy
 try:
     init_data
     # Add any classes here to reload if necessary
-    reload(xna_fbx_model)
-    reload(xna_fbx_takes)
+    reload(xna_fbx_export)
 except:
     # Add any classes here to match above
-    from io_export_xna import xna_fbx_model
-    from io_export_xna import xna_fbx_takes
+    from io_export_xna import xna_fbx_export
 
 init_data = True
 
 # Add each additional script in a simlar block to this
 def menu_export_fbx_model(self, context):
-    from io_export_xna import xna_fbx_model
+    from io_export_xna import xna_fbx_export
     import os
     default_path = os.path.splitext(bpy.data.filepath)[0] + ".fbx"
-    self.layout.operator(xna_fbx_model.FBXExporter.bl_idname, text="XNA FBX Model (.fbx)").filepath = default_path
+    self.layout.operator(xna_fbx_export.ExportFBXmodel.bl_idname, text="XNA FBX Model (.fbx)").filepath = default_path
 
 def menu_export_fbx_takes(self, context):
-    from io_export_xna import xna_fbx_takes
+    from io_export_xna import xna_fbx_export
     import os
     # get the current action name
     currentAction = ""
@@ -70,16 +68,24 @@ def menu_export_fbx_takes(self, context):
                     currentAction = arm_obj.animation_data.action.name
     
     default_path = os.path.splitext(bpy.data.filepath)[0] + "-" + currentAction + ".fbx"
-    self.layout.operator(xna_fbx_takes.FBXExporter.bl_idname, text="XNA FBX Animations (.fbx)").filepath = default_path
+    self.layout.operator(xna_fbx_export.ExportFBXtakes.bl_idname, text="XNA FBX Animations (.fbx)").filepath = default_path
     
+def menu_export_fbx_animated(self, context):
+    from io_export_xna import xna_fbx_export
+    import os
+    default_path = os.path.splitext(bpy.data.filepath)[0] + ".fbx"
+    self.layout.operator(xna_fbx_export.ExportFBXanimated.bl_idname, text="XNA FBX Animated Model (.fbx)").filepath = default_path
+
 
 # Add references to all scripts invoked by this class
 def register():
+    bpy.types.INFO_MT_file_export.append(menu_export_fbx_animated)
     bpy.types.INFO_MT_file_export.append(menu_export_fbx_model)
     bpy.types.INFO_MT_file_export.append(menu_export_fbx_takes)
 
 # Add references to all scripts invoked by this class
 def unregister():
+    bpy.types.INFO_MT_file_export.remove(menu_export_fbx_animated)
     bpy.types.INFO_MT_file_export.remove(menu_export_fbx_model)
     bpy.types.INFO_MT_file_export.remove(menu_export_fbx_takes)
 
