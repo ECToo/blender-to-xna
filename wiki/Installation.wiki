@@ -24,8 +24,8 @@ Make sure you have exited Blender.
 If you are re-installing you must delete the compiled Python files from the install folder otherwise Blender will use the old scripts.  The compiled files are the ones ending .pyc.
 You can just delete all the files in the package folder as you are about to replace them anyway.  
 
-Copy all the script files in to the install folder.  Typically that is one "__init__.py" file and one or more class files, such as 'xna_export_xxx.py'.
+Copy all the script files in to the install folder.  Typically that is one "__init__.py" file and one or more class files, such as 'xna_fbx_export.py'.
 
-Start Blender and bring up the File->Preferences menu.  Select the 'Addons' tab, find the new script from the list and enable it by puting a tick in the small box.  If you want that to start every time you start Blender you will need to press 'Save Default'.  If you have a model file open that also gets saved as part of the default!
+Start Blender and bring up the File->Preferences menu.  Select the 'Addons' tab, find the new script from the list and enable it by puting a tick (check) in the small box.  If you want that to start every time you start Blender you will need to press 'Save Default'.  If you have a model file open that also gets saved as part of the default!
 
 If the script is an export script it will then be available on the File->Export menu.
