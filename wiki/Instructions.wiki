@@ -13,7 +13,7 @@ The Autodesk FBX Importer shipped with XNA 4.0 can only load one animation in ea
 
 = Details =
 
-If you have followed the installation instructions you should have 3 new menu items on the Export menu in Blender.  XNA FBX Model Only, XNA FBX Animations and XNA FBX Animated Model.
+If you have followed the installation instructions you should have 3 new menu items on the Export menu in Blender.  _XNA FBX Model Only, XNA FBX Animations_ and _XNA FBX Animated Model._
 
 The _XNA FBX Model Only_ exports the model with armature (if present) but only in the rest pose.  No animations.  This produces the smallest file size compatible with being animated in XNA.
 
