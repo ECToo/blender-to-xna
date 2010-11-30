@@ -1,0 +1,30 @@
+#summary How to use these scripts
+#labels Phase-Deploy,Featured,Phase-Design
+= Summary =
+
+The Autodesk FBX Importer shipped with XNA 4.0 can only load one animation in each FBX file.  These scripts are written taking that in to account.
+
+- Export the Model Only as an FBX.
+
+- Export each Blender action as an FBX animation in to separate files.
+
+- Load the model in to XNA and merge the animations.  See Shawn Hargreaves blog on how to merge animations or use my TakeExtrator model viewer for testing.
+
+
+= Details =
+
+If you have followed the installation instructions you should have 3 new menu items on the Export menu in Blender.  XNA FBX Model Only, XNA FBX Animations and XNA FBX Animated Model.
+
+The _XNA FBX Model Only_ exports the model with armature (if present) but only in the rest pose.  No animations.  This produces the smallest file size compatible with being animated in XNA.
+
+The _XNA FBX Animations_ option (still W.I.P) is intended to use to export each animation one at a time.  In pose mode in Blender select whichever action you want to export.  Then select the _Export -> XNA FBX Animations_ from the menu and save that selected action.  Repeat selecting an action and exporting it for each animation you want to use in XNA.
+
+= Resources =
+
+Shawn Hargreaves blog:
+
+http://blogs.msdn.com/b/shawnhar/archive/2010/06/18/merging-animation-files.aspx
+
+TakeExtractor project which lets you load a model and then load individual animations from FBX files.
+
+http://code.google.com/p/take-extractor/
