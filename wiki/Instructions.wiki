@@ -21,7 +21,7 @@ The _XNA FBX Animations_ option (still W.I.P) is intended to use to export each 
 
 = Resources =
 
-Shawn Hargreaves blog:
+Shawn Hargreaves blog on how to merge animations in XNA:
 
 http://blogs.msdn.com/b/shawnhar/archive/2010/06/18/merging-animation-files.aspx
 
