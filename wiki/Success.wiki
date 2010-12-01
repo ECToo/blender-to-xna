@@ -1,5 +1,5 @@
 #summary Model and animations now export using FBX from Blender 2.55
-#labels Phase-Design,Featured
+#labels Phase-Design
 = Process =
 
 In the process of trying to rotate the animations I stumbled across a difference in the FBX file format that I had not noticed.  It was the same in the Blender 2.4x version of the FBX exporter but different in the sample FBX file I was comparing them to.
