@@ -54,7 +54,7 @@ def menu_export_fbx_model(self, context):
     from io_export_xna import xna_fbx_export
     import os
     default_path = os.path.splitext(bpy.data.filepath)[0] + ".fbx"
-    self.layout.operator(xna_fbx_export.ExportFBXmodel.bl_idname, text="XNA FBX Model Only (.fbx)").filepath = default_path
+    self.layout.operator(xna_fbx_export.ExportFBXmodel.bl_idname, text="XNA FBX Model only (.fbx)").filepath = default_path
 
 def menu_export_fbx_takes(self, context):
     from io_export_xna import xna_fbx_export
@@ -68,7 +68,7 @@ def menu_export_fbx_takes(self, context):
                     currentAction = arm_obj.animation_data.action.name
     
     default_path = os.path.splitext(bpy.data.filepath)[0] + "-" + currentAction + ".fbx"
-    self.layout.operator(xna_fbx_export.ExportFBXtakes.bl_idname, text="XNA FBX Animations (.fbx)").filepath = default_path
+    self.layout.operator(xna_fbx_export.ExportFBXtakes.bl_idname, text="XNA FBX Animations only (.fbx)").filepath = default_path
     
 def menu_export_fbx_animated(self, context):
     from io_export_xna import xna_fbx_export
