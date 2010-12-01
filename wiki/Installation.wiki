@@ -1,8 +1,8 @@
 #summary How to add the scripts in to Blender
-#labels Phase-Deploy
+#labels Phase-Deploy,Featured
 = Introduction =
 
-There are various scripts provided and they should be installed in the appropriate folders.  Be careful if you rename anything because class and folder names may be included in the scripts.
+The scripts are provided as a package and they should be installed in the appropriate folder.  Be careful if you rename anything because class and folder names may be included in the scripts.
 
 = Location =
 
