@@ -42,32 +42,28 @@
 # --------------------------------------------------------------------------
 
 # --------------------------------------------------------------------------
-# ** LIMITATIONS **
+# ** LIMITATIONS ** (JCB)
 # --------------------------------------------------------------------------
 # To work with XNA:
 # - the objects (meshes) must NOT have a scale applied
 # - bone transforms in actions must not use scale, only use Rotation and location
 # - all the objects must have the same centre ideally at the origin, (0, 0, 0)
-# - Animations have to be exported separately.
-#       XNA only support importing one animation but to look right that one 
-#       animation has to be exported in the rest pose postion.  
-#       I do not know why!
+# - The FBX importer included with XNA 4.0 only supports importing one animation per file
 # --------------------------------------------------------------------------
 
 # --------------------------------------------------------------------------
-# ** TODO ** 
+# ** TODO ** (JCB)
 # --------------------------------------------------------------------------
 # - Export the animations without the MESH and textures
 #       Just export the bones, armature and take(s)
-# - Remove Optimise Keyframes it complicates the script
+# - Remove Optimise Keyframes it unnecessarily complicates the script
 # --------------------------------------------------------------------------
 
 
 # --------------------------------------------------------------------------
-# ** Ideas for others **
+# ** Ideas for others ** (JCB)
 # --------------------------------------------------------------------------
-# - Find a way to export the model without the take being in the rest position
-# - Use the Free AutoDesk FBX SDK which support Python
+# - Use the Free AutoDesk FBX SDK which supports Python
 # --------------------------------------------------------------------------
  
 # --------------------------------------------------------------------------
@@ -75,30 +71,25 @@
 # --------------------------------------------------------------------------
 # Done - Use one script for all exports
 # Done - Reduce the frames used in the Rest pose take for the model to the minimum
-# Done - The Armature MUST be the root LimbNode
-#       This being null instead of LimbNode is what caused the leaning of 
-#       the animations!
 # Done - Disable the keyframe optimise options
 # Done - Reset the pose_position back to how it was before the script started
-# Done - For XNA the model only loads correctly if the take is in the bind pose 
-#           position.  I do not know why this is!
-#           This script sets the model to the REST position when starting.
-# Done - Stop the script erroring if the images are on a different drive
-#           to the output
+# Done - Stop the script erroring if the images are on a different drive to the output
 # Done - Added an option to include smoothing data (default = false)
 # Done - Added an option to include edge data (default = false)
 # Done - Move the user interface in to the this file
 # Done - Change the title to XNA FBX Model
 # Done - Remove the options for setting scale and rotation
 # Done - Set the GLOBAL_MATRIX to identity
-# Done - Move the script to the export_xna folder
-# Done - Register the fbx script in the __init__.py script along with export_xna
+# Done - Move the script to the io_export_xna folder
+# Done - Register the fbx script in the __init__.py script
 # Done - Remove batch support
-#        This is just to be tidy and to avoid an additional complication 
 # --------------------------------------------------------------------------
 # Completed tasks to make the output similar to working sample FBX files (JCB)
 # --------------------------------------------------------------------------
-# done - Added back this commented out line
+# Done - The Armature MUST be the root LimbNode
+#       This being null instead of LimbNode is what caused the leaning of 
+#       the animations!
+# Done - Added back this commented out line
 #        It is in the Relations: section of the FBX file.
 #           file.write('\n\tPose: "Pose::BIND_POSES", "BindPose" {\n\t}')
 # Done - Change object_tx()
@@ -106,7 +97,6 @@
 # Done - Change the takes so they use the same code as the 2.4x XNA FBX script
 #             Part done
 #             Changed to C,n instead of L
-#             Still using previous rotation [1] instead of [0]
 # Done OK - Make it export just the current take if all actions is not selected
 # Done OK - Remove the Default_Take
 #             There is no requirement to have a take at all
@@ -212,10 +202,6 @@ def sane_name(data, dct):
     else:
         orig_name_other = None
 
-    # dont cache, only ever call once for each data type now,
-    # so as to avoid namespace collision between types - like with objects <-> bones
-    #try:		return dct[name]
-    #except:		pass
 
     if not name:
         name = 'unnamed' # blank string, ASKING FOR TROUBLE!
@@ -269,7 +255,6 @@ def BPyMesh_meshWeight2List(ob, me):
 def meshNormalizedWeights(ob, me):
     try: # account for old bad BPyMesh
         groupNames, vWeightList = BPyMesh_meshWeight2List(ob, me)
-# 		groupNames, vWeightList = BPyMesh.meshWeight2List(me)
     except:
         return [],[]
 
@@ -301,6 +286,7 @@ header_comment = \
 def export_fbx(operator, context, filepath="",
         EXP_OBS_SELECTED = True,
         Exp_Model_Only = False,
+        Exp_Takes_Only = False,
         ANIM_ENABLE = True,
         ANIM_ACTION_ALL = False,
         EXP_MESH_APPLY_MOD = True,
@@ -1832,6 +1818,7 @@ def export_fbx(operator, context, filepath="",
         MultiLayer: 0
     }''')
 
+    # == START ==
     # == The following is the main body of the script (JCB)
 
     # add meshes here to clear because they are not used anywhere.
@@ -1926,23 +1913,10 @@ def export_fbx(operator, context, filepath="",
                         me = ob.data
                         mats = me.materials
 
-# 						# Support object colors
-# 						tmp_colbits = ob.colbits
-# 						if tmp_colbits:
-# 							tmp_ob_mats = ob.getMaterials(1) # 1 so we get None's too.
-# 							for i in xrange(16):
-# 								if tmp_colbits & (1<<i):
-# 									mats[i] = tmp_ob_mats[i]
-# 							del tmp_ob_mats
-# 						del tmp_colbits
-
 
                 if me:
-# 					# This WILL modify meshes in blender if EXP_MESH_APPLY_MOD is disabled.
-# 					# so strictly this is bad. but only in rare cases would it have negative results
-# 					# say with dupliverts the objects would rotate a bit differently
-# 					if EXP_MESH_HQ_NORMALS:
-# 						BPyMesh.meshCalcNormals(me) # high quality normals nice for realtime engines.
+                    # TODO: Some people might benefit from high quality normals
+                    # they could be added here if needed (JCB)
 
                     texture_mapping_local = {}
                     material_mapping_local = {}
@@ -2003,7 +1977,7 @@ def export_fbx(operator, context, filepath="",
     # To export animations the armature must be in the POSE position not the REST position 
     # so in most cases the script reverts to POSE when the bind pose has been saved. (JCB)
     # Added an option for models to export the pose position as a take so it must stay in REST 
-    # position in that case. (JCB)
+    # position in that exceptional case. (JCB)
     if EXP_ARMATURE and not Exp_Model_Only:
         # Set all the armatures to POSE postion
         for arm in bpy.data.armatures:
@@ -2016,7 +1990,7 @@ def export_fbx(operator, context, filepath="",
             # This causes the makeDisplayList command to effect the mesh
             scene.frame_set(scene.frame_current)
 
-    # Tidy up temporary objects before continuing
+    # Tidy up temporary objects before continuing (JCB)
     del tmp_ob_type, tmp_objects
 
     # now we have collected all armatures, add bones
@@ -2075,7 +2049,8 @@ def export_fbx(operator, context, filepath="",
                     my_bone.parent = my_bone_parent
                     break
 
-        bone_deformer_count += len(my_bone.blenMeshes)
+        if not Exp_Takes_Only:
+            bone_deformer_count += len(my_bone.blenMeshes)
 
     del my_bone_blenParent
 
@@ -2116,13 +2091,34 @@ def export_fbx(operator, context, filepath="",
     del tmp_obmapping
     # Finished finding groups we use
 
+    # == WRITE OBJECTS TO THE FILE ==
+    # == From now on we are building the FBX file from the information collected above (JCB)
 
     materials =	[(sane_matname(mat_tex_pair), mat_tex_pair) for mat_tex_pair in materials.keys()]
     textures =	[(sane_texname(tex), tex) for tex in textures.keys()  if tex]
     materials.sort() # sort by name
     textures.sort()
-
     camera_count = 8
+
+    # Quick hack to see if we can ignore some objects when we only want animations (JCB)
+    if Exp_Takes_Only:
+        # Clear the things we do not want
+        ob_meshes = None
+        ob_lights = None
+        ob_cameras = None
+        materials = None
+        textures = None
+        # Add them back as empty to avoid script errors
+        ob_meshes = []
+        ob_lights = []
+        ob_cameras = []
+        materials = []
+        textures = []
+        camera_count = 0
+
+    # XNA does not appear to care about the Definitions: counts
+    # it loads regardless (JCB)
+        
     file.write('''
 
 ; Object definitions
@@ -2183,9 +2179,10 @@ Definitions:  {
         if my_mesh.fbxArm:
             tmp+=1
 
-    # Add subdeformers
-    for my_bone in ob_bones:
-        tmp += len(my_bone.blenMeshes)
+    if not Exp_Takes_Only:
+        # Add subdeformers
+        for my_bone in ob_bones:
+            tmp += len(my_bone.blenMeshes)
 
     if tmp:
         file.write('''
@@ -2195,11 +2192,11 @@ Definitions:  {
     del tmp
 
     # we could avoid writing this possibly but for now just write it
-
-    file.write('''
-    ObjectType: "Pose" {
-        Count: 1
-    }''')
+    if not Exp_Takes_Only:
+        file.write('''
+        ObjectType: "Pose" {
+            Count: 1
+        }''')
 
     if groups:
         file.write('''
@@ -2221,7 +2218,8 @@ Definitions:  {
 Objects:  {''')
 
     # To comply with other FBX FILES
-    write_camera_switch()
+    if not Exp_Takes_Only:
+        write_camera_switch()
 
     # There is no need for a separate root object.  The armature is the root (JCB)
 
@@ -2243,7 +2241,8 @@ Objects:  {''')
     for my_bone in ob_bones:
         write_bone(my_bone)
 
-    write_camera_default()
+    if not Exp_Takes_Only:
+        write_camera_default()
 
     for matname, (mat, tex) in materials:
         write_material(matname, mat) # We only need to have a material per image pair, but no need to write any image info into the material (dumb fbx standard)
@@ -2273,33 +2272,36 @@ Objects:  {''')
             else:
                 weights = meshNormalizedWeights(my_mesh.blenObject, my_mesh.blenData)
 
-            for my_bone in ob_bones:
-                if me in iter(my_bone.blenMeshes.values()):
-                    write_sub_deformer_skin(my_mesh, my_bone, weights)
+            if not Exp_Takes_Only:
+                for my_bone in ob_bones:
+                    if me in iter(my_bone.blenMeshes.values()):
+                        write_sub_deformer_skin(my_mesh, my_bone, weights)
 
     # Write pose's really weired, only needed when an armature and mesh are used together
     # each by themselves dont need pose data. for now only pose meshes and bones
 
 
-    file.write('''
-    Pose: "Pose::BIND_POSES", "BindPose" {
-        Type: "BindPose"
-        Version: 100
-        Properties60:  {
-        }
-        NbPoseNodes: ''')
-    file.write(str(len(pose_items)))
+    if not Exp_Takes_Only:
+        file.write('''
+        Pose: "Pose::BIND_POSES", "BindPose" {
+            Type: "BindPose"
+            Version: 100
+            Properties60:  {
+            }
+            NbPoseNodes: ''')
+        file.write(str(len(pose_items)))
 
-    for fbxName, matrix in pose_items:
-        file.write('\n\t\tPoseNode:  {')
-        file.write('\n\t\t\tNode: "Model::%s"' % fbxName )
-        file.write('\n\t\t\tMatrix: %s' % mat4x4str(matrix if matrix else Matrix()))
-        file.write('\n\t\t}')
+        for fbxName, matrix in pose_items:
+            file.write('\n\t\tPoseNode:  {')
+            file.write('\n\t\t\tNode: "Model::%s"' % fbxName )
+            file.write('\n\t\t\tMatrix: %s' % mat4x4str(matrix if matrix else Matrix()))
+            file.write('\n\t\t}')
 
-    file.write('\n\t}')
+        file.write('\n\t}')
 
 
     # Finish Writing Objects
+    
     # Write global settings
     # In the original 2.55 version the UnitScaleFactor was 100
     # for XNA this was changed to 1 (JCB)
@@ -2381,16 +2383,17 @@ Relations:  {''')
         if my_mesh.fbxArm:
             file.write('\n\tDeformer: "Deformer::Skin %s", "Skin" {\n\t}' % my_mesh.fbxName)
 
-    #for bonename, bone, obname, me, armob in ob_bones:
-    for my_bone in ob_bones:
-        for fbxMeshObName in my_bone.blenMeshes: # .keys() - fbxMeshObName
-            # is this bone effecting a mesh?
-            file.write('\n\tDeformer: "SubDeformer::Cluster %s %s", "Cluster" {\n\t}' % (fbxMeshObName, my_bone.fbxName))
+    if not Exp_Takes_Only:
+        #for bonename, bone, obname, me, armob in ob_bones:
+        for my_bone in ob_bones:
+            for fbxMeshObName in my_bone.blenMeshes: # .keys() - fbxMeshObName
+                # is this bone effecting a mesh?
+                file.write('\n\tDeformer: "SubDeformer::Cluster %s %s", "Cluster" {\n\t}' % (fbxMeshObName, my_bone.fbxName))
 
-    # This should be at the end
-    # Added this back (JCB)
-    # It was this one line being missing that prevented the model and animations loading correctly in XNA
-    file.write('\n\tPose: "Pose::BIND_POSES", "BindPose" {\n\t}')
+        # This should be at the end
+        # Added this back (JCB)
+        # It was this one line being missing that prevented the model and animations loading correctly in XNA
+        file.write('\n\tPose: "Pose::BIND_POSES", "BindPose" {\n\t}')
 
     for groupname, group in groups:
         file.write('\n\tGroupSelection: "GroupSelection::%s", "Default" {\n\t}' % groupname)
@@ -2403,7 +2406,7 @@ Relations:  {''')
 
 Connections:  {''')
 
-    # NOTE - The FBX SDK dosnt care about the order but some importers DO!
+    # NOTE - The FBX SDK dose not care about the order but some importers DO!
     # for instance, defining the material->mesh connection
     # before the mesh->blend_root crashes cinema4d
 
@@ -2455,18 +2458,19 @@ Connections:  {''')
         for texname, tex in textures:
             file.write('\n\tConnect: "OO", "Video::%s", "Texture::%s"' % (texname, texname))
 
-    for my_mesh in ob_meshes:
-        if my_mesh.fbxArm:
-            file.write('\n\tConnect: "OO", "Deformer::Skin %s", "Model::%s"' % (my_mesh.fbxName, my_mesh.fbxName))
+    if not Exp_Takes_Only:
+        for my_mesh in ob_meshes:
+            if my_mesh.fbxArm:
+                file.write('\n\tConnect: "OO", "Deformer::Skin %s", "Model::%s"' % (my_mesh.fbxName, my_mesh.fbxName))
 
-    for my_bone in ob_bones:
-        for fbxMeshObName in my_bone.blenMeshes: # .keys()
-            file.write('\n\tConnect: "OO", "SubDeformer::Cluster %s %s", "Deformer::Skin %s"' % (fbxMeshObName, my_bone.fbxName, fbxMeshObName))
+        for my_bone in ob_bones:
+            for fbxMeshObName in my_bone.blenMeshes: # .keys()
+                file.write('\n\tConnect: "OO", "SubDeformer::Cluster %s %s", "Deformer::Skin %s"' % (fbxMeshObName, my_bone.fbxName, fbxMeshObName))
 
-    # limbs -> deformers
-    for my_bone in ob_bones:
-        for fbxMeshObName in my_bone.blenMeshes: # .keys()
-            file.write('\n\tConnect: "OO", "Model::%s", "SubDeformer::Cluster %s %s"' % (my_bone.fbxName, fbxMeshObName, my_bone.fbxName))
+        # limbs -> deformers
+        for my_bone in ob_bones:
+            for fbxMeshObName in my_bone.blenMeshes: # .keys()
+                file.write('\n\tConnect: "OO", "Model::%s", "SubDeformer::Cluster %s %s"' % (my_bone.fbxName, fbxMeshObName, my_bone.fbxName))
 
 
     # groups
@@ -2900,6 +2904,7 @@ class ExportFBXmodel(bpy.types.Operator, ExportHelper):
     
     # Fixed options
     exportModelOnly = True
+    exportTakesOnly = False
     allTakes = False
 
     def execute(self, context):
@@ -2911,6 +2916,7 @@ class ExportFBXmodel(bpy.types.Operator, ExportHelper):
         return export_fbx(self, context, self.filepath,
             self.selectedObjects,
             self.exportModelOnly,
+            self.exportTakesOnly,
             self.includeTakes,
             self.allTakes,
             self.applyModifiers,
@@ -2935,6 +2941,7 @@ class ExportFBXtakes(bpy.types.Operator, ExportHelper):
 
     # Fixed options
     exportModelOnly = False
+    exportTakesOnly = True
     includeTakes = True
     copyImages = False
     includeSmoothing = False
@@ -2949,6 +2956,7 @@ class ExportFBXtakes(bpy.types.Operator, ExportHelper):
         return export_fbx(self, context, self.filepath,
             self.selectedObjects,
             self.exportModelOnly,
+            self.exportTakesOnly,
             self.includeTakes,
             self.allTakes,
             self.applyModifiers,
@@ -2976,6 +2984,7 @@ class ExportFBXanimated(bpy.types.Operator, ExportHelper):
 
     # Fixed options
     exportModelOnly = False
+    exportTakesOnly = False
     includeTakes = True
 
     def execute(self, context):
@@ -2987,6 +2996,7 @@ class ExportFBXanimated(bpy.types.Operator, ExportHelper):
         return export_fbx(self, context, self.filepath,
             self.selectedObjects,
             self.exportModelOnly,
+            self.exportTakesOnly,
             self.includeTakes,
             self.allTakes,
             self.applyModifiers,
