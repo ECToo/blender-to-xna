@@ -1,0 +1,85 @@
+{{ScriptInfo
+|name= Blender to XNA
+|tooltip= Export animated FBX models to XNA 4
+|menu= Export / Import
+|usage= Export using one of the XNA FBX menu options
+|version= 1.0
+|author= John C Brown (JCBDigger) @MistyManor plus others
+|blender= 2.55
+|license= GPL
+|exe= io_export_xna
+|download= http://code.google.com/p/blender-to-xna/
+|bugtracker= http://code.google.com/p/blender-to-xna/
+|link= http://www.mistymanor.co.uk
+}}
+
+
+
+=== Blender 2.5 to XNA 4 ===
+This script package exports to Autodesk FBX files in a format suitable for Microsoft XNA 4.0
+
+{{Note|Download from the project home|
+http://code.google.com/p/blender-to-xna/
+}}
+
+== Summary ==
+
+The Autodesk FBX importer included with XNA 4.0 has a slightly stricter requirement for the file format compared to the previous version and introduced the limitation that only one animation can be loaded from each FBX file.
+
+These exporter scripts output in the correct format and let you export the currently selected action as the animation take in the FBX file.  That lets you save individual files for each animation.
+
+Typical usage:
+* Export the Model Only as an FBX. 
+* Export each Blender action as an FBX animation in to separate files. 
+* Load the model in to XNA and merge the animations. See Shawn Hargreaves blog on how to merge animations or use my TakeExtrator? model viewer for testing. 
+
+== Instructions ==
+
+If the scripts are installed and enabled you will have 3 new menu items on the Export menu in Blender. ''XNA FBX Model only, XNA FBX Animations only'' and ''XNA FBX Animated Model.'' 
+
+The ''XNA FBX Model only'' exports the model with armature (if present) but only in the rest pose. No animations. This produces the smallest file size compatible with being animated in XNA. 
+
+The ''XNA FBX Animations'' only option can be used to export each animation one at a time. In pose mode in Blender select whichever action you want to export. Then select the ''Export -> XNA FBX Animations only'' from the menu and save that selected action. Repeat selecting an action and exporting it for each animation you want to use in XNA. This option produces a much smaller FBX file size because it does not contain any of the model data. 
+
+The ''XNA FBX Animated Model'' option produces a complete FBX file with the model meshes and the animation take(s) all in one file. 
+
+== XNA Resources ==
+
+Shawn Hargreaves blog on how to merge animations in XNA: 
+http://blogs.msdn.com/b/shawnhar/archive/2010/06/18/merging-animation-files.aspx 
+
+TakeExtractor project which lets you load a model and then load individual animations from FBX files. 
+http://code.google.com/p/take-extractor/ 
+ 
+
+== History ==
+
+XNA is the development framework Microsoft has created for independent and hobby developers to use for games.  It is based on Microsoft .Net and C#.
+
+Autodesk FBX is one of the file formats supported as standard for import in to the XNA framework.
+
+Previous versions of Blender had a modified FBX exporter for them to be compatible with XNA.  Changes to both Blender and XNA have made those versions no longer compatible.  These scripts are variations based on that previous work and I would like to thank everyone who has contributed.
+
+{{Note|Acknowledgements|
+* Versions: Blender 2.55 beta and Microsoft XNA 4.0
+* License: GNU General Public License (GPL)
+* Convert 2.5x to XNA 4: John C Brown (JCBDigger) @MistyManor
+* Convert 2.4x to XNA 3: Fritz@triplebgames.com
+* Original FBX exporter: Campbell Barton (ideasman42)
+}}
+
+== Script Installation ==
+
+The scripts are installed the same way as all Blender scripts as follows:
+
+Make sure you have exited Blender. Copy the package folder and all the script files in to the 'addons' script folder. Typically that is one "__init.py__" file and one or more class files, such as 'xna_fbx_export.py'. 
+
+Start Blender and bring up the File->User Preferences menu. Select the 'Addons' tab, find the new script from the list and enable it by puting a tick (check) in the small box. If you want that to start every time you start Blender you will need to press 'Save Default'. If you have a model file open that also gets saved as part of the default! 
+
+These scripts are export scripts and will be available on the File -> Export menu. 
+ 
+Depending on the version of Windows the user script location will something similar to the following:
+
+"%USERPROFILE%\AppData\Roaming\Blender Foundation\Blender\2.5x\scripts\addons" 
+
+The AppData folder is usually hidden.
