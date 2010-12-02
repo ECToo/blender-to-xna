@@ -45,6 +45,8 @@ The ''XNA FBX Animated Model'' option produces a complete FBX file with the mode
 
 == XNA Resources ==
 
+Within your XNA game code content pipeline you will need to use a Skinned model processor either from a Microsoft sample or your own.  You will need a way to merge or add individual animations to your animation player.  The following demonstrate several methods:
+
 Shawn Hargreaves blog on how to merge animations in XNA: 
 http://blogs.msdn.com/b/shawnhar/archive/2010/06/18/merging-animation-files.aspx 
 
