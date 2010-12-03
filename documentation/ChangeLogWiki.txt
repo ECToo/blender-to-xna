@@ -1,0 +1,61 @@
+== Blender to XNA ==
+
+
+{| {{css/prettytable}}
+|+ Documentation
+| Script manual page
+| [[Extensions:2.5/Py/Scripts/File_I-O/Blender-toXNA]]
+|-
+| Script development page
+| [[Dev:2.5/Py/Scripts/File_I-O/Blender-toXNA]]
+|}
+
+== Blender to XNA Design Goals ==
+
+The purpose for writing this script package was to get animated models from Blender in to the pipeline 
+for use in games being created with the Microsoft XNA 4.0 framework.
+
+The scripts are most likely to be for use by developers like myself who are writing a game using 
+Microsoft XNA.  The playing of the animation and the moving about the scene and probably the scene 
+itself will all be done in XNA code.  The developer will only be interested in getting individual models 
+with animations from Blender.
+
+The export function needs to be easy to use with no choices.  The vast majority of people using the 
+scripts will not understand 3D file formats or what any of the options are for.  They will expect 
+the exported file to just work when imported in to XNA.  The design of this script package is based 
+on that assumption.
+
+
+== Changes from the original ==
+
+There is already an Autodesk FBX exporter included with the shipped versions of Blender both 2.4 and 2.5.  
+The 2.4 version had already been modified to work woth XNA 3.  Changes to XNA and to Blender mean that  
+older script is no longer compatible.
+
+I based my version of the script on the Autodesk FBX exporter that shipped with version 2.55 of Blnder 
+with reference back to the 
+previous modified version and comparing the output to the one sample animated model provided by Microsoft 
+in FBX format.  Much of the code is still identical to the original script.
+
+== Changes log ==
+
+* Change 'Limb' to 'LimbNode' - In the sample I had each bone and the armature is called a 'LimbNode' in several places in the output FBX file.  It is important for XNA that the armature is a 'LimbNode'.  There was one case in the original where it was a 'Null' instead.  That change to 'LimbNode' was significant to getting the file to work with XNA.
+* Connect the meshes to the scene not to the fake Blend_Root.  - In the one sample file I had that is how it outputted.
+* Connect the armature to the scene not the fake Root.
+* Make the armature the root for everything else.
+* Remove the fake 'Blend_Root'. - I had nothing to indicate this was necessary and my experimentation indicated that there was no reason to have any form of root.
+* Remove the 'Default_Take' - I had other FBX files that had no takes section at all and they still loaded.
+* Change it so there was a choice to export just the current animation.  Although the FBX file format supports multiple takes in one file.  The lastest official Autodesk FBX importer which Microsoft have shipped with XNA 4.0 for some unknown reason only imports the first take from the file!  Apparently Microsoft are in discussions with Autodesk to fix that but at the moment developers need to be able to quickly and easily output one FBX file per animation!  The menu options that I chose in Blender are to make this as easy as possible to do because there could be dozens if not hundreds of animations to export!
+* Changed the Takes output syntax to use C,n instead of L.  - I do not know what this does but it has something to do with Linear or not.  This change was copied from the older version of the XNA FBX exporter.   It is probably the most significant differece between the original and this script.
+* Removed all rotations. - Previous experimentation with rotating the actions from the Blender end had proved that using the methods in the exporter to rotate the animations caused a mess!  In fact even rotating models within Blender often caused the animations to be messed up.  I did not want any function in the exporter that could confuse the XNA developer.  If the rotations only worked on the mesh and not the animations I did not want them in the script at all.  All the rotation code for the actions has been completely removed and the GLOBAL_MATRIX has been set to Identity at the start of the script.  All rotation options have been removed from the UI.  The XNA developer can easily rotate the model and the animations correctly from the XNA pipeline end.
+* Added back this commented out line from the 'Relations:' section of the FBX file. - file.write('\n\tPose: "Pose::BIND_POSES", "BindPose" {\n\t}').  I have no idea why it was commented out but again it was significant in getting the animations to work with XNA.  It was in the one sample animated FBX file that I had to review.
+* Bug fix - Stopped the script erroring if the images to copy are on a different drive to the output
+* Removed Batch support.  I had no idea what it was for or how it was used and was an unnecessary feature to try to support.  I did not want anything unnecessary in my script that I did not understand.
+* Move the UI to the export.py script.  I think it is tidier and allowed me to easily add three variations of the exporter in to one script.  Having three separate menu options each set up to have the required options already set as the XNA developer would need wes important to me.  As the developer has to export one model and lots of individual animations it was important that this was as quick and easy as possible.  The model menu item only exports the model and the animations menu item only exports the animations.
+* Made the output of Edge data and Smoothing data an option selectable from the UI.  - This is because they were not needed for XNA but I did and still do not know if they are usable in XNA.   I decided not to remove a function that did no harm and might be useful.
+* Changed where the POSE and REST positions were set and reset.  The original script calculates the Bind Pose by setting the model to the REST position and then back to whatever it was before.  I changed this so that after the bind pose has been saved for most of the script the model is in the POSE position.  I reset to the orignal postions only at the very end of the script.  I also have a default option in the UI that outputs only the Bind pose.  In that situation the model stays in the REST position for the whole script.
+* Disabled the keyframe optimisation.  There is a large chunk of code that for my purposes is unnecessary. It was simple to set the option to False and remove from the UI.  All the code remains in the script.
+* Lights and cameras are of no use to XNA. Ligting and camera postion are done within XNA code and it has no concept of using an imported camera.  This output was easily disabled by setting the options to False and removing the UI options.  All the code remains within the script.
+* Added an option to output the rest pose as a single frame animation.  This is probably no longer necessary because other fixes above make this unnecessary but I'd written the code so left it in.
+* The Animation only script outputs just the take and the armature.  Added an option with various 'if not Exp_Takes_Only:' sections added within the code.
+* Renamed the package folder and the file names at the request of Mindrones (Luca).
