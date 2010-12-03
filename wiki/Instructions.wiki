@@ -1,5 +1,11 @@
 #summary How to use these scripts
 #labels Phase-Deploy,Featured,Phase-Design
+= Latest Instructions =
+
+The most up to date instructions will be on the Blender Wiki page:
+
+http://wiki.blender.org/index.php/Extensions:2.5/Py/Scripts/File_I-O/Blender-toXNA
+
 = Summary =
 
 The Autodesk FBX Importer shipped with XNA 4.0 can only load one animation in each FBX file.  These scripts are written taking that in to account.
