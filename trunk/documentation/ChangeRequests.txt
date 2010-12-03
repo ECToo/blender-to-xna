@@ -1,0 +1,23 @@
+Use sub menus
+See the space_view3d_copy_attributes script
+
+Start the menus Autodesk FBX for XNA
+
+Remove unnecessary comment lines to make the script start faster
+Specifically #----- lines
+
+Remove all tabs only use spaces
+
+Done - Join together continuation lines ending \
+e.g. __slots__
+
+Change the wiki references to the Blender wiki and not the external project
+
+
+Rename the package to the standard format
+io_anim-mesh_xna
+
+In the package folder use the following naming convention
+__inti__.py
+export_xna.py
+

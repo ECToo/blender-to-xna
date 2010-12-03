@@ -1,4 +1,3 @@
-# --------------------------------------------------------------------------
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # This program is free software; you can redistribute it and/or
@@ -14,129 +13,19 @@
 # details: http://www.gnu.org/licenses/gpl.html
 #
 # ***** END GPL LICENCE BLOCK *****
-# --------------------------------------------------------------------------
+
 # Blender to XNA
-# --------------------------------------------------------------------------
+
 # Project Home:
-# http://code.google.com/p/blender-to-xna/
-# --------------------------------------------------------------------------
+# http://wiki.blender.org/index.php/Extensions:2.5/Py/Scripts/File_I-O/Blender-toXNA
 
-# <pep8 compliant>
 # This script uses spaces for indents NOT tabs.
-
-# --------------------------------------------------------------------------
-# ***** HISTORY *****
-# --------------------------------------------------------------------------
-# Campbell Barton (AKA Ideasman42) 
-# Created the original FBX exporter for Blender.
-# --------------------------------------------------------------------------
-# Fritz@triplebgames.com 
-# Modified the 2.4x script to work with XNA
-# Save textures in the same folder, changes to suit XNA and other fixes
-# http://blenderartists.org/forum/showthread.php/119783-XNA-.fbx-Exporter(s)
-# --------------------------------------------------------------------------
-# John C Brown (JCBDigger @MistyManor) http://games.DiscoverThat.co.uk
-# Make a 2.5x script work with XNA 4.0
-# http://code.google.com/p/blender-to-xna/
-# November 2010
-# --------------------------------------------------------------------------
-
-# --------------------------------------------------------------------------
-# ** LIMITATIONS ** (JCB)
-# --------------------------------------------------------------------------
-# To work with XNA:
-# - the objects (meshes) must NOT have a scale applied
-# - bone transforms in actions must not use scale, only use Rotation and location
-# - all the objects must have the same centre ideally at the origin, (0, 0, 0)
-# - The FBX importer included with XNA 4.0 only supports importing one animation per file
-# --------------------------------------------------------------------------
-
-# --------------------------------------------------------------------------
-# ** TODO ** (JCB)
-# --------------------------------------------------------------------------
-# - Export the animations without the MESH and textures
-#       Just export the bones, armature and take(s)
-# - Remove Optimise Keyframes it unnecessarily complicates the script
-# --------------------------------------------------------------------------
-
-
-# --------------------------------------------------------------------------
-# ** Ideas for others ** (JCB)
-# --------------------------------------------------------------------------
-# - Use the Free AutoDesk FBX SDK which supports Python
-# --------------------------------------------------------------------------
- 
-# --------------------------------------------------------------------------
-# Completed tidy up tasks and other fixes (JCB)
-# --------------------------------------------------------------------------
-# Done - Use one script for all exports
-# Done - Reduce the frames used in the Rest pose take for the model to the minimum
-# Done - Disable the keyframe optimise options
-# Done - Reset the pose_position back to how it was before the script started
-# Done - Stop the script erroring if the images are on a different drive to the output
-# Done - Added an option to include smoothing data (default = false)
-# Done - Added an option to include edge data (default = false)
-# Done - Move the user interface in to the this file
-# Done - Change the title to XNA FBX Model
-# Done - Remove the options for setting scale and rotation
-# Done - Set the GLOBAL_MATRIX to identity
-# Done - Move the script to the io_export_xna folder
-# Done - Register the fbx script in the __init__.py script
-# Done - Remove batch support
-# --------------------------------------------------------------------------
-# Completed tasks to make the output similar to working sample FBX files (JCB)
-# --------------------------------------------------------------------------
-# Done - The Armature MUST be the root LimbNode
-#       This being null instead of LimbNode is what caused the leaning of 
-#       the animations!
-# Done - Added back this commented out line
-#        It is in the Relations: section of the FBX file.
-#           file.write('\n\tPose: "Pose::BIND_POSES", "BindPose" {\n\t}')
-# Done - Change object_tx()
-#             Remove the rotation applied to the armature
-# Done - Change the takes so they use the same code as the 2.4x XNA FBX script
-#             Part done
-#             Changed to C,n instead of L
-# Done OK - Make it export just the current take if all actions is not selected
-# Done OK - Remove the Default_Take
-#             There is no requirement to have a take at all
-# Done OK - Remove 'Blend_Root'
-#             As far as I can tell there is no need for any form of root object.
-#             A valid model can be as simple as a single mesh connected to the scene.
-# Done OK - Make the armature the root instead of Blend_Root
-# Done OK - Connect the armature to the scene not to root
-# Done OK - Check that the first bone is connected to the armature object not to root
-# Done OK - Connect all the objects (meshes) to the scene not to the armature
-# Done OK - Change 'Limb' to 'LimbNode'
-# Done OK - Make the armature a LimbNode instead of a null
-# --------------------------------------------------------------------------
-# Prior tasks (Unknown author)
-# --------------------------------------------------------------------------
-# All line numbers correspond to original export_fbx.py (under release/scripts)
-# - Draw.PupMenu alternative in 2.5?, temporarily replaced PupMenu with print
-# - get rid of bpy.path.clean_name somehow
-# + fixed: isinstance(inst, bpy.types.*) doesn't work on RNA objects: line 565
-# + get rid of BPyObject_getObjectArmature, move it in RNA?
-# - BATCH_ENABLE and BATCH_GROUP options: line 327
-# - implement all BPyMesh_* used here with RNA
-# - getDerivedObjects is not fully replicated with .dupli* funcs
-# - talk to Campbell, this code won't work? lines 1867-1875
-# - don't know what those colbits are, do we need them? they're said to be deprecated in DNA_object_types.h: 1886-1893
-# - no hq normals: 1900-1901
-# --------------------------------------------------------------------------
-# Incomplete (Unknown author)
-# --------------------------------------------------------------------------
-# - bpy.data.remove_scene: line 366
-# - bpy.sys.time move to bpy.sys.util?
-# - new scene creation, activation: lines 327-342, 368
-# - uses bpy.path.abspath, *.relpath - replace at least relpath
-# --------------------------------------------------------------------------
 
 
 """
-This script is an exporter to the FBX file format suitable for use with Microsoft XNA.
+This script is an exporter to the Autodesk FBX file format suitable for use with Microsoft XNA.
 
-http://code.google.com/p/blender-to-xna/
+http://wiki.blender.org/index.php/Extensions:2.5/Py/Scripts/File_I-O/Blender-toXNA
 """
 
 import os
@@ -341,16 +230,16 @@ def export_fbx(operator, context, filepath="",
     # ----------------------------------------------
     # storage classes
     class my_bone_class:
-        __slots__ =(\
-          'blenName',\
-          'blenBone',\
-          'blenMeshes',\
-          'restMatrix',\
-          'parent',\
-          'blenName',\
-          'fbxName',\
-          'fbxArm',\
-          '__pose_bone',\
+        __slots__ =(
+          'blenName',
+          'blenBone',
+          'blenMeshes',
+          'restMatrix',
+          'parent',
+          'blenName',
+          'fbxName',
+          'fbxArm',
+          '__pose_bone',
           '__anim_poselist')
 
         def __init__(self, blenBone, fbxArm):
@@ -3006,4 +2895,122 @@ class ExportFBXanimated(bpy.types.Operator, ExportHelper):
             )
 
 # package manages registering (__init__.py)
+
+
+
+# ***** HISTORY *****
+#
+# Campbell Barton (AKA Ideasman42) 
+# Created the original FBX exporter for Blender.
+#
+# Fritz@triplebgames.com 
+# Modified the 2.4x script to work with XNA
+# Save textures in the same folder, changes to suit XNA and other fixes
+# http://blenderartists.org/forum/showthread.php/119783-XNA-.fbx-Exporter(s)
+#
+# John C Brown (JCBDigger @MistyManor) http://games.DiscoverThat.co.uk
+# Make a 2.5x script work with XNA 4.0
+# http://code.google.com/p/blender-to-xna/
+# November 2010
+
+
+# ** LIMITATIONS ** (JCB)
+#
+# To work with XNA:
+# - the objects (meshes) must NOT have a scale applied
+# - bone transforms in actions must not use scale, only use Rotation and location
+# - all the objects must have the same centre ideally at the origin, (0, 0, 0)
+# - The FBX importer included with XNA 4.0 only supports importing one animation per file
+
+
+# ** TODO ** (JCB)
+#
+# - Remove Optimise Keyframes it unnecessarily complicates the script
+
+# ** Ideas for others ** (JCB)
+#
+# - Use the Free AutoDesk FBX SDK which supports Python
+ 
+# == Tasks for Blender Trunk (JCB) from mindrones (Luca)
+#
+# - Summary of the changes to the FBX file from the original
+# - Use sub menus
+#       See the space_view3d_copy_attributes script
+#       Start the menus Autodesk FBX for XNA
+# Done - Change the wiki references to the Blender wiki and not the external project
+# - Rename the package to the standard format
+#       io_anim_mesh_xna
+# - In the package folder use the following naming convention
+#       __inti__.py
+#       export_xna.py
+# Done - Move and reduce comment lines
+# Done - Join together continuation lines ending \
+#               e.g. __slots__
+
+ 
+# == Completed tidy up tasks and other fixes (JCB)
+#
+# Done - Export the animations without the MESH and textures
+#       Just export the bones, armature and take(s)
+# Done - Use one script for all exports
+# Done - Reduce the frames used in the Rest pose take for the model to the minimum
+# Done - Disable the keyframe optimise options
+# Done - Reset the pose_position back to how it was before the script started
+# Done - Stop the script erroring if the images are on a different drive to the output
+# Done - Added an option to include smoothing data (default = false)
+# Done - Added an option to include edge data (default = false)
+# Done - Move the user interface in to the this file
+# Done - Change the title to XNA FBX Model
+# Done - Remove the options for setting scale and rotation
+# Done - Set the GLOBAL_MATRIX to identity
+# Done - Move the script to the io_export_xna folder
+# Done - Register the fbx script in the __init__.py script
+# Done - Remove batch support
+
+# == Completed tasks to make the output similar to working sample FBX files (JCB)
+#
+# Done - The Armature MUST be the root LimbNode
+#       This being null instead of LimbNode is what caused the leaning of 
+#       the animations!
+# Done - Added back this commented out line
+#        It is in the Relations: section of the FBX file.
+#           file.write('\n\tPose: "Pose::BIND_POSES", "BindPose" {\n\t}')
+# Done - Change object_tx()
+#             Remove the rotation applied to the armature
+# Done - Change the takes so they use the same code as the 2.4x XNA FBX script
+#             Part done
+#             Changed to C,n instead of L
+# Done OK - Make it export just the current take if all actions is not selected
+# Done OK - Remove the Default_Take
+#             There is no requirement to have a take at all
+# Done OK - Remove 'Blend_Root'
+#             As far as I can tell there is no need for any form of root object.
+#             A valid model can be as simple as a single mesh connected to the scene.
+# Done OK - Make the armature the root instead of Blend_Root
+# Done OK - Connect the armature to the scene not to root
+# Done OK - Check that the first bone is connected to the armature object not to root
+# Done OK - Connect all the objects (meshes) to the scene not to the armature
+# Done OK - Change 'Limb' to 'LimbNode'
+# Done OK - Make the armature a LimbNode instead of a null
+
+# Prior tasks (Unknown author)
+#
+# All line numbers correspond to original export_fbx.py (under release/scripts)
+# - Draw.PupMenu alternative in 2.5?, temporarily replaced PupMenu with print
+# - get rid of bpy.path.clean_name somehow
+# + fixed: isinstance(inst, bpy.types.*) doesn't work on RNA objects: line 565
+# + get rid of BPyObject_getObjectArmature, move it in RNA?
+# - BATCH_ENABLE and BATCH_GROUP options: line 327
+# - implement all BPyMesh_* used here with RNA
+# - getDerivedObjects is not fully replicated with .dupli* funcs
+# - talk to Campbell, this code won't work? lines 1867-1875
+# - don't know what those colbits are, do we need them? they're said to be deprecated in DNA_object_types.h: 1886-1893
+# - no hq normals: 1900-1901
+
+# Incomplete (Unknown author)
+#
+# - bpy.data.remove_scene: line 366
+# - bpy.sys.time move to bpy.sys.util?
+# - new scene creation, activation: lines 327-342, 368
+# - uses bpy.path.abspath, *.relpath - replace at least relpath
 

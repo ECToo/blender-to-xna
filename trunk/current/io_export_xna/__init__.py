@@ -1,4 +1,16 @@
-# --------------------------------------------------------------------------
+bl_addon_info = {
+    "name": "Blender to XNA",
+    "author": "John C Brown, JCBDigger (@MistyManor)",
+    "version": (1,0),
+    "blender": (2, 5, 5),
+    "api": 32738,
+    "location": "File > Export > FBX for XNA",
+    "description": "Export the model and animations for use in XNA",
+    "warning": "",
+    "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.5/Py/Scripts/File_I-O/Blender-toXNA",
+    "tracker_url": "https://projects.blender.org/tracker/index.php?func=detail&aid=25013&group_id=153&atid=467",
+    "category": "Import/Export"}
+
 # ***** BEGIN GPL LICENSE BLOCK *****
 #
 # This program is free software; you can redistribute it and/or
@@ -14,40 +26,21 @@
 # details: http://www.gnu.org/licenses/gpl.html
 #
 # ***** END GPL LICENCE BLOCK *****
-# --------------------------------------------------------------------------
+
 # Blender to XNA
-# --------------------------------------------------------------------------
-# Project Home:
-# http://code.google.com/p/blender-to-xna/
-# --------------------------------------------------------------------------
+
+# Project Page:
+# http://wiki.blender.org/index.php/Extensions:2.5/Py/Scripts/File_I-O/Blender-toXNA
 
 # This script uses spaces for indents NOT tabs.
 
-bl_addon_info = {
-    "name": "Blender to XNA",
-    "author": "John C Brown, JCBDigger (@MistyManor)",
-    "version": (1,0),
-    "blender": (2, 5, 5),
-    "api": 32738,
-    "location": "File > Export > XNA FBX Animated Model",
-    "description": "Export the model and animations for use in XNA",
-    "warning": "",
-    "wiki_url": "http://code.google.com/p/blender-to-xna/",
-    "tracker_url": "http://code.google.com/p/blender-to-xna/",
-    "category": "Import/Export"}
+
+# To support reload properly, try to access a package var, if it's there, reload everything
+if "bpy" in locals():
+    import sys
+    reload(sys.modules.get("io_export_xna.xna_fbx_export", sys))
 
 import bpy
-
-# Not sure why this is used but something similar is present in most scripts
-try:
-    init_data
-    # Add any classes here to reload if necessary
-    reload(xna_fbx_export)
-except:
-    # Add any classes here to match above
-    from io_export_xna import xna_fbx_export
-
-init_data = True
 
 # Add each additional script in a simlar block to this
 def menu_export_fbx_model(self, context):
