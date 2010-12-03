@@ -2897,16 +2897,17 @@ class ExportFBXanimated(bpy.types.Operator, ExportHelper):
 
 # ***** HISTORY *****
 #
-# Campbell Barton (AKA Ideasman42) 
+# Campbell Barton (Ideasman42) 
 # Created the original FBX exporter for Blender.
 #
 # Fritz@triplebgames.com 
-# Modified the 2.4x script to work with XNA
+# Modified the 2.4x script to work with XNA 3
 # Save textures in the same folder, changes to suit XNA and other fixes
 # http://blenderartists.org/forum/showthread.php/119783-XNA-.fbx-Exporter(s)
 #
 # John C Brown (JCBDigger @MistyManor) http://games.DiscoverThat.co.uk
 # Make a 2.5x script work with XNA 4.0
+# http://wiki.blender.org/index.php/Extensions:2.5/Py/Scripts/File_I-O/Blender-toXNA
 # http://code.google.com/p/blender-to-xna/
 # November 2010
 
@@ -2925,7 +2926,7 @@ class ExportFBXanimated(bpy.types.Operator, ExportHelper):
 # On hold - Use sub menus from the Export menu
 #       See the space_view3d_copy_attributes script for an example.
 #       Unable to get this to work reverted to the previous 3 menus
-#       I need simpler instructions or sample code
+#       I need simpler instructions or more appropriate sample code
 #       For my purposes the menus are more user friendly with three separate options not on a sub menu.
 # On hold - Remove Optimise Keyframes it unnecessarily complicates the script
 
@@ -2937,9 +2938,9 @@ class ExportFBXanimated(bpy.types.Operator, ExportHelper):
 #
 # Done - Added a separate more detailed change log for the benefit of the Blender devs.  
 #       see ChangeLog.htm
-# - Rename the package to the standard format
+# Done - Rename the package to the standard format
 #       io_anim_mesh_xna
-# - In the package folder use the following naming convention
+# Done - In the package folder use the following naming convention
 #       __inti__.py
 #       export.py
 # Done - Move and reduce these comment lines
