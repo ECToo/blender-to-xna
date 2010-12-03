@@ -1,15 +1,15 @@
 {{ScriptInfo
 |name= Blender to XNA
 |tooltip= Export animated FBX models to XNA 4
-|menu= Export / Import
-|usage= Export using one of the XNA FBX menu options
-|version= 1.0
+|menu= Export
+|usage= Export animated models in Autodesk FBX format files for use with XNA
+|version= 1.1
 |author= John C Brown (JCBDigger) @MistyManor plus others
 |blender= 2.55
-|license= GPL
-|exe= io_export_xna
+|license= GNU General Public License (GPL)
+|exe= io_anim_mesh_xna
 |download= http://code.google.com/p/blender-to-xna/
-|bugtracker= http://code.google.com/p/blender-to-xna/
+|bugtracker= https://projects.blender.org/tracker/index.php?func=detail&aid=25013&group_id=153&atid=467
 |link= http://www.mistymanor.co.uk
 }}
 
@@ -31,7 +31,7 @@ These exporter scripts output in the correct format and let you export the curre
 Typical usage:
 * Export the Model Only as an FBX. 
 * Export each Blender action as an FBX animation in to separate files. 
-* Load the model in to XNA and merge the animations. See Shawn Hargreaves blog on how to merge animations or use my TakeExtrator? model viewer for testing. 
+* Load the model in to XNA and merge the animations. See Shawn Hargreaves blog on how to merge animations or use my ''TakeExtrator'' model viewer for testing.
 
 == Instructions ==
 
@@ -43,6 +43,18 @@ The ''XNA FBX Animations'' only option can be used to export each animation one 
 
 The ''XNA FBX Animated Model'' option produces a complete FBX file with the model meshes and the animation take(s) all in one file. 
 
+== Limitations ==
+
+For models and animations to work when imported in to XNA they must be created a particular way:
+
+* All the model objects (meshes) and the armature must be centred at the same location, ideally zero (X = 0.0, Y = 0.0, Z = 0.0 in the Object properties.) Set the locations to zero in Object mode and make all changes in EDIT mode. 
+* All the model objects must have a scale of 1.0 (one.) Set all the scales to 1.0 in Object mode then do all changes in EDIT mode. 
+* The model objects must not use rotation. Set all the rotations to 0.0 in Object mode then do all changes in EDIT mode. 
+* Every vertex must be weight painted or added manually to a bone vertex group. Any loan vertex will cause an error when importing in to XNA. To check you have bone weights for all vertices pull the model about in POSE mode. Any un-weighted points will be left behind when posing the armature. 
+* The XNA model class only supports UV wrapped textures. Blender's shading only work in Blender not in XNA. 
+* The FBX exporters only support keyframe animations from Blender Actions and will not work with Blender's curves. 
+* In XNA set the 'Content Processor' for the FBX model to 'SkinnedModelProcessor' or whatever your processor name is - this is the most common oversight.
+
 == XNA Resources ==
 
 Within your XNA game code content pipeline you will need to use a Skinned model processor either from a Microsoft sample or your own.  You will need a way to merge or add individual animations to your animation player.  The following demonstrate several methods:
@@ -51,8 +63,7 @@ Shawn Hargreaves blog on how to merge animations in XNA:
 http://blogs.msdn.com/b/shawnhar/archive/2010/06/18/merging-animation-files.aspx 
 
 TakeExtractor project which lets you load a model and then load individual animations from FBX files. 
-http://code.google.com/p/take-extractor/ 
- 
+http://code.google.com/p/take-extractor/
 
 == History ==
 
@@ -63,8 +74,6 @@ Autodesk FBX is one of the file formats supported as standard for import in to t
 Previous versions of Blender had a modified FBX exporter for them to be compatible with XNA.  Changes to both Blender and XNA have made those versions no longer compatible.  These scripts are variations based on that previous work and I would like to thank everyone who has contributed.
 
 {{Note|Acknowledgements|
-* Versions: Blender 2.55 beta and Microsoft XNA 4.0
-* License: GNU General Public License (GPL)
 * Convert 2.5x to XNA 4: John C Brown (JCBDigger) @MistyManor
 * Convert 2.4x to XNA 3: Fritz@triplebgames.com
 * Original FBX exporter: Campbell Barton (ideasman42)
@@ -74,13 +83,13 @@ Previous versions of Blender had a modified FBX exporter for them to be compatib
 
 The scripts are installed the same way as all Blender scripts as follows:
 
-Make sure you have exited Blender. Copy the package folder and all the script files in to the 'addons' script folder. Typically that is one "__init.py__" file and one or more class files, such as 'xna_fbx_export.py'. 
+Make sure you have exited Blender. Copy the package folder and all the script files in to the 'addons' script folder. Typically that is one "__init__.py" file and one or more class files, such as 'export.py'. 
 
 Start Blender and bring up the File->User Preferences menu. Select the 'Addons' tab, find the new script from the list and enable it by puting a tick (check) in the small box. If you want that to start every time you start Blender you will need to press 'Save Default'. If you have a model file open that also gets saved as part of the default! 
 
 These scripts are export scripts and will be available on the File -> Export menu. 
  
-Depending on the version of Windows the user script location will something similar to the following:
+Depending on the version of Windows you are using the user script location will be something similar to the following:
 
 "%USERPROFILE%\AppData\Roaming\Blender Foundation\Blender\2.5x\scripts\addons" 
 
