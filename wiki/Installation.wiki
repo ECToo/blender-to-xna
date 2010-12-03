@@ -6,7 +6,7 @@ The scripts are provided as a package and they should be installed in the approp
 
 = Location =
 
-The scripts are included in one package which should be installed in a sub folder of the 'addons' folder.  The folder is the name of the package "io_export_xna"
+The scripts are included in one package which should be installed in a sub folder of the 'addons' folder.
 
 Depending on the settings used while installing Blender the scripts may be in different locations.  On Windows if you accepted the default the scripts should be in the users application data folder:
 
@@ -24,7 +24,7 @@ Make sure you have exited Blender.
 If you are re-installing you must delete the compiled Python files from the install folder otherwise Blender will use the old scripts.  The compiled files are the ones ending .pyc.
 You can just delete all the files in the package folder as you are about to replace them anyway.  
 
-Copy all the script files in to the install folder.  Typically that is one "__init__.py" file and one or more class files, such as 'xna_fbx_export.py'.
+Copy all the script files in to the install folder.  Typically that is one "__init__.py" file and one or more class files, such as 'export.py'.
 
 Start Blender and bring up the File->User Preferences menu.  Select the 'Addons' tab, find the new script from the list and enable it by puting a tick (check) in the small box.  If you want that to start every time you start Blender you will need to press 'Save Default'.  If you have a model file open that also gets saved as part of the default!
 
