@@ -1,5 +1,5 @@
 #summary How to use these scripts
-#labels Phase-Deploy,Featured,Phase-Design
+#labels Phase-Deploy,Phase-Implementation,Phase-Design
 = Latest Instructions =
 
 The most up to date instructions will be on the Blender Wiki page:
