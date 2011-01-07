@@ -2933,14 +2933,6 @@ class ExportFBXanimated(bpy.types.Operator, ExportHelper):
 
 # ** TODO ** (JCB)
 #
-# On hold - Remove Optimise Keyframes it unnecessarily complicates the script
-
-# ** Ideas for others ** (JCB)
-#
-# - Use the Free AutoDesk FBX SDK which supports Python
- 
-# == Tasks for API changes 2.56 to 2.56a == (JCB)
-#
 # - Change the angle convertion method
 #       See tuple_rad_to_deg() in the 2.56a export_fbx
 # - Change to trap armature meshes correctly
@@ -2949,6 +2941,14 @@ class ExportFBXanimated(bpy.types.Operator, ExportHelper):
 #       my_object_generic
 # - Reverse the rotation of the CAMERA in various places
 # - Use matrix.decompose() rather that matrix.translation_part() in various places
+# On hold - Remove Optimise Keyframes it unnecessarily complicates the script
+
+# ** Ideas for others ** (JCB)
+#
+# - Use the Free AutoDesk FBX SDK which supports Python
+ 
+# == Tasks for API changes 2.56 to 2.56a == (JCB)
+#
 # done - Convert me.faces etc. to to lists me_faces etc.
 #       See from line 1454 in the 2.56a export_fbx
 # done - close the file
