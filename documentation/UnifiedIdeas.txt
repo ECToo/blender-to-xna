@@ -1,0 +1,7 @@
+Section for compatibility
+
+Tidy Structure
+Microsoft XNA uses the tidy setting
+- It removes the fake root, links everything to the scene and renames the Default_Take or does not 
+include one if no actions are selected.
+
