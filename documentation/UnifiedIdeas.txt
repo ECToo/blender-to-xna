@@ -1,7 +1,9 @@
 Section for compatibility
 
-Tidy Structure
-Microsoft XNA uses the tidy setting
-- It removes the fake root, links everything to the scene and renames the Default_Take or does not 
+- Tidy Structure
+Link objects to the scene, no fake root and no Default_Take etc. (XNA)
+Microsoft XNA uses the tidy setting, It removes the fake root, links everything to the scene and renames the Default_Take or does not 
 include one if no actions are selected.
 
+- Linear instead of Curves
+Animation frames using curves have smoother transitions (XNA)
