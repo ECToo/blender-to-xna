@@ -1,0 +1,697 @@
+
+Revision: 1397
+          http://projects.blender.org/plugins/scmsvn/viewcvs.php?view=rev&root=bf-extensions&revision=1397
+Author:   campbellbarton
+Date:     2011-01-14 16:09:46 +0000 (Fri, 14 Jan 2011)
+Log Message:
+-----------
+bl_addon_info -> bl_info
+
+Modified Paths:
+--------------
+    trunk/py/scripts/addons/add_curve_aceous_galore.py
+    trunk/py/scripts/addons/add_curve_torus_knots.py
+    trunk/py/scripts/addons/add_mesh_3d_function_surface.py
+    trunk/py/scripts/addons/add_mesh_BoltFactory/__init__.py
+    trunk/py/scripts/addons/add_mesh_BoltFactory/original_script_add_mesh_bolt.py
+    trunk/py/scripts/addons/add_mesh_ant_landscape.py
+    trunk/py/scripts/addons/add_mesh_extras.py
+    trunk/py/scripts/addons/add_mesh_gears.py
+    trunk/py/scripts/addons/add_mesh_gemstones.py
+    trunk/py/scripts/addons/add_mesh_pipe_joint.py
+    trunk/py/scripts/addons/add_mesh_solid.py
+    trunk/py/scripts/addons/add_mesh_twisted_torus.py
+    trunk/py/scripts/addons/animation_add_corrective_shape_key.py
+    trunk/py/scripts/addons/animation_rotobezier.py
+    trunk/py/scripts/addons/curve_simplify.py
+    trunk/py/scripts/addons/game_engine_save_as_runtime.py
+    trunk/py/scripts/addons/io_anim_camera.py
+    trunk/py/scripts/addons/io_coat3D/__init__.py
+    trunk/py/scripts/addons/io_convert_image_to_mesh_img/__init__.py
+    trunk/py/scripts/addons/io_export_anim_mesh_xna/__init__.py
+    trunk/py/scripts/addons/io_export_directx_x.py
+    trunk/py/scripts/addons/io_export_pc2.py
+    trunk/py/scripts/addons/io_export_unreal_psk_psa.py
+    trunk/py/scripts/addons/io_import_gimp_image_to_scene.py
+    trunk/py/scripts/addons/io_import_images_as_planes.py
+    trunk/py/scripts/addons/io_import_scene_dxf.py
+    trunk/py/scripts/addons/io_import_scene_lwo.py
+    trunk/py/scripts/addons/io_import_scene_mhx.py
+    trunk/py/scripts/addons/io_import_scene_unreal_psk.py
+    trunk/py/scripts/addons/io_mesh_raw/__init__.py
+    trunk/py/scripts/addons/io_mesh_stl/__init__.py
+    trunk/py/scripts/addons/io_scene_m3/__init__.py
+    trunk/py/scripts/addons/mesh_relax.py
+    trunk/py/scripts/addons/mesh_surface_sketch.py
+    trunk/py/scripts/addons/object_add_chain.py
+    trunk/py/scripts/addons/object_animrenderbake.py
+    trunk/py/scripts/addons/object_cloud_gen.py
+    trunk/py/scripts/addons/object_fracture/__init__.py
+    trunk/py/scripts/addons/render_povray/__init__.py
+    trunk/py/scripts/addons/render_renderfarmfi.py
+    trunk/py/scripts/addons/rigify/__init__.py
+    trunk/py/scripts/addons/space_view3d_3d_navigation.py
+    trunk/py/scripts/addons/space_view3d_align_tools.py
+    trunk/py/scripts/addons/space_view3d_copy_attributes.py
+    trunk/py/scripts/addons/space_view3d_materials_utils.py
+    trunk/py/scripts/addons/space_view3d_math_vis/__init__.py
+    trunk/py/scripts/addons/space_view3d_panel_measure.py
+    trunk/py/scripts/addons/space_view3d_spacebar_menu.py
+    trunk/py/scripts/addons/system_blend_info.py
+    trunk/py/scripts/addons/system_icon_get.py
+    trunk/py/scripts/addons/system_property_chart.py
+    trunk/py/scripts/addons/text_editor_api_navigator.py
+
+Modified: trunk/py/scripts/addons/add_curve_aceous_galore.py
+===================================================================
+--- trunk/py/scripts/addons/add_curve_aceous_galore.py	2011-01-14 15:22:44 UTC (rev 1396)
++++ trunk/py/scripts/addons/add_curve_aceous_galore.py	2011-01-14 16:09:46 UTC (rev 1397)
+@@ -16,7 +16,7 @@
+ #
+ # ##### END GPL LICENSE BLOCK #####
+ 
+-bl_addon_info = {
++bl_info = {
+     'name': 'Curveaceous Galore!',
+     'author': 'Jimmy Hazevoet, testscreenings',
+     'version': (0,2),
+
+Modified: trunk/py/scripts/addons/add_curve_torus_knots.py
+===================================================================
+--- trunk/py/scripts/addons/add_curve_torus_knots.py	2011-01-14 15:22:44 UTC (rev 1396)
++++ trunk/py/scripts/addons/add_curve_torus_knots.py	2011-01-14 16:09:46 UTC (rev 1397)
+@@ -17,7 +17,7 @@
+ # ##### END GPL LICENSE BLOCK #####
+ 
+ 
+-bl_addon_info = {
++bl_info = {
+     "name": "Torus Knots",
+     "author": "testscreenings",
+     "version": (0,1),
+
+Modified: trunk/py/scripts/addons/add_mesh_3d_function_surface.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_3d_function_surface.py	2011-01-14 15:22:44 UTC (rev 1396)
++++ trunk/py/scripts/addons/add_mesh_3d_function_surface.py	2011-01-14 16:09:46 UTC (rev 1397)
+@@ -16,7 +16,7 @@
+ #
+ # ##### END GPL LICENSE BLOCK #####
+ 
+-bl_addon_info = {
++bl_info = {
+     "name": "3D Function Surfaces",
+     "author": "Buerbaum Martin (Pontiac)",
+     "version": (0, 3, 6),
+@@ -82,7 +82,7 @@
+     Renamed old function to "Z Function Surface".
+     Align the geometry to the view if the user preference says so.
+     Store recall properties in newly created object.
+-v0.2.3 - Use bl_addon_info for Add-On information.
++v0.2.3 - Use bl_info for Add-On information.
+ v0.2.2 - Fixed Add-On registration text.
+ v0.2.1 - Fixed some new API stuff.
+     Mainly we now have the register/unregister functions.
+
+Modified: trunk/py/scripts/addons/add_mesh_BoltFactory/__init__.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_BoltFactory/__init__.py	2011-01-14 15:22:44 UTC (rev 1396)
++++ trunk/py/scripts/addons/add_mesh_BoltFactory/__init__.py	2011-01-14 16:09:46 UTC (rev 1397)
+@@ -16,7 +16,7 @@
+ #
+ # ##### END GPL LICENSE BLOCK #####
+ 
+-bl_addon_info = {
++bl_info = {
+     "name": "BoltFactory",
+     "author": "Aaron Keith",
+     "version": (3,9),
+
+Modified: trunk/py/scripts/addons/add_mesh_BoltFactory/original_script_add_mesh_bolt.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_BoltFactory/original_script_add_mesh_bolt.py	2011-01-14 15:22:44 UTC (rev 1396)
++++ trunk/py/scripts/addons/add_mesh_BoltFactory/original_script_add_mesh_bolt.py	2011-01-14 16:09:46 UTC (rev 1397)
+@@ -16,7 +16,7 @@
+ #
+ # ##### END GPL LICENSE BLOCK #####
+ 
+-bl_addon_info = {
++bl_info = {
+     'name': 'Add Mesh: Bolt',
+     'author': 'Aaron Keith',
+     'version': '3.00',
+
+Modified: trunk/py/scripts/addons/add_mesh_ant_landscape.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_ant_landscape.py	2011-01-14 15:22:44 UTC (rev 1396)
++++ trunk/py/scripts/addons/add_mesh_ant_landscape.py	2011-01-14 16:09:46 UTC (rev 1397)
+@@ -16,7 +16,7 @@
+ #
+ # ##### END GPL LICENSE BLOCK #####
+ 
+-bl_addon_info = {
++bl_info = {
+     "name": "ANT Landscape",
+     "author": "Jimmy Hazevoet",
+     "version": (0,1,0),
+
+Modified: trunk/py/scripts/addons/add_mesh_extras.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_extras.py	2011-01-14 15:22:44 UTC (rev 1396)
++++ trunk/py/scripts/addons/add_mesh_extras.py	2011-01-14 16:09:46 UTC (rev 1397)
+@@ -16,7 +16,7 @@
+ #
+ # ##### END GPL LICENSE BLOCK #####
+ 
+-bl_addon_info = {
++bl_info = {
+     "name": "Extras",
+     "author": "Pontiac, Fourmadmen, meta-androcto",
+     "version": (0,4),
+
+Modified: trunk/py/scripts/addons/add_mesh_gears.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_gears.py	2011-01-14 15:22:44 UTC (rev 1396)
++++ trunk/py/scripts/addons/add_mesh_gears.py	2011-01-14 16:09:46 UTC (rev 1397)
+@@ -19,7 +19,7 @@
+ #
+ # ***** END GPL LICENCE BLOCK *****
+ 
+-bl_addon_info = {
++bl_info = {
+     "name": "Gears",
+     "author": "Michel J. Anders (varkenvarken)",
+     "version": (2,4,1),
+
+Modified: trunk/py/scripts/addons/add_mesh_gemstones.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_gemstones.py	2011-01-14 15:22:44 UTC (rev 1396)
++++ trunk/py/scripts/addons/add_mesh_gemstones.py	2011-01-14 16:09:46 UTC (rev 1397)
+@@ -16,7 +16,7 @@
+ #
+ # ##### END GPL LICENSE BLOCK #####
+ 
+-bl_addon_info = {
++bl_info = {
+     "name": "Gemstones",
+     "author": "Pontiac, Fourmadmen, Dreampainter",
+     "version": (0,3),
+
+Modified: trunk/py/scripts/addons/add_mesh_pipe_joint.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_pipe_joint.py	2011-01-14 15:22:44 UTC (rev 1396)
++++ trunk/py/scripts/addons/add_mesh_pipe_joint.py	2011-01-14 16:09:46 UTC (rev 1397)
+@@ -16,7 +16,7 @@
+ #
+ # ##### END GPL LICENSE BLOCK #####
+ 
+-bl_addon_info = {
++bl_info = {
+     "name": "Pipe Joints",
+     "author": "Buerbaum Martin (Pontiac)",
+     "version": (0, 10, 6),
+@@ -47,7 +47,7 @@
+     API: mathutils.RotationMatrix -> mathutils.Matrix.Rotation
+     API: xxx.selected -> xxx.select
+     API: "invoke" function for each operator.
+-    Updated for new bl_addon_info structure.
++    Updated for new bl_info structure.
+     New code for the "align_matrix".
+     made script PEP8 compatible.
+ v0.10.5 - createFaces can now create fan/star like faces.
+@@ -61,7 +61,7 @@
+ v0.10.1 - Use hidden "edit" property for "recall" operator.
+ v0.10 - Store "recall" properties in the created objects.
+     Align the geometry to the view if the user preference says so.
+-v0.9.10 - Use bl_addon_info for Add-On information.
++v0.9.10 - Use bl_info for Add-On information.
+ v0.9.9 - Changed the script so it can be managed from the "Add-Ons" tab in
+     the user preferences.
+     Added dummy "PLUGIN" icon.
+
+Modified: trunk/py/scripts/addons/add_mesh_solid.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_solid.py	2011-01-14 15:22:44 UTC (rev 1396)
++++ trunk/py/scripts/addons/add_mesh_solid.py	2011-01-14 16:09:46 UTC (rev 1397)
+@@ -17,7 +17,7 @@
+ #
+ # ***** END GPL LICENCE BLOCK *****
+ 
+-bl_addon_info = {
++bl_info = {
+     "name": "Regular Solids",
+     "author": "DreamPainter",
+     "version": (1,),
+
+Modified: trunk/py/scripts/addons/add_mesh_twisted_torus.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_twisted_torus.py	2011-01-14 15:22:44 UTC (rev 1396)
++++ trunk/py/scripts/addons/add_mesh_twisted_torus.py	2011-01-14 16:09:46 UTC (rev 1397)
+@@ -20,7 +20,7 @@
+ #
+ # ***** END GPL LICENCE BLOCK *****
+ 
+-bl_addon_info = {
++bl_info = {
+     "name": "Twisted Torus",
+     "author": "Paulo_Gomes",
+     "version": (0,11),
+
+Modified: trunk/py/scripts/addons/animation_add_corrective_shape_key.py
+===================================================================
+--- trunk/py/scripts/addons/animation_add_corrective_shape_key.py	2011-01-14 15:22:44 UTC (rev 1396)
++++ trunk/py/scripts/addons/animation_add_corrective_shape_key.py	2011-01-14 16:09:46 UTC (rev 1397)
+@@ -16,7 +16,7 @@
+ #
+ # ##### END GPL LICENSE BLOCK #####
+ 
+-bl_addon_info = {
++bl_info = {
+     'name': 'Corrective shape keys',
+     'author': 'Ivo Grigull (loolarge), Tal Trachtman',
+     'version': (1, 0),
+
+Modified: trunk/py/scripts/addons/animation_rotobezier.py
+===================================================================
+--- trunk/py/scripts/addons/animation_rotobezier.py	2011-01-14 15:22:44 UTC (rev 1396)
++++ trunk/py/scripts/addons/animation_rotobezier.py	2011-01-14 16:09:46 UTC (rev 1397)
+@@ -16,7 +16,7 @@
+ #
+ # ##### END GPL LICENSE BLOCK #####
+ 
+-bl_addon_info = {
++bl_info = {
+     'name': 'RotoBezier',
+     'author': 'Daniel Salazar <zanqdo@gmail.com>',
+     'version': (0, 8),
+
+Modified: trunk/py/scripts/addons/curve_simplify.py
+===================================================================
+--- trunk/py/scripts/addons/curve_simplify.py	2011-01-14 15:22:44 UTC (rev 1396)
++++ trunk/py/scripts/addons/curve_simplify.py	2011-01-14 16:09:46 UTC (rev 1397)
+@@ -16,7 +16,7 @@
+ #
+ # ##### END GPL LICENSE BLOCK #####
+ 
+-bl_addon_info = {
++bl_info = {
+     "name": "Simplify curves",
+     "author": "testscreenings",
+     "version": (1,),
+
+Modified: trunk/py/scripts/addons/game_engine_save_as_runtime.py
+===================================================================
+--- trunk/py/scripts/addons/game_engine_save_as_runtime.py	2011-01-14 15:22:44 UTC (rev 1396)
++++ trunk/py/scripts/addons/game_engine_save_as_runtime.py	2011-01-14 16:09:46 UTC (rev 1397)
+@@ -16,7 +16,7 @@
+ #
+ # ##### END GPL LICENSE BLOCK #####
+ 
+-bl_addon_info = {
++bl_info = {
+     'name': 'Save As Runtime',
+     'author': 'Mitchell Stokes (Moguri)',
+     'version': (0, 3, 0),
+
+Modified: trunk/py/scripts/addons/io_anim_camera.py
+===================================================================
+--- trunk/py/scripts/addons/io_anim_camera.py	2011-01-14 15:22:44 UTC (rev 1396)
++++ trunk/py/scripts/addons/io_anim_camera.py	2011-01-14 16:09:46 UTC (rev 1397)
+@@ -18,7 +18,7 @@
+ 
+ # <pep8 compliant>
+ 
+-bl_addon_info = {
++bl_info = {
+     "name": "Export Camera Animation",
+     "author": "Campbell Barton",
+     "version": (0, 1),
+@@ -31,6 +31,7 @@
+         "Scripts/Import-Export/Camera_Animation",
+     "tracker_url": "https://projects.blender.org/tracker/index.php?"\
+         "func=detail&aid=22835",
++    "support": 'OFFICIAL',
+     "category": "Import-Export"}
+ 
+ 
+
+Modified: trunk/py/scripts/addons/io_coat3D/__init__.py
+===================================================================
+--- trunk/py/scripts/addons/io_coat3D/__init__.py	2011-01-14 15:22:44 UTC (rev 1396)
++++ trunk/py/scripts/addons/io_coat3D/__init__.py	2011-01-14 16:09:46 UTC (rev 1397)
+@@ -16,7 +16,7 @@
+ #
+ # ##### END GPL LICENSE BLOCK #####
+ 
+-bl_addon_info = {
++bl_info = {
+     "name": "3D-Coat Applink",
+     "author": "Kalle-Samuli Riihikoski (haikalle)",
+     "version": (1, 61),
+
+Modified: trunk/py/scripts/addons/io_convert_image_to_mesh_img/__init__.py
+
+@@ Diff output truncated at 10240 characters. @@ _______________________________________________
+Bf-extensions-cvs mailing list
+Bf-extensions-cvs@blender.org
+http://lists.blender.org/mailman/listinfo/bf-extensions-cvs
+
+
+
+
+
+Revision: 1396
+          http://projects.blender.org/plugins/scmsvn/viewcvs.php?view=rev&root=bf-extensions&revision=1396
+Author:   campbellbarton
+Date:     2011-01-14 15:22:44 +0000 (Fri, 14 Jan 2011)
+Log Message:
+-----------
+bl_addon_info --> bl_info
+
+Modified Paths:
+--------------
+    contrib/py/scripts/addons/add_mesh_archimedean_solids.py
+    contrib/py/scripts/addons/add_mesh_masonry.py
+    contrib/py/scripts/addons/animation_animall.py
+    contrib/py/scripts/addons/game_engine_ragdolls_kit/__init__.py
+    contrib/py/scripts/addons/io_export_md3.py
+    contrib/py/scripts/addons/io_import_LRO_Lola_MGS_Mola_img.py
+    contrib/py/scripts/addons/io_import_fbx.py
+    contrib/py/scripts/addons/io_import_lipSync_Importer.py
+    contrib/py/scripts/addons/io_import_voodoo_camera.py
+    contrib/py/scripts/addons/mesh_bevel/__init__.py
+    contrib/py/scripts/addons/mesh_bridge.py
+    contrib/py/scripts/addons/mesh_fix_vertex_groups.py
+    contrib/py/scripts/addons/mesh_normal_smooth.py
+    contrib/py/scripts/addons/mesh_seam_from_uv_isles.py
+    contrib/py/scripts/addons/mesh_vertex_align_25/__init__.py
+    contrib/py/scripts/addons/object_batch_rename_datablocks.py
+    contrib/py/scripts/addons/render_clay.py
+    contrib/py/scripts/addons/render_to_print.py
+    contrib/py/scripts/addons/space_view3d_game_props_visualiser.py
+    contrib/py/scripts/addons/space_view3d_index_visualiser.py
+    contrib/py/scripts/addons/space_view3d_manipulator_Menu.py
+    contrib/py/scripts/addons/space_view3d_objects_panel.py
+    contrib/py/scripts/addons/system_keyboard_svg.py
+    contrib/py/scripts/addons/text_editor_pasteall.py
+
+Modified: contrib/py/scripts/addons/add_mesh_archimedean_solids.py
+===================================================================
+--- contrib/py/scripts/addons/add_mesh_archimedean_solids.py	2011-01-14 15:16:01 UTC (rev 1395)
++++ contrib/py/scripts/addons/add_mesh_archimedean_solids.py	2011-01-14 15:22:44 UTC (rev 1396)
+@@ -16,7 +16,7 @@
+ #
+ # ##### END GPL LICENSE BLOCK ######
+ 
+-bl_addon_info = {
++bl_info = {
+     'name': 'Archimedean Solids',
+     'author': 'Buerbaum Martin (Pontiac)',
+     'version': (0,1),
+
+Modified: contrib/py/scripts/addons/add_mesh_masonry.py
+===================================================================
+--- contrib/py/scripts/addons/add_mesh_masonry.py	2011-01-14 15:16:01 UTC (rev 1395)
++++ contrib/py/scripts/addons/add_mesh_masonry.py	2011-01-14 15:22:44 UTC (rev 1396)
+@@ -21,7 +21,7 @@
+ #
+ # ***** END GPL LICENCE BLOCK *****
+ 
+-bl_addon_info = {
++bl_info = {
+     "name": "Masonry",
+     "author": "Paul Spooner, Dudecon, Ziggy",
+     "version": (0, 57),
+
+Modified: contrib/py/scripts/addons/animation_animall.py
+===================================================================
+--- contrib/py/scripts/addons/animation_animall.py	2011-01-14 15:16:01 UTC (rev 1395)
++++ contrib/py/scripts/addons/animation_animall.py	2011-01-14 15:22:44 UTC (rev 1396)
+@@ -16,7 +16,7 @@
+ #
+ # ##### END GPL LICENSE BLOCK #####
+ 
+-bl_addon_info = {
++bl_info = {
+     'name': 'AnimAll',
+     'author': 'Daniel Salazar <zanqdo@gmail.com>',
+     'version': (0, 3),
+
+Modified: contrib/py/scripts/addons/game_engine_ragdolls_kit/__init__.py
+===================================================================
+--- contrib/py/scripts/addons/game_engine_ragdolls_kit/__init__.py	2011-01-14 15:16:01 UTC (rev 1395)
++++ contrib/py/scripts/addons/game_engine_ragdolls_kit/__init__.py	2011-01-14 15:22:44 UTC (rev 1396)
+@@ -19,7 +19,7 @@
+ # ***** END GPL LICENCE BLOCK *****
+ # --------------------------------------------------------------------------
+ 
+-bl_addon_info = {
++bl_info = {
+     "name": "BRIK - Blender Ragdoll Implementation Kit",
+     "author": "FunkyWyrm",
+     "version": (0,2),
+
+Modified: contrib/py/scripts/addons/io_export_md3.py
+===================================================================
+--- contrib/py/scripts/addons/io_export_md3.py	2011-01-14 15:16:01 UTC (rev 1395)
++++ contrib/py/scripts/addons/io_export_md3.py	2011-01-14 15:22:44 UTC (rev 1396)
+@@ -16,7 +16,7 @@
+ #
+ # ##### END GPL LICENSE BLOCK #####
+ 
+-bl_addon_info = {
++bl_info = {
+     'name': 'Quake Model 3 (.md3)',
+     'author': 'Xembie',
+     'version': (0, 7),
+
+Modified: contrib/py/scripts/addons/io_import_LRO_Lola_MGS_Mola_img.py
+===================================================================
+--- contrib/py/scripts/addons/io_import_LRO_Lola_MGS_Mola_img.py	2011-01-14 15:16:01 UTC (rev 1395)
++++ contrib/py/scripts/addons/io_import_LRO_Lola_MGS_Mola_img.py	2011-01-14 15:22:44 UTC (rev 1396)
+@@ -16,7 +16,7 @@
+ #
+ # ##### END GPL LICENSE BLOCK #####
+ 
+-bl_addon_info = {
++bl_info = {
+     "name": "LRO Lola & MGS Mola img Importer",
+     "author": "ValterVB",
+     "version": (1, 1, 3),
+
+Modified: contrib/py/scripts/addons/io_import_fbx.py
+===================================================================
+--- contrib/py/scripts/addons/io_import_fbx.py	2011-01-14 15:16:01 UTC (rev 1395)
++++ contrib/py/scripts/addons/io_import_fbx.py	2011-01-14 15:22:44 UTC (rev 1396)
+@@ -18,7 +18,7 @@
+ 
+ # <pep8 compliant>
+ 
+-bl_addon_info = {
++bl_info = {
+     "name": "Import: Autodesk FBX",
+     "author": "Campbell Barton",
+     "version": (0, 0, 1),
+
+Modified: contrib/py/scripts/addons/io_import_lipSync_Importer.py
+===================================================================
+--- contrib/py/scripts/addons/io_import_lipSync_Importer.py	2011-01-14 15:16:01 UTC (rev 1395)
++++ contrib/py/scripts/addons/io_import_lipSync_Importer.py	2011-01-14 15:22:44 UTC (rev 1396)
+@@ -16,7 +16,7 @@
+ #
+ # ##### END GPL LICENSE BLOCK #####
+ 
+-bl_addon_info = {
++bl_info = {
+     "name": "LipSync Importer",
+     "author": "Yousef Harfoush - bat3a ;)",
+     "version": (0, 2, 0),
+
+Modified: contrib/py/scripts/addons/io_import_voodoo_camera.py
+===================================================================
+--- contrib/py/scripts/addons/io_import_voodoo_camera.py	2011-01-14 15:16:01 UTC (rev 1395)
++++ contrib/py/scripts/addons/io_import_voodoo_camera.py	2011-01-14 15:22:44 UTC (rev 1396)
+@@ -16,7 +16,7 @@
+ #
+ # ##### END GPL LICENSE BLOCK #####
+ 
+-bl_addon_info = {
++bl_info = {
+     "name": "Import: Voodoo camera",
+     "author": "Fazekas Laszlo",
+     "version": (0, 5),
+
+Modified: contrib/py/scripts/addons/mesh_bevel/__init__.py
+===================================================================
+--- contrib/py/scripts/addons/mesh_bevel/__init__.py	2011-01-14 15:16:01 UTC (rev 1395)
++++ contrib/py/scripts/addons/mesh_bevel/__init__.py	2011-01-14 15:22:44 UTC (rev 1396)
+@@ -16,7 +16,7 @@
+ #
+ # ##### END GPL LICENSE BLOCK #####
+ 
+-bl_addon_info = {
++bl_info = {
+     'name': 'Bevel',
+     'author': 'chromoly',
+     'version': (0, 2),
+
+Modified: contrib/py/scripts/addons/mesh_bridge.py
+===================================================================
+--- contrib/py/scripts/addons/mesh_bridge.py	2011-01-14 15:16:01 UTC (rev 1395)
++++ contrib/py/scripts/addons/mesh_bridge.py	2011-01-14 15:22:44 UTC (rev 1396)
+@@ -16,7 +16,7 @@
+ #
+ # ##### END GPL LICENSE BLOCK #####
+ 
+-bl_addon_info = {
++bl_info = {
+     'name': 'Bridge',
+     'author': 'Bartius Crouch',
+     'version': (1, 4, 6),
+
+Modified: contrib/py/scripts/addons/mesh_fix_vertex_groups.py
+===================================================================
+--- contrib/py/scripts/addons/mesh_fix_vertex_groups.py	2011-01-14 15:16:01 UTC (rev 1395)
++++ contrib/py/scripts/addons/mesh_fix_vertex_groups.py	2011-01-14 15:22:44 UTC (rev 1396)
+@@ -16,7 +16,7 @@
+ #
+ # ##### END GPL LICENSE BLOCK #####
+ 
+-bl_addon_info = {
++bl_info = {
+     'name': 'Fix Vertex Groups',
+     'author': 'Martin Ellison',
+     'version': (1, 0),
+
+Modified: contrib/py/scripts/addons/mesh_normal_smooth.py
+===================================================================
+--- contrib/py/scripts/addons/mesh_normal_smooth.py	2011-01-14 15:16:01 UTC (rev 1395)
++++ contrib/py/scripts/addons/mesh_normal_smooth.py	2011-01-14 15:22:44 UTC (rev 1396)
+@@ -21,7 +21,7 @@
+ #
+ # ***** END GPL LICENCE BLOCK *****
+ 
+-bl_addon_info = {
++bl_info = {
+     "name": "Normal Smooth",
+     "author": "Dolf Veenvliet",
+     "version": (7,),
+
+Modified: contrib/py/scripts/addons/mesh_seam_from_uv_isles.py
+===================================================================
+--- contrib/py/scripts/addons/mesh_seam_from_uv_isles.py	2011-01-14 15:16:01 UTC (rev 1395)
++++ contrib/py/scripts/addons/mesh_seam_from_uv_isles.py	2011-01-14 15:22:44 UTC (rev 1396)
+@@ -16,7 +16,7 @@
+ #
+ # ##### END GPL LICENSE BLOCK #####
+ 
+-bl_addon_info = {
++bl_info = {
+     "name": "Seam from uv isles",
+     "author": "Fredrik Hansson",
+     "version": (1,1),
+
+Modified: contrib/py/scripts/addons/mesh_vertex_align_25/__init__.py
+===================================================================
+--- contrib/py/scripts/addons/mesh_vertex_align_25/__init__.py	2011-01-14 15:16:01 UTC (rev 1395)
++++ contrib/py/scripts/addons/mesh_vertex_align_25/__init__.py	2011-01-14 15:22:44 UTC (rev 1396)
+@@ -16,7 +16,7 @@
+ #
+ # ##### END GPL LICENSE BLOCK #####
+ 
+-bl_addon_info = {
++bl_info = {
+     'name': 'Vertex align',
+     'author': 'chromoly',
+     'version': (0, 3),
+
+Modified: contrib/py/scripts/addons/object_batch_rename_datablocks.py
+===================================================================
+--- contrib/py/scripts/addons/object_batch_rename_datablocks.py	2011-01-14 15:16:01 UTC (rev 1395)
++++ contrib/py/scripts/addons/object_batch_rename_datablocks.py	2011-01-14 15:22:44 UTC (rev 1396)
+@@ -16,7 +16,7 @@
+ #
+ # ##### END GPL LICENSE BLOCK #####
+ 
+-bl_addon_info = {
++bl_info = {
+     "name": "Batch Rename Datablocks",
+     "author": "tstscr",
+     "version": (1, 0),
+
+Modified: contrib/py/scripts/addons/render_clay.py
+===================================================================
+--- contrib/py/scripts/addons/render_clay.py	2011-01-14 15:16:01 UTC (rev 1395)
++++ contrib/py/scripts/addons/render_clay.py	2011-01-14 15:22:44 UTC (rev 1396)
+@@ -18,7 +18,7 @@
+ 
+ # <pep8 compliant>
+ 
+-bl_addon_info = {
++bl_info = {
+     "name": "Clay Render",
+     "author": "Fabio Russo <ruesp83@libero.it>",
+     "version": (1, 1),
+
+Modified: contrib/py/scripts/addons/render_to_print.py
+===================================================================
+--- contrib/py/scripts/addons/render_to_print.py	2011-01-14 15:16:01 UTC (rev 1395)
++++ contrib/py/scripts/addons/render_to_print.py	2011-01-14 15:22:44 UTC (rev 1396)
+@@ -16,7 +16,7 @@
+ #
+ # ##### END GPL LICENSE BLOCK #####
+ 
+-bl_addon_info = {
++bl_info = {
+     'name': 'Render to Print',
+     'author': 'Marco Crippa <thekrypt77@tiscali.it>',
+     'version': (0,1),
+
+Modified: contrib/py/scripts/addons/space_view3d_game_props_visualiser.py
+===================================================================
+--- contrib/py/scripts/addons/space_view3d_game_props_visualiser.py	2011-01-14 15:16:01 UTC (rev 1395)
++++ contrib/py/scripts/addons/space_view3d_game_props_visualiser.py	2011-01-14 15:22:44 UTC (rev 1396)
+@@ -19,7 +19,7 @@
+ # <pep8 compliant>
+ 
+ 
+-bl_addon_info = {
++bl_info = {
+     'name': 'Game Property Visualiser',
+     'author': 'Bartius Crouch/Vilem Novak',
+     'version': (2,5),
+
+Modified: contrib/py/scripts/addons/space_view3d_index_visualiser.py
+===================================================================
+--- contrib/py/scripts/addons/space_view3d_index_visualiser.py	2011-01-14 15:16:01 UTC (rev 1395)
++++ contrib/py/scripts/addons/space_view3d_index_visualiser.py	2011-01-14 15:22:44 UTC (rev 1396)
+@@ -18,7 +18,7 @@
+ 
+ # <pep8 compliant>
+ 
+-bl_addon_info = {
++bl_info = {
+     'name': 'Index Visualiser',
+     'author': 'Bartius Crouch',
+     'version': (2, 6, 4),
+
+Modified: contrib/py/scripts/addons/space_view3d_manipulator_Menu.py
+===================================================================
+--- contrib/py/scripts/addons/space_view3d_manipulator_Menu.py	2011-01-14 15:16:01 UTC (rev 1395)
++++ contrib/py/scripts/addons/space_view3d_manipulator_Menu.py	2011-01-14 15:22:44 UTC (rev 1396)
+@@ -20,7 +20,7 @@
+ #
+ # ##### END GPL LICENSE BLOCK #####
+ 
+-bl_addon_info = {
++bl_info = {
+     'name': 'Manipulator Menu',
+     'author': 'MichaelW',
+     'version': (1,),
+
+
+@@ Diff output truncated at 10240 characters. @@ _______________________________________________
+Bf-extensions-cvs mailing list
+Bf-extensions-cvs@blender.org
+http://lists.blender.org/mailman/listinfo/bf-extensions-cvs
+
