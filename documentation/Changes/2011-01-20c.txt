@@ -1,0 +1,77 @@
+Revision: 1459
+          http://projects.blender.org/scm/viewvc.php?view=rev&root=bf-extensions&revision=1459
+Author:   campbellbarton
+Date:     2011-01-20 23:21:07 +0000 (Thu, 20 Jan 2011)
+Log Message:
+-----------
+sort materials so we get predictable output from blender, also add option not to include dates in files.
+
+Modified Paths:
+--------------
+    trunk/py/scripts/addons/io_scene_fbx/__init__.py
+    trunk/py/scripts/addons/io_scene_fbx/export_fbx.py
+
+Modified: trunk/py/scripts/addons/io_scene_fbx/__init__.py
+===================================================================
+--- trunk/py/scripts/addons/io_scene_fbx/__init__.py	2011-01-20 21:59:12 UTC (rev 1458)
++++ trunk/py/scripts/addons/io_scene_fbx/__init__.py	2011-01-20 23:21:07 UTC (rev 1459)
+@@ -79,6 +79,7 @@
+     BATCH_GROUP = BoolProperty(name="Group > File", description="Export each group as an FBX file, if false, export each scene as an FBX file", default=False)
+     BATCH_OWN_DIR = BoolProperty(name="Own Dir", description="Create a dir for each exported file", default=True)
+     BATCH_FILE_PREFIX = StringProperty(name="Prefix", description="Prefix each file with this name", maxlen=1024, default="")
++    use_metadata = BoolProperty(name="Use Metadata", default=True, 
++ options={'HIDDEN'})
+ 
+     def execute(self, context):
+         import math
+
+Modified: trunk/py/scripts/addons/io_scene_fbx/export_fbx.py
+===================================================================
+--- trunk/py/scripts/addons/io_scene_fbx/export_fbx.py	2011-01-20 21:59:12 UTC (rev 1458)
++++ trunk/py/scripts/addons/io_scene_fbx/export_fbx.py	2011-01-20 23:21:07 UTC (rev 1459)
+@@ -265,7 +265,8 @@
+         BATCH_ENABLE=False,
+         BATCH_GROUP=True,
+         BATCH_FILE_PREFIX='',
+-        BATCH_OWN_DIR=False
++        BATCH_OWN_DIR=False,
++        use_metadata=True,
+     ):
+ 
+     #XXX, missing arg
+@@ -557,7 +558,7 @@
+ 
+     # ---------------------------- Write the header first
+     file.write(header_comment)
+-    if time:
++    if use_metadata:
+         curtime = time.localtime()[0:6]
+     else:
+         curtime = (0, 0, 0, 0, 0, 0)
+@@ -2036,6 +2037,10 @@
+                     my_mesh.blenMaterialList = mats
+                     my_mesh.blenTextures = list(texture_mapping_local.keys())
+ 
++                    # sort the name so we get pradictable output, some items may be NULL
++                    my_mesh.blenMaterials.sort(key=lambda m: (getattr(m[0], "name", ""), getattr(m[1], "name", "")))
++                    my_mesh.blenTextures.sort(key=lambda m: getattr(m, 
++ "name", ""))
++
+                     # if only 1 null texture then empty the list
+                     if len(my_mesh.blenTextures) == 1 and my_mesh.blenTextures[0] is None:
+                         my_mesh.blenTextures = [] @@ -2163,8 +2168,8 @@
+ 
+     materials = [(sane_matname(mat_tex_pair), mat_tex_pair) for mat_tex_pair in materials.keys()]
+     textures = [(sane_texname(tex), tex) for tex in textures.keys()  if tex]
+-    materials.sort()  # sort by name
+-    textures.sort()
++    materials.sort(key=lambda m: m[0])  # sort by name
++    textures.sort(key=lambda m: m[0])
+ 
+     camera_count = 8
+     file.write('''
+
+_______________________________________________
+Bf-extensions-cvs mailing list
+Bf-extensions-cvs@blender.org
+http://lists.blender.org/mailman/listinfo/bf-extensions-cvs
