@@ -1,0 +1,51 @@
+Revision: 1484
+          http://projects.blender.org/scm/viewvc.php?view=rev&root=bf-extensions&revision=1484
+Author:   campbellbarton
+Date:     2011-01-23 13:06:39 +0000 (Sun, 23 Jan 2011)
+Log Message:
+-----------
+add accessor function to private variable, direct access was giving an error.
+
+Modified Paths:
+--------------
+    trunk/py/scripts/addons/io_scene_fbx/export_fbx.py
+
+Modified: trunk/py/scripts/addons/io_scene_fbx/export_fbx.py
+===================================================================
+--- trunk/py/scripts/addons/io_scene_fbx/export_fbx.py	2011-01-23 12:48:31 UTC (rev 1483)
++++ trunk/py/scripts/addons/io_scene_fbx/export_fbx.py	2011-01-23 13:06:39 UTC (rev 1484)
+@@ -446,6 +446,9 @@
+ 
+             self.__anim_poselist[f] = self.__pose_bone.matrix.copy()
+ 
++        def getPoseBone(self):
++            return self.__pose_bone
++        
+         # get pose from frame.
+         def getPoseMatrix(self, f):  # ----------------------------------------------
+             return self.__anim_poselist[f] @@ -798,7 +801,7 @@
+         file.write('\n\t\tVersion: 232')
+ 
+         #poseMatrix = write_object_props(my_bone.blenBone, None, None, my_bone.fbxArm.parRelMatrix())[3]
+-        poseMatrix = write_object_props(my_bone.blenBone, pose_bone=my_bone.__pose_bone)[3]  # dont apply bone matricies anymore
++        poseMatrix = write_object_props(my_bone.blenBone, 
++ pose_bone=my_bone.getPoseBone())[3]  # dont apply bone matricies 
++ anymore
+         pose_items.append((my_bone.fbxName, poseMatrix))
+ 
+         # file.write('\n\t\t\tProperty: "Size", "double", "",%.6f' % ((my_bone.blenData.head['ARMATURESPACE'] - my_bone.blenData.tail['ARMATURESPACE']) * my_bone.fbxArm.parRelMatrix()).length)
+@@ -2076,7 +2079,7 @@
+                     my_mesh.blenMaterialList = mats
+                     my_mesh.blenTextures = list(texture_mapping_local.keys())
+ 
+-                    # sort the name so we get pradictable output, some items may be NULL
++                    # sort the name so we get predictable output, some 
++ items may be NULL
+                     my_mesh.blenMaterials.sort(key=lambda m: (getattr(m[0], "name", ""), getattr(m[1], "name", "")))
+                     my_mesh.blenTextures.sort(key=lambda m: getattr(m, "name", ""))
+ 
+
+_______________________________________________
+Bf-extensions-cvs mailing list
+Bf-extensions-cvs@blender.org
+http://lists.blender.org/mailman/listinfo/bf-extensions-cvs
