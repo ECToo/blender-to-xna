@@ -1,0 +1,406 @@
+Revision: 1569
+          http://projects.blender.org/scm/viewvc.php?view=rev&root=bf-extensions&revision=1569
+Author:   campbellbarton
+Date:     2011-02-11 01:29:13 +0000 (Fri, 11 Feb 2011)
+Log Message:
+-----------
+add in module register calls (first pass, batch replace, will test each addon next).
+
+Modified Paths:
+--------------
+    trunk/py/scripts/addons/add_curve_aceous_galore.py
+    trunk/py/scripts/addons/add_curve_torus_knots.py
+    trunk/py/scripts/addons/add_mesh_3d_function_surface.py
+    trunk/py/scripts/addons/add_mesh_BoltFactory/__init__.py
+    trunk/py/scripts/addons/add_mesh_BoltFactory/original_script_add_mesh_bolt.py
+    trunk/py/scripts/addons/add_mesh_ant_landscape.py
+    trunk/py/scripts/addons/add_mesh_extras.py
+    trunk/py/scripts/addons/add_mesh_gears.py
+    trunk/py/scripts/addons/add_mesh_gemstones.py
+    trunk/py/scripts/addons/add_mesh_pipe_joint.py
+    trunk/py/scripts/addons/add_mesh_solid.py
+    trunk/py/scripts/addons/add_mesh_twisted_torus.py
+    trunk/py/scripts/addons/animation_add_corrective_shape_key.py
+    trunk/py/scripts/addons/animation_animall.py
+    trunk/py/scripts/addons/animation_rotobezier.py
+    trunk/py/scripts/addons/curve_simplify.py
+    trunk/py/scripts/addons/development_icon_get.py
+    trunk/py/scripts/addons/game_engine_save_as_runtime.py
+    trunk/py/scripts/addons/io_anim_bvh/__init__.py
+    trunk/py/scripts/addons/io_anim_camera.py
+    trunk/py/scripts/addons/io_coat3D/__init__.py
+    trunk/py/scripts/addons/io_coat3D/coat.py
+    trunk/py/scripts/addons/io_convert_image_to_mesh_img/__init__.py
+    trunk/py/scripts/addons/io_export_anim_mesh_xna/__init__.py
+    trunk/py/scripts/addons/io_export_directx_x.py
+    trunk/py/scripts/addons/io_export_pc2.py
+    trunk/py/scripts/addons/io_export_unreal_psk_psa.py
+    trunk/py/scripts/addons/io_import_gimp_image_to_scene.py
+    trunk/py/scripts/addons/io_import_images_as_planes.py
+    trunk/py/scripts/addons/io_import_scene_dxf.py
+    trunk/py/scripts/addons/io_import_scene_lwo.py
+    trunk/py/scripts/addons/io_import_scene_mhx.py
+    trunk/py/scripts/addons/io_import_scene_unreal_psk.py
+    trunk/py/scripts/addons/io_mesh_ply/__init__.py
+    trunk/py/scripts/addons/io_mesh_raw/__init__.py
+    trunk/py/scripts/addons/io_mesh_stl/__init__.py
+    trunk/py/scripts/addons/io_scene_3ds/__init__.py
+    trunk/py/scripts/addons/io_scene_fbx/__init__.py
+    trunk/py/scripts/addons/io_scene_m3/__init__.py
+    trunk/py/scripts/addons/io_scene_obj/__init__.py
+    trunk/py/scripts/addons/io_scene_x3d/__init__.py
+    trunk/py/scripts/addons/io_shape_mdd/__init__.py
+    trunk/py/scripts/addons/mesh_relax.py
+    trunk/py/scripts/addons/mesh_surface_sketch.py
+    trunk/py/scripts/addons/object_add_chain.py
+    trunk/py/scripts/addons/object_animrenderbake.py
+    trunk/py/scripts/addons/object_cloud_gen.py
+    trunk/py/scripts/addons/object_fracture/__init__.py
+    trunk/py/scripts/addons/render_povray/__init__.py
+    trunk/py/scripts/addons/render_renderfarmfi.py
+    trunk/py/scripts/addons/rigify/__init__.py
+    trunk/py/scripts/addons/rigify/metarig_menu.py
+    trunk/py/scripts/addons/rigify/ui.py
+    trunk/py/scripts/addons/space_view3d_3d_navigation.py
+    trunk/py/scripts/addons/space_view3d_align_tools.py
+    trunk/py/scripts/addons/space_view3d_copy_attributes.py
+    trunk/py/scripts/addons/space_view3d_materials_utils.py
+    trunk/py/scripts/addons/space_view3d_math_vis/__init__.py
+    trunk/py/scripts/addons/space_view3d_panel_measure.py
+    trunk/py/scripts/addons/space_view3d_spacebar_menu.py
+    trunk/py/scripts/addons/system_blend_info.py
+    trunk/py/scripts/addons/system_property_chart.py
+    trunk/py/scripts/addons/text_editor_api_navigator.py
+
+Modified: trunk/py/scripts/addons/add_curve_aceous_galore.py
+===================================================================
+--- trunk/py/scripts/addons/add_curve_aceous_galore.py	2011-02-11 00:43:35 UTC (rev 1568)
++++ trunk/py/scripts/addons/add_curve_aceous_galore.py	2011-02-11 01:29:13 UTC (rev 1569)
+@@ -1134,9 +1134,13 @@
+ 
+ 
+ def register():
++    bpy.utils.register_module(__name__)
++
+     bpy.types.INFO_MT_curve_add.append(Curveaceous_galore_button)
+ 
+ def unregister():
++    bpy.utils.unregister_module(__name__)
++
+     bpy.types.INFO_MT_curve_add.remove(Curveaceous_galore_button)
+ 
+ if __name__ == "__main__":
+
+Modified: trunk/py/scripts/addons/add_curve_torus_knots.py
+===================================================================
+--- trunk/py/scripts/addons/add_curve_torus_knots.py	2011-02-11 00:43:35 UTC (rev 1568)
++++ trunk/py/scripts/addons/add_curve_torus_knots.py	2011-02-11 01:29:13 UTC (rev 1569)
+@@ -234,9 +234,13 @@
+ 
+ 
+ def register():
++    bpy.utils.register_module(__name__)
++
+     bpy.types.INFO_MT_curve_add.append(torus_knot_plus_button)
+ 
+ def unregister():
++    bpy.utils.unregister_module(__name__)
++
+     bpy.types.INFO_MT_curve_add.remove(torus_knot_plus_button)
+ 
+ if __name__ == "__main__":
+
+Modified: trunk/py/scripts/addons/add_mesh_3d_function_surface.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_3d_function_surface.py	2011-02-11 00:43:35 UTC (rev 1568)
++++ trunk/py/scripts/addons/add_mesh_3d_function_surface.py	2011-02-11 01:29:13 UTC (rev 1569)
+@@ -514,12 +514,16 @@
+ 
+ 
+ def register():
++    bpy.utils.register_module(__name__)
++
+     # Add menus to the "Add Mesh" menu
+     space_info.INFO_MT_mesh_add.append(menu_func_z)
+     space_info.INFO_MT_mesh_add.append(menu_func_xyz)
+ 
+ 
+ def unregister():
++    bpy.utils.unregister_module(__name__)
++
+     # Remove menus from the "Add Mesh" menu.
+     space_info.INFO_MT_mesh_add.remove(menu_func_z)
+     space_info.INFO_MT_mesh_add.remove(menu_func_xyz)
+
+Modified: trunk/py/scripts/addons/add_mesh_BoltFactory/__init__.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_BoltFactory/__init__.py	2011-02-11 00:43:35 UTC (rev 1568)
++++ trunk/py/scripts/addons/add_mesh_BoltFactory/__init__.py	2011-02-11 01:29:13 UTC (rev 1569)
+@@ -46,10 +46,14 @@
+ 
+ 
+ def register():
++    bpy.utils.register_module(__name__)
++
+     bpy.types.INFO_MT_mesh_add.append(add_mesh_bolt_button)
+     #bpy.types.VIEW3D_PT_tools_objectmode.prepend(add_mesh_bolt_button) #just for testing
+ 
+ def unregister():
++    bpy.utils.unregister_module(__name__)
++
+     bpy.types.INFO_MT_mesh_add.remove(add_mesh_bolt_button)
+     #bpy.types.VIEW3D_PT_tools_objectmode.remove(add_mesh_bolt_button) #just for testing
+     
+
+Modified: trunk/py/scripts/addons/add_mesh_BoltFactory/original_script_add_mesh_bolt.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_BoltFactory/original_script_add_mesh_bolt.py	2011-02-11 00:43:35 UTC (rev 1568)
++++ trunk/py/scripts/addons/add_mesh_BoltFactory/original_script_add_mesh_bolt.py	2011-02-11 01:29:13 UTC (rev 1569)
+@@ -2600,9 +2600,13 @@
+ 
+ 
+ def register():
++    bpy.utils.register_module(__name__)
++
+     pass
+     
+ def unregister():
++    bpy.utils.unregister_module(__name__)
++
+     pass
+ 
+  
+
+Modified: trunk/py/scripts/addons/add_mesh_ant_landscape.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_ant_landscape.py	2011-02-11 00:43:35 UTC (rev 1568)
++++ trunk/py/scripts/addons/add_mesh_ant_landscape.py	2011-02-11 01:29:13 UTC (rev 1569)
+@@ -806,9 +806,13 @@
+     self.layout.operator(landscape_add.bl_idname, text="Landscape", icon="PLUGIN")
+ 
+ def register():
++    bpy.utils.register_module(__name__)
++
+     space_info.INFO_MT_mesh_add.append(menu_func_landscape)
+ 
+ def unregister():
++    bpy.utils.unregister_module(__name__)
++
+     space_info.INFO_MT_mesh_add.remove(menu_func_landscape)
+ 
+ if __name__ == "__main__":
+
+Modified: trunk/py/scripts/addons/add_mesh_extras.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_extras.py	2011-02-11 00:43:35 UTC (rev 1568)
++++ trunk/py/scripts/addons/add_mesh_extras.py	2011-02-11 01:29:13 UTC (rev 1569)
+@@ -530,11 +530,15 @@
+ 
+ 
+ def register():
++    bpy.utils.register_module(__name__)
++
+     # Add "Extras" menu to the "Add Mesh" menu
+     space_info.INFO_MT_mesh_add.append(menu_func)
+ 
+ 
+ def unregister():
++    bpy.utils.unregister_module(__name__)
++
+     # Remove "Extras" menu from the "Add Mesh" menu.
+     space_info.INFO_MT_mesh_add.remove(menu_func)
+ 
+
+Modified: trunk/py/scripts/addons/add_mesh_gears.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_gears.py	2011-02-11 00:43:35 UTC (rev 1568)
++++ trunk/py/scripts/addons/add_mesh_gears.py	2011-02-11 01:29:13 UTC (rev 1569)
+@@ -820,11 +820,15 @@
+ 
+ 
+ def register():
++    bpy.utils.register_module(__name__)
++
+     # Add "Gears" entry to the "Add Mesh" menu.
+     bpy.types.INFO_MT_mesh_add.append(menu_func)
+ 
+ 
+ def unregister():
++    bpy.utils.unregister_module(__name__)
++
+     # Remove "Gears" entry from the "Add Mesh" menu.
+     bpy.types.INFO_MT_mesh_add.remove(menu_func)
+ 
+
+Modified: trunk/py/scripts/addons/add_mesh_gemstones.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_gemstones.py	2011-02-11 00:43:35 UTC (rev 1568)
++++ trunk/py/scripts/addons/add_mesh_gemstones.py	2011-02-11 01:29:13 UTC (rev 1569)
+@@ -356,11 +356,15 @@
+ 
+ 
+ def register():
++    bpy.utils.register_module(__name__)
++
+     # Add "Gemstones" menu to the "Add Mesh" menu
+     space_info.INFO_MT_mesh_add.append(menu_func)
+ 
+ 
+ def unregister():
++    bpy.utils.unregister_module(__name__)
++
+     # Remove "Gemstones" menu from the "Add Mesh" menu.
+     space_info.INFO_MT_mesh_add.remove(menu_func)
+ 
+
+Modified: trunk/py/scripts/addons/add_mesh_pipe_joint.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_pipe_joint.py	2011-02-11 00:43:35 UTC (rev 1568)
++++ trunk/py/scripts/addons/add_mesh_pipe_joint.py	2011-02-11 01:29:13 UTC (rev 1569)
+@@ -1135,11 +1135,15 @@
+ 
+ 
+ def register():
++    bpy.utils.register_module(__name__)
++
+     # Add "Pipe Joints" menu to the "Add Mesh" menu
+     space_info.INFO_MT_mesh_add.append(menu_func)
+ 
+ 
+ def unregister():
++    bpy.utils.unregister_module(__name__)
++
+     # Remove "Pipe Joints" menu from the "Add Mesh" menu.
+     space_info.INFO_MT_mesh_add.remove(menu_func)
+ 
+
+Modified: trunk/py/scripts/addons/add_mesh_solid.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_solid.py	2011-02-11 00:43:35 UTC (rev 1568)
++++ trunk/py/scripts/addons/add_mesh_solid.py	2011-02-11 01:29:13 UTC (rev 1569)
+@@ -804,9 +804,13 @@
+ 
+ 
+ def register():
++    bpy.utils.register_module(__name__)
++
+     space_info.INFO_MT_mesh_add.append(menu_func)
+ 
+ def unregister():
++    bpy.utils.unregister_module(__name__)
++
+     space_info.INFO_MT_mesh_add.remove(menu_func)
+       
+ if __name__ == "__main__":
+
+Modified: trunk/py/scripts/addons/add_mesh_twisted_torus.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_twisted_torus.py	2011-02-11 00:43:35 UTC (rev 1568)
++++ trunk/py/scripts/addons/add_mesh_twisted_torus.py	2011-02-11 01:29:13 UTC (rev 1569)
+@@ -259,10 +259,14 @@
+ 
+ 
+ def register():
++    bpy.utils.register_module(__name__)
++
+     bpy.types.INFO_MT_mesh_add.append(menu_func)
+ 
+ 
+ def unregister():
++    bpy.utils.unregister_module(__name__)
++
+     bpy.types.INFO_MT_mesh_add.remove(menu_func)
+ 
+ if __name__ == "__main__":
+
+Modified: trunk/py/scripts/addons/animation_add_corrective_shape_key.py
+===================================================================
+--- trunk/py/scripts/addons/animation_add_corrective_shape_key.py	2011-02-11 00:43:35 UTC (rev 1568)
++++ trunk/py/scripts/addons/animation_add_corrective_shape_key.py	2011-02-11 01:29:13 UTC (rev 1569)
+@@ -490,8 +490,12 @@
+ 
+ 
+ def register():
++    bpy.utils.register_module(__name__)
++
+     bpy.types.MESH_MT_shape_key_specials.append( vgroups_draw )
+     bpy.types.DATA_PT_modifiers.append( modifiers_draw )
+ 
+ def unregister():
++    bpy.utils.unregister_module(__name__)
++
+     pass
+
+Modified: trunk/py/scripts/addons/animation_animall.py
+===================================================================
+--- trunk/py/scripts/addons/animation_animall.py	2011-02-11 00:43:35 UTC (rev 1568)
++++ trunk/py/scripts/addons/animation_animall.py	2011-02-11 01:29:13 UTC (rev 1569)
+@@ -277,9 +277,13 @@
+ 
+ 
+ def register():
++    bpy.utils.register_module(__name__)
++
+     pass
+     
+ def unregister():
++    bpy.utils.unregister_module(__name__)
++
+     pass
+     
+ if __name__ == "__main__":
+
+Modified: trunk/py/scripts/addons/animation_rotobezier.py
+===================================================================
+--- trunk/py/scripts/addons/animation_rotobezier.py	2011-02-11 00:43:35 UTC (rev 1568)
++++ trunk/py/scripts/addons/animation_rotobezier.py	2011-02-11 01:29:13 UTC (rev 1569)
+@@ -369,9 +369,13 @@
+ 
+ 
+ def register():
++    bpy.utils.register_module(__name__)
++
+     pass
+     
+ def unregister():
++    bpy.utils.unregister_module(__name__)
++
+     pass
+     
+ if __name__ == "__main__":
+
+Modified: trunk/py/scripts/addons/curve_simplify.py
+===================================================================
+--- trunk/py/scripts/addons/curve_simplify.py	2011-02-11 00:43:35 UTC (rev 1568)
++++ trunk/py/scripts/addons/curve_simplify.py	2011-02-11 01:29:13 UTC (rev 1569)
+@@ -584,9 +584,13 @@
+ #### REGISTER ###################################
+ #################################################
+ def register():
++    bpy.utils.register_module(__name__)
++
+     pass
+ 
+ def unregister():
++    bpy.utils.unregister_module(__name__)
++
+     pass
+ 
+ if __name__ == "__main__":
+
+Modified: trunk/py/scripts/addons/development_icon_get.py
+===================================================================
+--- trunk/py/scripts/addons/development_icon_get.py	2011-02-11 00:43:35 UTC (rev 1568)
++++ trunk/py/scripts/addons/development_icon_get.py	2011-02-11 01:29:13 UTC (rev 1569)
+@@ -211,6 +211,8 @@
+ 
+ 
+ def register():
++    bpy.utils.register_module(__name__)
++
+     bpy.types.Scene.icon_props = bpy.props.PointerProperty(type = IconProps)
+
+@@ Diff output truncated at 10240 characters. @@ _______________________________________________
+Bf-extensions-cvs mailing list
+Bf-extensions-cvs@blender.org
+http://lists.blender.org/mailman/listinfo/bf-extensions-cvs
