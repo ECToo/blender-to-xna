@@ -1,0 +1,276 @@
+Revision: 1707
+          http://projects.blender.org/scm/viewvc.php?view=rev&root=bf-extensions&revision=1707
+Author:   campbellbarton
+Date:     2011-03-14 01:38:56 +0000 (Mon, 14 Mar 2011)
+Log Message:
+-----------
+update for changes in rna api
+
+Modified Paths:
+--------------
+    trunk/py/scripts/addons/animation_add_corrective_shape_key.py
+    trunk/py/scripts/addons/io_export_anim_mesh_xna/export_xna.py
+    trunk/py/scripts/addons/io_export_directx_x.py
+    trunk/py/scripts/addons/io_export_pc2.py
+    trunk/py/scripts/addons/io_mesh_ply/export_ply.py
+    trunk/py/scripts/addons/io_mesh_raw/export_raw.py
+    trunk/py/scripts/addons/io_mesh_stl/blender_utils.py
+    trunk/py/scripts/addons/io_scene_3ds/export_3ds.py
+    trunk/py/scripts/addons/io_scene_fbx/export_fbx.py
+    trunk/py/scripts/addons/io_scene_obj/export_obj.py
+    trunk/py/scripts/addons/io_scene_x3d/export_x3d.py
+    trunk/py/scripts/addons/io_shape_mdd/export_mdd.py
+    trunk/py/scripts/addons/light_field_tools/light_field_tools.py
+    trunk/py/scripts/addons/object_fracture/fracture_ops.py
+    trunk/py/scripts/addons/render_povray/render.py
+
+Modified: trunk/py/scripts/addons/animation_add_corrective_shape_key.py
+===================================================================
+--- trunk/py/scripts/addons/animation_add_corrective_shape_key.py	2011-03-14 00:24:07 UTC (rev 1706)
++++ trunk/py/scripts/addons/animation_add_corrective_shape_key.py	2011-03-14 01:38:56 UTC (rev 1707)
+@@ -101,7 +101,7 @@
+ def extractMappedX(ob, mesh):
+     totvert = len(mesh)
+     
+-    mesh = ob.create_mesh( bpy.context.scene, True, 'PREVIEW' )
++    mesh = ob.to_mesh( bpy.context.scene, True, 'PREVIEW' )
+ 
+     x = []
+ 
+@@ -246,7 +246,7 @@
+         return {'FINISHED'}
+ 
+ def func_object_duplicate_flatten_modifiers(ob, scene):
+-    mesh = ob.create_mesh( bpy.context.scene, True, 'PREVIEW' )
++    mesh = ob.to_mesh( bpy.context.scene, True, 'PREVIEW' )
+     name = ob.name + "_clean"
+     new_object = bpy.data.objects.new( name, mesh)
+     new_object.data = mesh
+
+Modified: trunk/py/scripts/addons/io_export_anim_mesh_xna/export_xna.py
+===================================================================
+--- trunk/py/scripts/addons/io_export_anim_mesh_xna/export_xna.py	2011-03-14 00:24:07 UTC (rev 1706)
++++ trunk/py/scripts/addons/io_export_anim_mesh_xna/export_xna.py	2011-03-14 01:38:56 UTC (rev 1707)
+@@ -1763,7 +1763,7 @@
+ 
+         obs = [(ob_base, ob_base.matrix_world)]
+         if ob_base.dupli_type != 'NONE':
+-            ob_base.create_dupli_list(scene)
++            ob_base.dupli_list_create(scene)
+             obs = [(dob.object, dob.matrix) for dob in ob_base.dupli_list]
+ 
+         for ob, mtx in obs:
+@@ -1784,7 +1784,7 @@
+             elif EXP_MESH:
+                 origData = True
+                 if tmp_ob_type != 'MESH':
+-                    try:	me = ob.create_mesh(scene, True, 'PREVIEW')
++                    try:	me = ob.to_mesh(scene, True, 'PREVIEW')
+                     except:	me = None
+                     if me:
+                         meshes_to_clear.append( me ) @@ -1793,7 +1793,7 @@
+                 else:
+                     # Mesh Type!
+                     if EXP_MESH_APPLY_MOD:
+-                        me = ob.create_mesh(scene, True, 'PREVIEW')
++                        me = ob.to_mesh(scene, True, 'PREVIEW')
+ 
+                         # print ob, me, me.getVertGroupNames()
+                         meshes_to_clear.append( me ) @@ -1866,7 +1866,7 @@
+                     ob_meshes.append( my_mesh )
+ 
+         # not forgetting to free dupli_list
+-        if ob_base.dupli_list: ob_base.free_dupli_list()
++        if ob_base.dupli_list: ob_base.dupli_list_clear()
+ 
+     # To export animations the armature must be in the POSE position not the REST position 
+     # so in most cases the script reverts to POSE when the bind pose has been saved. (JCB)
+
+Modified: trunk/py/scripts/addons/io_export_directx_x.py
+===================================================================
+--- trunk/py/scripts/addons/io_export_directx_x.py	2011-03-14 00:24:07 UTC (rev 1706)
++++ trunk/py/scripts/addons/io_export_directx_x.py	2011-03-14 01:38:56 UTC (rev 1707)
+@@ -274,11 +274,11 @@
+                     Object2 = Object.copy()
+                     for Modifier in [Modifier for Modifier in Object2.modifiers if Modifier.type == "ARMATURE"]:
+                         Object2.modifiers.remove(Modifier)
+-                    Mesh = Object2.create_mesh(bpy.context.scene, True, "PREVIEW")
++                    Mesh = Object2.to_mesh(bpy.context.scene, True, 
++ "PREVIEW")
+                 else:
+-                    Mesh = Object.create_mesh(bpy.context.scene, True, "PREVIEW")
++                    Mesh = Object.to_mesh(bpy.context.scene, True, 
++ "PREVIEW")
+             else:
+-                Mesh = Object.create_mesh(bpy.context.scene, False, "PREVIEW")
++                Mesh = Object.to_mesh(bpy.context.scene, False, 
++ "PREVIEW")
+             if Config.Verbose:
+                 print("    Done")
+                 print("    Writing Mesh...")
+
+Modified: trunk/py/scripts/addons/io_export_pc2.py
+===================================================================
+--- trunk/py/scripts/addons/io_export_pc2.py	2011-03-14 00:24:07 UTC (rev 1706)
++++ trunk/py/scripts/addons/io_export_pc2.py	2011-03-14 01:38:56 UTC (rev 1707)
+@@ -60,7 +60,7 @@
+     end = props.range_end
+     sampling = float(props.sampling)
+     apply_modifiers = props.apply_modifiers
+-    me = ob.create_mesh(sc, apply_modifiers, 'PREVIEW')
++    me = ob.to_mesh(sc, apply_modifiers, 'PREVIEW')
+     vertCount = len(me.vertices)
+     sampletimes = getSampling(start, end, sampling)
+     sampleCount = len(sampletimes)
+@@ -75,7 +75,7 @@
+     
+     for frame in sampletimes:
+         sc.frame_set(frame)
+-        me = ob.create_mesh(sc, apply_modifiers, 'PREVIEW')
++        me = ob.to_mesh(sc, apply_modifiers, 'PREVIEW')
+         
+         if len(me.vertices) != vertCount:
+             file.close()
+
+Modified: trunk/py/scripts/addons/io_mesh_ply/export_ply.py
+===================================================================
+--- trunk/py/scripts/addons/io_mesh_ply/export_ply.py	2011-03-14 00:24:07 UTC (rev 1706)
++++ trunk/py/scripts/addons/io_mesh_ply/export_ply.py	2011-03-14 01:38:56 UTC (rev 1707)
+@@ -51,7 +51,7 @@
+         bpy.ops.object.mode_set(mode='OBJECT')
+ 
+     if use_modifiers:
+-        mesh = obj.create_mesh(scene, True, 'PREVIEW')
++        mesh = obj.to_mesh(scene, True, 'PREVIEW')
+     else:
+         mesh = obj.data
+ 
+
+Modified: trunk/py/scripts/addons/io_mesh_raw/export_raw.py
+===================================================================
+--- trunk/py/scripts/addons/io_mesh_raw/export_raw.py	2011-03-14 00:24:07 UTC (rev 1706)
++++ trunk/py/scripts/addons/io_mesh_raw/export_raw.py	2011-03-14 01:38:56 UTC (rev 1707)
+@@ -68,7 +68,7 @@
+             matrix = obj.matrix_world
+ 
+             if (applyMods):
+-                me = obj.create_mesh(bpy.context.scene, True, "PREVIEW")
++                me = obj.to_mesh(bpy.context.scene, True, "PREVIEW")
+             else:
+                 me = obj.data
+ 
+
+Modified: trunk/py/scripts/addons/io_mesh_stl/blender_utils.py
+===================================================================
+--- trunk/py/scripts/addons/io_mesh_stl/blender_utils.py	2011-03-14 00:24:07 UTC (rev 1706)
++++ trunk/py/scripts/addons/io_mesh_stl/blender_utils.py	2011-03-14 01:38:56 UTC (rev 1707)
+@@ -54,8 +54,7 @@
+ 
+     # get the modifiers
+     try:
+-        mesh = ob.create_mesh(bpy.context.scene,
+-                                apply_modifier, "PREVIEW")
++        mesh = ob.to_mesh(bpy.context.scene, apply_modifier, "PREVIEW")
+     except RuntimeError:
+         return ()
+ 
+
+Modified: trunk/py/scripts/addons/io_scene_3ds/export_3ds.py
+===================================================================
+--- trunk/py/scripts/addons/io_scene_3ds/export_3ds.py	2011-03-14 00:24:07 UTC (rev 1706)
++++ trunk/py/scripts/addons/io_scene_3ds/export_3ds.py	2011-03-14 01:38:56 UTC (rev 1707)
+@@ -926,7 +926,7 @@
+                 continue
+ 
+             try:
+-                data = ob_derived.create_mesh(scene, True, 'PREVIEW')
++                data = ob_derived.to_mesh(scene, True, 'PREVIEW')
+             except:
+                 data = None
+ 
+
+Modified: trunk/py/scripts/addons/io_scene_fbx/export_fbx.py
+===================================================================
+--- trunk/py/scripts/addons/io_scene_fbx/export_fbx.py	2011-03-14 00:24:07 UTC (rev 1706)
++++ trunk/py/scripts/addons/io_scene_fbx/export_fbx.py	2011-03-14 01:38:56 UTC (rev 1707)
+@@ -1856,7 +1856,7 @@
+ 
+         obs = [(ob_base, ob_base.matrix_world)]
+         if ob_base.dupli_type != 'NONE':
+-            ob_base.create_dupli_list(scene)
++            ob_base.dupli_list_create(scene)
+             obs = [(dob.object, dob.matrix) for dob in ob_base.dupli_list]
+ 
+         for ob, mtx in obs:
+@@ -1881,7 +1881,7 @@
+                 origData = True
+                 if tmp_ob_type != 'MESH':
+                     try:
+-                        me = ob.create_mesh(scene, True, 'PREVIEW')
++                        me = ob.to_mesh(scene, True, 'PREVIEW')
+                     except:
+                         me = None
+ 
+@@ -1892,7 +1892,7 @@
+                 else:
+                     # Mesh Type!
+                     if EXP_MESH_APPLY_MOD:
+-                        me = ob.create_mesh(scene, True, 'PREVIEW')
++                        me = ob.to_mesh(scene, True, 'PREVIEW')
+ 
+                         # print ob, me, me.getVertGroupNames()
+                         meshes_to_clear.append(me) @@ -1983,7 +1983,7 @@
+ 
+         # not forgetting to free dupli_list
+         if ob_base.dupli_list:
+-            ob_base.free_dupli_list()
++            ob_base.dupli_list_clear()
+ 
+     if EXP_ARMATURE:
+         # now we have the meshes, restore the rest arm position
+
+Modified: trunk/py/scripts/addons/io_scene_obj/export_obj.py
+===================================================================
+--- trunk/py/scripts/addons/io_scene_obj/export_obj.py	2011-03-14 00:24:07 UTC (rev 1706)
++++ trunk/py/scripts/addons/io_scene_obj/export_obj.py	2011-03-14 01:38:56 UTC (rev 1707)
+@@ -358,7 +358,7 @@
+         if ob_main.dupli_type != 'NONE':
+             # XXX
+             print('creating dupli_list on', ob_main.name)
+-            ob_main.create_dupli_list(scene)
++            ob_main.dupli_list_create(scene)
+ 
+             obs = [(dob.object, dob.matrix) for dob in ob_main.dupli_list]
+ 
+@@ -380,7 +380,7 @@
+             if ob.type != 'MESH':
+                 continue
+ 
+-            me = ob.create_mesh(scene, EXPORT_APPLY_MODIFIERS, 'PREVIEW')
++            me = ob.to_mesh(scene, EXPORT_APPLY_MODIFIERS, 'PREVIEW')
+ 
+             if EXPORT_ROTX90:
+                 me.transform(mat_xrot90 * ob_mat) @@ -674,7 +674,7 @@
+             bpy.data.meshes.remove(me)
+ 
+         if ob_main.dupli_type != 'NONE':
+-            ob_main.free_dupli_list()
++            ob_main.dupli_list_clear()
+ 
+     file.close()
+ 
+
+Modified: trunk/py/scripts/addons/io_scene_x3d/export_x3d.py
+===================================================================
+--- trunk/py/scripts/addons/io_scene_x3d/export_x3d.py	2011-03-14 00:24:07 UTC (rev 1706)
++++ trunk/py/scripts/addons/io_scene_x3d/export_x3d.py	2011-03-14 01:38:56 UTC (rev 1707)
+@@ -725,7 +725,7 @@
+                 elif objType in ('MESH', 'CURVE', 'SURF', 'FONT'):
+                     if use_apply_modifiers or objType != 'MESH':
+                         try:
+-                            me = ob.create_mesh(scene, use_apply_modifiers, 'PREVIEW')
+
+@@ Diff output truncated at 10240 characters. @@ _______________________________________________
+Bf-extensions-cvs mailing list
+Bf-extensions-cvs@blender.org
+http://lists.blender.org/mailman/listinfo/bf-extensions-cvs
