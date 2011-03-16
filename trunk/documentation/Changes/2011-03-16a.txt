@@ -1,0 +1,30 @@
+Revision: 1714
+          http://projects.blender.org/scm/viewvc.php?view=rev&root=bf-extensions&revision=1714
+Author:   campbellbarton
+Date:     2011-03-16 12:04:48 +0000 (Wed, 16 Mar 2011)
+Log Message:
+-----------
+fix for error in recent updates.
+
+Modified Paths:
+--------------
+    trunk/py/scripts/addons/io_scene_fbx/export_fbx.py
+
+Modified: trunk/py/scripts/addons/io_scene_fbx/export_fbx.py
+===================================================================
+--- trunk/py/scripts/addons/io_scene_fbx/export_fbx.py	2011-03-16 09:04:09 UTC (rev 1713)
++++ trunk/py/scripts/addons/io_scene_fbx/export_fbx.py	2011-03-16 12:04:48 UTC (rev 1714)
+@@ -2836,7 +2836,7 @@
+         if use_selection:
+             kwargs_mod["context_objects"] = context.selected_objects
+         else:
+-            kwargs_mod["context_objects"] = scene.objects
++            kwargs_mod["context_objects"] = context.scene.objects
+ 
+         return save_single(operator, context.scene, filepath, **kwargs_mod)
+     else:
+
+_______________________________________________
+Bf-extensions-cvs mailing list
+Bf-extensions-cvs@blender.org
+http://lists.blender.org/mailman/listinfo/bf-extensions-cvs
