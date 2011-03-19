@@ -1,0 +1,330 @@
+Revision: 1719
+          http://projects.blender.org/scm/viewvc.php?view=rev&root=bf-extensions&revision=1719
+Author:   jaydez
+Date:     2011-03-19 13:20:33 +0000 (Sat, 19 Mar 2011)
+Log Message:
+-----------
+Updated Blender Version to 2.57 and api version
+
+Modified Paths:
+--------------
+    trunk/py/scripts/addons/add_curve_aceous_galore.py
+    trunk/py/scripts/addons/add_curve_torus_knots.py
+    trunk/py/scripts/addons/add_mesh_3d_function_surface.py
+    trunk/py/scripts/addons/add_mesh_BoltFactory/__init__.py
+    trunk/py/scripts/addons/add_mesh_ant_landscape.py
+    trunk/py/scripts/addons/add_mesh_extras.py
+    trunk/py/scripts/addons/add_mesh_gears.py
+    trunk/py/scripts/addons/add_mesh_gemstones.py
+    trunk/py/scripts/addons/add_mesh_pipe_joint.py
+    trunk/py/scripts/addons/add_mesh_solid.py
+    trunk/py/scripts/addons/add_mesh_twisted_torus.py
+    trunk/py/scripts/addons/animation_add_corrective_shape_key.py
+    trunk/py/scripts/addons/animation_animall.py
+    trunk/py/scripts/addons/animation_rotobezier.py
+    trunk/py/scripts/addons/curve_simplify.py
+    trunk/py/scripts/addons/development_api_navigator.py
+    trunk/py/scripts/addons/development_icon_get.py
+    trunk/py/scripts/addons/game_engine_save_as_runtime.py
+    trunk/py/scripts/addons/io_anim_bvh/__init__.py
+    trunk/py/scripts/addons/io_anim_camera.py
+    trunk/py/scripts/addons/io_coat3D/__init__.py
+    trunk/py/scripts/addons/io_convert_image_to_mesh_img/__init__.py
+    trunk/py/scripts/addons/io_curve_svg/__init__.py
+    trunk/py/scripts/addons/io_export_anim_mesh_xna/__init__.py
+    trunk/py/scripts/addons/io_export_directx_x.py
+    trunk/py/scripts/addons/io_export_pc2.py
+    trunk/py/scripts/addons/io_export_unreal_psk_psa.py
+    trunk/py/scripts/addons/io_import_gimp_image_to_scene.py
+    trunk/py/scripts/addons/io_import_images_as_planes.py
+    trunk/py/scripts/addons/io_import_scene_dxf.py
+    trunk/py/scripts/addons/io_import_scene_lwo.py
+    trunk/py/scripts/addons/io_import_scene_mhx.py
+    trunk/py/scripts/addons/io_mesh_ply/__init__.py
+    trunk/py/scripts/addons/io_mesh_raw/__init__.py
+    trunk/py/scripts/addons/io_mesh_stl/__init__.py
+    trunk/py/scripts/addons/io_mesh_uv_layout/__init__.py
+    trunk/py/scripts/addons/io_scene_3ds/__init__.py
+    trunk/py/scripts/addons/io_scene_fbx/__init__.py
+    trunk/py/scripts/addons/io_scene_m3/__init__.py
+    trunk/py/scripts/addons/io_scene_obj/__init__.py
+    trunk/py/scripts/addons/io_scene_x3d/__init__.py
+    trunk/py/scripts/addons/io_shape_mdd/__init__.py
+    trunk/py/scripts/addons/light_field_tools/__init__.py
+    trunk/py/scripts/addons/mesh_relax.py
+    trunk/py/scripts/addons/mesh_surface_sketch.py
+    trunk/py/scripts/addons/object_add_chain.py
+    trunk/py/scripts/addons/object_animrenderbake.py
+    trunk/py/scripts/addons/object_cloud_gen.py
+    trunk/py/scripts/addons/object_fracture/__init__.py
+    trunk/py/scripts/addons/render_povray/__init__.py
+    trunk/py/scripts/addons/render_renderfarmfi.py
+    trunk/py/scripts/addons/rigify/__init__.py
+    trunk/py/scripts/addons/space_view3d_3d_navigation.py
+    trunk/py/scripts/addons/space_view3d_align_tools.py
+    trunk/py/scripts/addons/space_view3d_copy_attributes.py
+    trunk/py/scripts/addons/space_view3d_math_vis/__init__.py
+    trunk/py/scripts/addons/space_view3d_panel_measure.py
+    trunk/py/scripts/addons/space_view3d_spacebar_menu.py
+    trunk/py/scripts/addons/system_blend_info.py
+    trunk/py/scripts/addons/system_property_chart.py
+
+Modified: trunk/py/scripts/addons/add_curve_aceous_galore.py
+===================================================================
+--- trunk/py/scripts/addons/add_curve_aceous_galore.py	2011-03-19 01:27:55 UTC (rev 1718)
++++ trunk/py/scripts/addons/add_curve_aceous_galore.py	2011-03-19 13:20:33 UTC (rev 1719)
+@@ -20,8 +20,8 @@
+     'name': 'Curveaceous Galore!',
+     'author': 'Jimmy Hazevoet, testscreenings',
+     'version': (0,2),
+-    'blender': (2, 5, 3),
+-    'api': 32411,
++    "blender": (2, 5, 7),
++    "api": 35622,
+     'location': 'View3D > Add > Curve',
+     'description': 'Adds many different types of Curves',
+     'warning': '', # used for warning icon and text in addons panel
+
+Modified: trunk/py/scripts/addons/add_curve_torus_knots.py
+===================================================================
+--- trunk/py/scripts/addons/add_curve_torus_knots.py	2011-03-19 01:27:55 UTC (rev 1718)
++++ trunk/py/scripts/addons/add_curve_torus_knots.py	2011-03-19 13:20:33 UTC (rev 1719)
+@@ -21,8 +21,8 @@
+     "name": "Torus Knots",
+     "author": "testscreenings",
+     "version": (0,1),
+-    "blender": (2, 5, 5),
+-    "api": 33754,
++    "blender": (2, 5, 7),
++    "api": 35622,
+     "location": "View3D > Add > Curve",
+     "description": "Adds many types of (torus) knots",
+     "warning": "",
+
+Modified: trunk/py/scripts/addons/add_mesh_3d_function_surface.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_3d_function_surface.py	2011-03-19 01:27:55 UTC (rev 1718)
++++ trunk/py/scripts/addons/add_mesh_3d_function_surface.py	2011-03-19 13:20:33 UTC (rev 1719)
+@@ -20,8 +20,8 @@
+     "name": "3D Function Surfaces",
+     "author": "Buerbaum Martin (Pontiac)",
+     "version": (0, 3, 7),
+-    "blender": (2, 5, 6),
+-    "api": 34093,
++    "blender": (2, 5, 7),
++    "api": 35622,
+     "location": "View3D > Add > Mesh",
+     "description": "Create Objects using Math Formulas",
+     "warning": "",
+
+Modified: trunk/py/scripts/addons/add_mesh_BoltFactory/__init__.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_BoltFactory/__init__.py	2011-03-19 01:27:55 UTC (rev 1718)
++++ trunk/py/scripts/addons/add_mesh_BoltFactory/__init__.py	2011-03-19 13:20:33 UTC (rev 1719)
+@@ -19,9 +19,9 @@
+ bl_info = {
+     "name": "BoltFactory",
+     "author": "Aaron Keith",
+-    "version": (3,9),
+-    "blender": (2, 5, 3),
+-    "api": 32411,
++    "version": (3, 9),
++    "blender": (2, 5, 7),
++    "api": 35622,
+     "location": "View3D > Add > Mesh",
+     "description": "Adds a Bolt or Nut",
+     "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.5/Py/"\
+
+Modified: trunk/py/scripts/addons/add_mesh_ant_landscape.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_ant_landscape.py	2011-03-19 01:27:55 UTC (rev 1718)
++++ trunk/py/scripts/addons/add_mesh_ant_landscape.py	2011-03-19 13:20:33 UTC (rev 1719)
+@@ -20,8 +20,8 @@
+     "name": "ANT Landscape",
+     "author": "Jimmy Hazevoet",
+     "version": (0,1,1),
+-    "blender": (2, 5, 6),
+-    "api": 32411,
++    "blender": (2, 5, 7),
++    "api": 35622,
+     "location": "View3D > Add > Mesh",
+     "description": "Adds a Landscape Primitive",
+     "warning": "", # used for warning icon and text in addons panel
+
+Modified: trunk/py/scripts/addons/add_mesh_extras.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_extras.py	2011-03-19 01:27:55 UTC (rev 1718)
++++ trunk/py/scripts/addons/add_mesh_extras.py	2011-03-19 13:20:33 UTC (rev 1719)
+@@ -20,8 +20,8 @@
+     "name": "Extras",
+     "author": "Pontiac, Fourmadmen, meta-androcto",
+     "version": (0, 5),
+-    "blender": (2, 5, 6),
+-    "api": 33832,
++    "blender": (2, 5, 7),
++    "api": 35622,
+     "location": "View3D > Add > Mesh > Extras",
+     "description": "Adds Star, Wedge, & Sqorus objects.",
+     "warning": "",
+
+Modified: trunk/py/scripts/addons/add_mesh_gears.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_gears.py	2011-03-19 01:27:55 UTC (rev 1718)
++++ trunk/py/scripts/addons/add_mesh_gears.py	2011-03-19 13:20:33 UTC (rev 1719)
+@@ -23,8 +23,8 @@
+     "name": "Gears",
+     "author": "Michel J. Anders (varkenvarken)",
+     "version": (2, 4, 2),
+-    "blender": (2, 5, 6),
+-    "api": 32411,
++    "blender": (2, 5, 7),
++    "api": 35622,
+     "location": "View3D > Add > Mesh > Gears ",
+     "description": "Adds a mesh Gear to the Add Mesh menu",
+     "warning": "",
+
+Modified: trunk/py/scripts/addons/add_mesh_gemstones.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_gemstones.py	2011-03-19 01:27:55 UTC (rev 1718)
++++ trunk/py/scripts/addons/add_mesh_gemstones.py	2011-03-19 13:20:33 UTC (rev 1719)
+@@ -20,8 +20,8 @@
+     "name": "Gemstones",
+     "author": "Pontiac, Fourmadmen, Dreampainter",
+     "version": (0, 4),
+-    "blender": (2, 5, 6),
+-    "api": 32411,
++    "blender": (2, 5, 7),
++    "api": 35622,
+     "location": "View3D > Add > Mesh > Gemstones",
+     "description": "Adds various gemstone (Diamond & Gem) meshes.",
+     "warning": "",
+
+Modified: trunk/py/scripts/addons/add_mesh_pipe_joint.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_pipe_joint.py	2011-03-19 01:27:55 UTC (rev 1718)
++++ trunk/py/scripts/addons/add_mesh_pipe_joint.py	2011-03-19 13:20:33 UTC (rev 1719)
+@@ -20,8 +20,8 @@
+     "name": "Pipe Joints",
+     "author": "Buerbaum Martin (Pontiac)",
+     "version": (0, 10, 7),
+-    "blender": (2, 5, 3),
+-    "api": 32411,
++    "blender": (2, 5, 7),
++    "api": 35622,
+     "location": "View3D > Add > Mesh > Pipe Joints",
+     "description": "Adds 5 pipe Joint types to the Add Mesh menu",
+     "warning": "",
+
+Modified: trunk/py/scripts/addons/add_mesh_solid.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_solid.py	2011-03-19 01:27:55 UTC (rev 1718)
++++ trunk/py/scripts/addons/add_mesh_solid.py	2011-03-19 13:20:33 UTC (rev 1719)
+@@ -21,8 +21,8 @@
+     "name": "Regular Solids",
+     "author": "DreamPainter",
+     "version": (1, 0, 1),
+-    "blender": (2, 5, 3),
+-    "api": 32411,
++    "blender": (2, 5, 7),
++    "api": 35622,
+     "location": "View3D > Add > Mesh > Regular Solids",
+     "description": "Add a Regular Solid mesh.",
+     "warning": "",
+
+Modified: trunk/py/scripts/addons/add_mesh_twisted_torus.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_twisted_torus.py	2011-03-19 01:27:55 UTC (rev 1718)
++++ trunk/py/scripts/addons/add_mesh_twisted_torus.py	2011-03-19 13:20:33 UTC (rev 1719)
+@@ -24,8 +24,8 @@
+     "name": "Twisted Torus",
+     "author": "Paulo_Gomes",
+     "version": (0, 11, 1),
+-    "blender": (2, 5, 3),
+-    "api": 32411,
++    "blender": (2, 5, 7),
++    "api": 35622,
+     "location": "View3D > Add > Mesh ",
+     "description": "Adds a mesh Twisted Torus to the Add Mesh menu",
+     "warning": "",
+
+Modified: trunk/py/scripts/addons/animation_add_corrective_shape_key.py
+===================================================================
+--- trunk/py/scripts/addons/animation_add_corrective_shape_key.py	2011-03-19 01:27:55 UTC (rev 1718)
++++ trunk/py/scripts/addons/animation_add_corrective_shape_key.py	2011-03-19 13:20:33 UTC (rev 1719)
+@@ -20,7 +20,8 @@
+     'name': 'Corrective shape keys',
+     'author': 'Ivo Grigull (loolarge), Tal Trachtman',
+     'version': (1, 0),
+-    'blender': (2, 5, 5),
++    "blender": (2, 5, 7),
++    "api": 35622,
+     'location': 'Object Data > Shape Keys (Search: corrective) ',
+     'description': 'Creates a corrective shape key for the current pose',
+     "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.5/Py/"\
+
+Modified: trunk/py/scripts/addons/animation_animall.py
+===================================================================
+--- trunk/py/scripts/addons/animation_animall.py	2011-03-19 01:27:55 UTC (rev 1718)
++++ trunk/py/scripts/addons/animation_animall.py	2011-03-19 13:20:33 UTC (rev 1719)
+@@ -20,8 +20,8 @@
+     'name': 'AnimAll',
+     'author': 'Daniel Salazar <zanqdo@gmail.com>',
+     'version': (0, 4),
+-    'blender': (2, 5, 5),
+-    'api': 34513,
++    "blender": (2, 5, 7),
++    "api": 35622,
+     'location': 'Select a Mesh: Tool Shelf > AnimAll panel',
+     'description': 'Allows animation of mesh and lattice data (Shape Keys, VCols, VGroups, UVs)',
+     'warning': '',
+
+Modified: trunk/py/scripts/addons/animation_rotobezier.py
+===================================================================
+--- trunk/py/scripts/addons/animation_rotobezier.py	2011-03-19 01:27:55 UTC (rev 1718)
++++ trunk/py/scripts/addons/animation_rotobezier.py	2011-03-19 13:20:33 UTC (rev 1719)
+@@ -20,8 +20,8 @@
+     'name': 'RotoBezier',
+     'author': 'Daniel Salazar <zanqdo@gmail.com>',
+     'version': (0, 8),
+-    'blender': (2, 5, 5),
+-    'api': 33232,
++    "blender": (2, 5, 7),
++    "api": 35622,
+     'location': 'Select a Curve: Tool Shelf > RotoBezier Panel',
+     'description': 'Allows animation of Bezier and NURBS curves',
+     'warning': '',
+
+Modified: trunk/py/scripts/addons/curve_simplify.py
+===================================================================
+--- trunk/py/scripts/addons/curve_simplify.py	2011-03-19 01:27:55 UTC (rev 1718)
++++ trunk/py/scripts/addons/curve_simplify.py	2011-03-19 13:20:33 UTC (rev 1719)
+@@ -20,8 +20,8 @@
+     "name": "Simplify curves",
+     "author": "testscreenings",
+     "version": (1,),
+-    "blender": (2, 5, 3),
+-    "api": 32411,
++    "blender": (2, 5, 7),
++    "api": 35622,
+     "location": "Search > Simplify Curves",
+     "description": "Simplifies 3D curves and fcurves",
+     "warning": "",
+
+Modified: trunk/py/scripts/addons/development_api_navigator.py
+===================================================================
+--- trunk/py/scripts/addons/development_api_navigator.py	2011-03-19 01:27:55 UTC (rev 1718)
++++ trunk/py/scripts/addons/development_api_navigator.py	2011-03-19 13:20:33 UTC (rev 1719)
+@@ -24,7 +24,7 @@
+     "author": "Dany Lebel (Axon_D)",
+     "version": (1, 0, 2),
+     "blender": (2, 5, 7),
+-    "api": 34995,
++    "api": 35622,
+     "location": "Text Editor > Properties > API Navigator Panel",
+     "description": "Allows to explore the python api via the user interface",
+     "warning": "",
+
+@@ Diff output truncated at 10240 characters. @@ _______________________________________________
+Bf-extensions-cvs mailing list
+Bf-extensions-cvs@blender.org
+http://lists.blender.org/mailman/listinfo/bf-extensions-cvs
