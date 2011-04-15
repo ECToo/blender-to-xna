@@ -1,0 +1,266 @@
+Revision: 1805
+          http://projects.blender.org/scm/viewvc.php?view=rev&root=bf-extensions&revision=1805
+Author:   jaydez
+Date:     2011-04-10 11:09:27 +0000 (Sun, 10 Apr 2011)
+Log Message:
+-----------
+Formatting/standardization for description/location
+
+Modified Paths:
+--------------
+    trunk/py/scripts/addons/development_api_navigator.py
+    trunk/py/scripts/addons/io_anim_camera.py
+    trunk/py/scripts/addons/io_curve_svg/__init__.py
+    trunk/py/scripts/addons/io_export_anim_mesh_xna/__init__.py
+    trunk/py/scripts/addons/io_export_directx_x.py
+    trunk/py/scripts/addons/io_export_pc2.py
+    trunk/py/scripts/addons/io_export_unreal_psk_psa.py
+    trunk/py/scripts/addons/io_import_gimp_image_to_scene.py
+    trunk/py/scripts/addons/io_import_scene_dxf.py
+    trunk/py/scripts/addons/io_import_scene_mhx.py
+    trunk/py/scripts/addons/io_import_scene_unreal_psk.py
+    trunk/py/scripts/addons/io_mesh_raw/__init__.py
+    trunk/py/scripts/addons/io_scene_m3/__init__.py
+
+Modified: trunk/py/scripts/addons/development_api_navigator.py
+===================================================================
+--- trunk/py/scripts/addons/development_api_navigator.py	2011-04-09 16:39:42 UTC (rev 1804)
++++ trunk/py/scripts/addons/development_api_navigator.py	2011-04-10 11:09:27 UTC (rev 1805)
+@@ -24,9 +24,9 @@
+     "author": "Dany Lebel (Axon_D)",
+     "version": (1, 0, 2),
+     "blender": (2, 5, 7),
+-    "api": 35622,
++    "api": 36079,
+     "location": "Text Editor > Properties > API Navigator Panel",
+-    "description": "Allows to explore the python api via the user interface",
++    "description": "Allows exploration of the python api via the user 
++ interface",
+     "warning": "",
+     "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.5/Py/"
+         "Scripts/Text_Editor/API_Navigator",
+
+Modified: trunk/py/scripts/addons/io_anim_camera.py
+===================================================================
+--- trunk/py/scripts/addons/io_anim_camera.py	2011-04-09 16:39:42 UTC (rev 1804)
++++ trunk/py/scripts/addons/io_anim_camera.py	2011-04-10 11:09:27 UTC (rev 1805)
+@@ -23,9 +23,9 @@
+     "author": "Campbell Barton",
+     "version": (0, 1),
+     "blender": (2, 5, 7),
+-    "api": 35622,
+-    "location": "File > Export > Camera Animation",
+-    "description": "Export Cameras & Markers",
++    "api": 36079,
++    "location": "File > Export > Cameras & Markers (.py)",
++    "description": "Export Cameras & Markers (.py)",
+     "warning": "",
+     "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.5/Py/"\
+         "Scripts/Import-Export/Camera_Animation",
+
+Modified: trunk/py/scripts/addons/io_curve_svg/__init__.py
+===================================================================
+--- trunk/py/scripts/addons/io_curve_svg/__init__.py	2011-04-09 16:39:42 UTC (rev 1804)
++++ trunk/py/scripts/addons/io_curve_svg/__init__.py	2011-04-10 11:09:27 UTC (rev 1805)
+@@ -22,9 +22,9 @@
+     "name": "Scalable Vector Graphics (SVG) 1.1 format",
+     "author": "Sergey Sharybin",
+     "blender": (2, 5, 7),
+-    "api": 35622,
+-    "location": "File > Import-Export",
+-    "description": "Import SVG",
++    "api": 36079,
++    "location": "File > Import > Scalable Vector Graphics (.svg)",
++    "description": "Import SVG as curves",
+     "warning": "",
+     "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.5/Py/"\
+         "Scripts/Import-Export/SVG",
+
+Modified: trunk/py/scripts/addons/io_export_anim_mesh_xna/__init__.py
+===================================================================
+--- trunk/py/scripts/addons/io_export_anim_mesh_xna/__init__.py	2011-04-09 16:39:42 UTC (rev 1804)
++++ trunk/py/scripts/addons/io_export_anim_mesh_xna/__init__.py	2011-04-10 11:09:27 UTC (rev 1805)
+@@ -15,13 +15,13 @@
+ # ***** END GPL LICENCE BLOCK *****
+ 
+ bl_info = {
+-    "name": "Blender to XNA",
++    "name": "Export XNA format (.fbx)",
+     "author": "John C Brown, JCBDigger (@MistyManor)",
+     "version": (1, 2),
+     "blender": (2, 5, 7),
+-    "api": 35622,
+-    "location": "File > Export > XNA FBX Animated Model",
+-    "description": "Export the model and animations for use in XNA",
++    "api": 36079,
++    "location": "File > Export > XNA FBX Animated Model (*.fbx)",
++    "description": "Export XNA models and animations",
+     "warning": "",
+     "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.5/Py/"\
+         "Scripts/Import-Export/Blender-toXNA",
+
+Modified: trunk/py/scripts/addons/io_export_directx_x.py
+===================================================================
+--- trunk/py/scripts/addons/io_export_directx_x.py	2011-04-09 16:39:42 UTC (rev 1804)
++++ trunk/py/scripts/addons/io_export_directx_x.py	2011-04-10 11:09:27 UTC (rev 1805)
+@@ -20,9 +20,9 @@
+     "author": "Chris Foster (Kira Vakaan)",
+     "version": (2, 1),
+     "blender": (2, 5, 7),
+-    "api": 35927,
+-    "location": "File > Export",
+-    "description": "Export to the DirectX Model Format (.x)",
++    "api": 36079,
++    "location": "File > Export > DirectX (.x)",
++    "description": "Export DirectX Model Format (.x)",
+     "warning": "",
+     "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.5/Py/"\
+         "Scripts/Import-Export/DirectX_Exporter",
+
+Modified: trunk/py/scripts/addons/io_export_pc2.py
+===================================================================
+--- trunk/py/scripts/addons/io_export_pc2.py	2011-04-09 16:39:42 UTC (rev 1804)
++++ trunk/py/scripts/addons/io_export_pc2.py	2011-04-10 11:09:27 UTC (rev 1805)
+@@ -17,13 +17,13 @@
+ # ##### END GPL LICENSE BLOCK #####
+ 
+ bl_info = {
+-    "name": "Export Pointcache (.pc2)",
++    "name": "Export Pointcache Format(.pc2)",
+     "author": "Florian Meyer (tstscr)",
+     "version": (1, 0),
+     "blender": (2, 5, 7),
+-    "api": 35622,
+-    "location": "File > Export",
+-    "description": "Export Mesh Pointcache to .pc2",
++    "api": 36079,
++    "location": "File > Export > Pointcache (.pc2)",
++    "description": "Export mesh Pointcache data (.pc2)",
+     "warning": "",
+     "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.5/Py/"\
+         "Scripts/Import-Export/PC2_Pointcache_export",
+
+Modified: trunk/py/scripts/addons/io_export_unreal_psk_psa.py
+===================================================================
+--- trunk/py/scripts/addons/io_export_unreal_psk_psa.py	2011-04-09 16:39:42 UTC (rev 1804)
++++ trunk/py/scripts/addons/io_export_unreal_psk_psa.py	2011-04-10 11:09:27 UTC (rev 1805)
+@@ -16,13 +16,13 @@
+ #  ***** GPL LICENSE BLOCK *****
+ 
+ bl_info = {
+-    "name": "Export Skeleletal Mesh/Animation Data",
++    "name": "Export Unreal Engine Format(.psk/.psa)",
+     "author": "Darknet/Optimus_P-Fat/Active_Trash/Sinsoft/VendorX",
+     "version": (2, 2),
+     "blender": (2, 5, 7),
+-    "api": 35622,
++    "api": 36079,
+     "location": "File > Export > Skeletal Mesh/Animation Data (.psk/.psa)",
+-    "description": "Export Unreal Engine (.psk)",
++    "description": "Export Skeleletal Mesh/Animation Data",
+     "warning": "",
+     "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.5/Py/"\
+         "Scripts/Import-Export/Unreal_psk_psa",
+
+Modified: trunk/py/scripts/addons/io_import_gimp_image_to_scene.py
+===================================================================
+--- trunk/py/scripts/addons/io_import_gimp_image_to_scene.py	2011-04-09 16:39:42 UTC (rev 1804)
++++ trunk/py/scripts/addons/io_import_gimp_image_to_scene.py	2011-04-10 11:09:27 UTC (rev 1805)
+@@ -17,13 +17,13 @@
+ # ##### END GPL LICENSE BLOCK #####
+ 
+ bl_info = {
+-    "name": "Import GIMP Image to Scene (.xcf, .xjt)",
++    "name": "Import GIMP Image to Scene (.xcf/.xjt)",
+     "author": "Daniel Salazar (ZanQdo)",
+     "version": (2, 0, 0),
+     "blender": (2, 5, 7),
+-    "api": 35622,
+-    "location": "File > Import > GIMP Image to Scene(.xcf, .xjt)",
+-    "description": "Imports GIMP multilayer image files into 3D Layers",
++    "api": 36079,
++    "location": "File > Import > GIMP Image to Scene(.xcf/.xjt)",
++    "description": "Imports GIMP multilayer image files as a series of 
++ multiple planes",
+     "warning": "XCF import requires xcftools installed",
+     "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.5/Py/"\
+         "Scripts/Import-Export/GIMPImageToScene",
+
+Modified: trunk/py/scripts/addons/io_import_scene_dxf.py
+===================================================================
+--- trunk/py/scripts/addons/io_import_scene_dxf.py	2011-04-09 16:39:42 UTC (rev 1804)
++++ trunk/py/scripts/addons/io_import_scene_dxf.py	2011-04-10 11:09:27 UTC (rev 1805)
+@@ -17,14 +17,14 @@
+ # ##### END GPL LICENSE BLOCK #####
+ 
+ bl_info = {
+-    'name': 'Import Autocad DXF (.dxf)',
++    'name': 'Import Autocad DXF Format (.dxf)',
+     'author': 'Thomas Larsson, Remigiusz Fiedler',
+     'version': (0, 1, 5),
+     "blender": (2, 5, 7),
+-    "api": 35622,
+-    'location': 'File > Import',
++    "api": 36079,
++    'location': 'File > Import > Autocad (.dxf)',
+     'description': 'Import files in the Autocad DXF format (.dxf)',
+-    'warning': 'only a part of DXF specification is supported, WIP',
++    'warning': 'only a part of DXF specification is supported: Work in 
++ Progress',
+     'wiki_url': 'http://wiki.blender.org/index.php/Extensions:2.5/Py/'\
+         'Scripts/Import-Export/DXF_Importer',
+     'tracker_url': 'https://projects.blender.org/tracker/index.php?'\
+
+Modified: trunk/py/scripts/addons/io_import_scene_mhx.py
+===================================================================
+--- trunk/py/scripts/addons/io_import_scene_mhx.py	2011-04-09 16:39:42 UTC (rev 1804)
++++ trunk/py/scripts/addons/io_import_scene_mhx.py	2011-04-10 11:09:27 UTC (rev 1805)
+@@ -42,7 +42,7 @@
+     'version': (1, 4, 0),
+     "blender": (2, 5, 7),
+     "api": 35774,
+-    'location': "File > Import",
++    'location': "File > Import > MakeHuman (.mhx)",
+     'description': 'Import files in the MakeHuman eXchange format (.mhx)',
+     'warning': '',
+     'wiki_url': 'http://sites.google.com/site/makehumandocs/blender-export-and-mhx',
+
+Modified: trunk/py/scripts/addons/io_import_scene_unreal_psk.py
+===================================================================
+--- trunk/py/scripts/addons/io_import_scene_unreal_psk.py	2011-04-09 16:39:42 UTC (rev 1804)
++++ trunk/py/scripts/addons/io_import_scene_unreal_psk.py	2011-04-10 11:09:27 UTC (rev 1805)
+@@ -17,13 +17,13 @@
+ # ##### END GPL LICENSE BLOCK #####
+ 
+ bl_info = {
+-    "name": "Import Unreal Skeleton Mesh(.psk)",
++    "name": "Import Unreal Skeleton Mesh (.psk)",
+     "author": "Darknet",
+     "version": (2, 0),
+     "blender": (2, 5, 3),
+-    "api": 31847,
+-    "location": "File > Import ",
+-    "description": "Import Unreal Engine (.psk)",
++    "api": 36079,
++    "location": "File > Import > Skeleton Mesh (.psk)",
++    "description": "Import Skeleleton Mesh",
+     "warning": "",
+     "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.5/Py/"
+         "Scripts/Import-Export/Unreal_psk_psa",
+
+Modified: trunk/py/scripts/addons/io_mesh_raw/__init__.py
+===================================================================
+--- trunk/py/scripts/addons/io_mesh_raw/__init__.py	2011-04-09 16:39:42 UTC (rev 1804)
++++ trunk/py/scripts/addons/io_mesh_raw/__init__.py	2011-04-10 11:09:27 UTC (rev 1805)
+@@ -17,13 +17,13 @@
+ # ##### END GPL LICENSE BLOCK #####
+ 
+ bl_info = {
+-    "name": "Raw mesh",
++    "name": "Raw mesh format (.raw)",
+     "author": "Anthony D,Agostino (Scorpius), Aurel Wildfellner",
+
+@@ Diff output truncated at 10240 characters. @@ _______________________________________________
+Bf-extensions-cvs mailing list
+Bf-extensions-cvs@blender.org
+http://lists.blender.org/mailman/listinfo/bf-extensions-cvs
