@@ -1,0 +1,296 @@
+Revision: 1932
+          http://projects.blender.org/scm/viewvc.php?view=rev&root=bf-extensions&revision=1932
+Author:   campbellbarton
+Date:     2011-05-16 07:52:45 +0000 (Mon, 16 May 2011)
+Log Message:
+-----------
+update for changes in blender module layout, also add global axis conversion to FBX.
+
+Modified Paths:
+--------------
+    trunk/py/scripts/addons/add_mesh_ant_landscape.py
+    trunk/py/scripts/addons/add_mesh_extra_objects/add_mesh_3d_function_surface.py
+    trunk/py/scripts/addons/add_mesh_extra_objects/add_mesh_extra_objects.py
+    trunk/py/scripts/addons/add_mesh_extra_objects/add_mesh_gears.py
+    trunk/py/scripts/addons/add_mesh_extra_objects/add_mesh_gemstones.py
+    trunk/py/scripts/addons/add_mesh_extra_objects/add_mesh_twisted_torus.py
+    trunk/py/scripts/addons/add_mesh_pipe_joint.py
+    trunk/py/scripts/addons/add_mesh_solid.py
+    trunk/py/scripts/addons/io_anim_bvh/__init__.py
+    trunk/py/scripts/addons/io_anim_camera.py
+    trunk/py/scripts/addons/io_convert_image_to_mesh_img/__init__.py
+    trunk/py/scripts/addons/io_curve_svg/__init__.py
+    trunk/py/scripts/addons/io_export_anim_mesh_xna/export_xna.py
+    trunk/py/scripts/addons/io_export_pc2.py
+    trunk/py/scripts/addons/io_import_images_as_planes.py
+    trunk/py/scripts/addons/io_import_scene_mhx.py
+    trunk/py/scripts/addons/io_mesh_ply/__init__.py
+    trunk/py/scripts/addons/io_mesh_ply/import_ply.py
+    trunk/py/scripts/addons/io_mesh_raw/import_raw.py
+    trunk/py/scripts/addons/io_mesh_stl/__init__.py
+    trunk/py/scripts/addons/io_scene_3ds/__init__.py
+    trunk/py/scripts/addons/io_scene_3ds/export_3ds.py
+    trunk/py/scripts/addons/io_scene_3ds/import_3ds.py
+    trunk/py/scripts/addons/io_scene_fbx/__init__.py
+    trunk/py/scripts/addons/io_scene_fbx/export_fbx.py
+    trunk/py/scripts/addons/io_scene_m3/__init__.py
+    trunk/py/scripts/addons/io_scene_m3/import_m3.py
+    trunk/py/scripts/addons/io_scene_obj/__init__.py
+    trunk/py/scripts/addons/io_scene_obj/export_obj.py
+    trunk/py/scripts/addons/io_scene_obj/import_obj.py
+    trunk/py/scripts/addons/io_scene_x3d/__init__.py
+    trunk/py/scripts/addons/io_scene_x3d/export_x3d.py
+    trunk/py/scripts/addons/io_scene_x3d/import_x3d.py
+    trunk/py/scripts/addons/io_shape_mdd/__init__.py
+    trunk/py/scripts/addons/object_cloud_gen.py
+    trunk/py/scripts/addons/system_demo_mode/__init__.py
+    trunk/py/scripts/addons/texture_paint_layer_manager.py
+
+Modified: trunk/py/scripts/addons/add_mesh_ant_landscape.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_ant_landscape.py	2011-05-15 21:56:30 UTC (rev 1931)
++++ trunk/py/scripts/addons/add_mesh_ant_landscape.py	2011-05-16 07:52:45 UTC (rev 1932)
+@@ -94,8 +94,8 @@
+     # Update mesh geometry after adding stuff.
+     mesh.update()
+ 
+-    import add_object_utils
+-    return add_object_utils.object_data_add(context, mesh, operator=None)
++    from bpy_extras import object_utils
++    return object_utils.object_data_add(context, mesh, operator=None)
+ 
+ # A very simple "bridge" tool.
+ # Connects two equally long vertex rows with faces.
+
+Modified: trunk/py/scripts/addons/add_mesh_extra_objects/add_mesh_3d_function_surface.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_extra_objects/add_mesh_3d_function_surface.py	2011-05-15 21:56:30 UTC (rev 1931)
++++ trunk/py/scripts/addons/add_mesh_extra_objects/add_mesh_3d_function_surface.py	2011-05-16 07:52:45 UTC (rev 1932)
+@@ -140,8 +140,8 @@
+     # Update mesh geometry after adding stuff.
+     mesh.update()
+ 
+-    import add_object_utils
+-    return add_object_utils.object_data_add(context, mesh, operator=None)
++    from bpy_extras import object_utils
++    return object_utils.object_data_add(context, mesh, operator=None)
+ 
+ 
+ # A very simple "bridge" tool.
+
+Modified: trunk/py/scripts/addons/add_mesh_extra_objects/add_mesh_extra_objects.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_extra_objects/add_mesh_extra_objects.py	2011-05-15 21:56:30 UTC (rev 1931)
++++ trunk/py/scripts/addons/add_mesh_extra_objects/add_mesh_extra_objects.py	2011-05-16 07:52:45 UTC (rev 1932)
+@@ -38,8 +38,8 @@
+     # Update mesh geometry after adding stuff.
+     mesh.update()
+ 
+-    import add_object_utils
+-    return add_object_utils.object_data_add(context, mesh, operator=None)
++    from bpy_extras import object_utils
++    return object_utils.object_data_add(context, mesh, operator=None)
+ 
+ 
+ # A very simple "bridge" tool.
+
+Modified: trunk/py/scripts/addons/add_mesh_extra_objects/add_mesh_gears.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_extra_objects/add_mesh_gears.py	2011-05-15 21:56:30 UTC (rev 1931)
++++ trunk/py/scripts/addons/add_mesh_extra_objects/add_mesh_gears.py	2011-05-16 07:52:45 UTC (rev 1932)
+@@ -87,8 +87,8 @@
+     # Update mesh geometry after adding stuff.
+     mesh.update()
+ 
+-    import add_object_utils
+-    return add_object_utils.object_data_add(context, mesh, operator=None)
++    from bpy_extras import object_utils
++    return object_utils.object_data_add(context, mesh, operator=None)
+ 
+ 
+ # A very simple "bridge" tool.
+
+Modified: trunk/py/scripts/addons/add_mesh_extra_objects/add_mesh_gemstones.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_extra_objects/add_mesh_gemstones.py	2011-05-15 21:56:30 UTC (rev 1931)
++++ trunk/py/scripts/addons/add_mesh_extra_objects/add_mesh_gemstones.py	2011-05-16 07:52:45 UTC (rev 1932)
+@@ -53,8 +53,8 @@
+     # Update mesh geometry after adding stuff.
+     mesh.update()
+ 
+-    import add_object_utils
+-    return add_object_utils.object_data_add(context, mesh, operator=None)
++    from bpy_extras import object_utils
++    return object_utils.object_data_add(context, mesh, operator=None)
+ 
+ 
+ # A very simple "bridge" tool.
+
+Modified: trunk/py/scripts/addons/add_mesh_extra_objects/add_mesh_twisted_torus.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_extra_objects/add_mesh_twisted_torus.py	2011-05-15 21:56:30 UTC (rev 1931)
++++ trunk/py/scripts/addons/add_mesh_extra_objects/add_mesh_twisted_torus.py	2011-05-16 07:52:45 UTC (rev 1932)
+@@ -68,8 +68,8 @@
+     # Update mesh geometry after adding stuff.
+     mesh.update()
+ 
+-    import add_object_utils
+-    return add_object_utils.object_data_add(context, mesh, operator=None)
++    from bpy_extras import object_utils
++    return object_utils.object_data_add(context, mesh, operator=None)
+ 
+ # A very simple "bridge" tool.
+ # Connects two equally long vertex rows with faces.
+
+Modified: trunk/py/scripts/addons/add_mesh_pipe_joint.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_pipe_joint.py	2011-05-15 21:56:30 UTC (rev 1931)
++++ trunk/py/scripts/addons/add_mesh_pipe_joint.py	2011-05-16 07:52:45 UTC (rev 1932)
+@@ -148,8 +148,8 @@
+     # Update mesh geometry after adding stuff.
+     mesh.update()
+ 
+-    import add_object_utils
+-    return add_object_utils.object_data_add(context, mesh, operator=None)
++    from bpy_extras import object_utils
++    return object_utils.object_data_add(context, mesh, operator=None)
+ 
+ # A very simple "bridge" tool.
+ # Connects two equally long vertex rows with faces.
+
+Modified: trunk/py/scripts/addons/add_mesh_solid.py
+===================================================================
+--- trunk/py/scripts/addons/add_mesh_solid.py	2011-05-15 21:56:30 UTC (rev 1931)
++++ trunk/py/scripts/addons/add_mesh_solid.py	2011-05-16 07:52:45 UTC (rev 1932)
+@@ -37,7 +37,7 @@
+ from math import sqrt
+ from mathutils import Vector,Matrix
+ from functools import reduce
+-from add_object_utils import object_data_add
++from bpy_extras.object_utils import object_data_add
+ 
+ # this function creates a chain of quads and, when necessary, a remaining tri  # for each polygon created in this script. be aware though, that this function
+
+Modified: trunk/py/scripts/addons/io_anim_bvh/__init__.py
+===================================================================
+--- trunk/py/scripts/addons/io_anim_bvh/__init__.py	2011-05-15 21:56:30 UTC (rev 1931)
++++ trunk/py/scripts/addons/io_anim_bvh/__init__.py	2011-05-16 07:52:45 UTC (rev 1932)
+@@ -42,7 +42,7 @@
+ 
+ import bpy
+ from bpy.props import StringProperty, FloatProperty, IntProperty, BoolProperty, EnumProperty -from io_utils import ImportHelper, ExportHelper
++from bpy_extras.io_utils import ImportHelper, ExportHelper
+ 
+ 
+ class ImportBVH(bpy.types.Operator, ImportHelper):
+
+Modified: trunk/py/scripts/addons/io_anim_camera.py
+===================================================================
+--- trunk/py/scripts/addons/io_anim_camera.py	2011-05-15 21:56:30 UTC (rev 1931)
++++ trunk/py/scripts/addons/io_anim_camera.py	2011-05-16 07:52:45 UTC (rev 1932)
+@@ -115,7 +115,7 @@
+ 
+ 
+ from bpy.props import StringProperty, IntProperty, BoolProperty -from io_utils import ExportHelper
++from bpy_extras.io_utils import ExportHelper
+ 
+ 
+ class CameraExporter(bpy.types.Operator, ExportHelper):
+
+Modified: trunk/py/scripts/addons/io_convert_image_to_mesh_img/__init__.py
+===================================================================
+--- trunk/py/scripts/addons/io_convert_image_to_mesh_img/__init__.py	2011-05-15 21:56:30 UTC (rev 1931)
++++ trunk/py/scripts/addons/io_convert_image_to_mesh_img/__init__.py	2011-05-16 07:52:45 UTC (rev 1932)
+@@ -50,7 +50,7 @@
+ 
+ import bpy
+ from bpy.props import *
+-from io_utils import ImportHelper
++from bpy_extras.io_utils import ImportHelper
+ 
+ 
+ class ImportHiRISEIMGDTM(bpy.types.Operator, ImportHelper):
+
+Modified: trunk/py/scripts/addons/io_curve_svg/__init__.py
+===================================================================
+--- trunk/py/scripts/addons/io_curve_svg/__init__.py	2011-05-15 21:56:30 UTC (rev 1931)
++++ trunk/py/scripts/addons/io_curve_svg/__init__.py	2011-05-16 07:52:45 UTC (rev 1932)
+@@ -43,7 +43,7 @@
+ 
+ import bpy
+ from bpy.props import StringProperty
+-from io_utils import ImportHelper, ExportHelper
++from bpy_extras.io_utils import ImportHelper, ExportHelper
+ 
+ 
+ class ImportSVG(bpy.types.Operator, ImportHelper):
+
+Modified: trunk/py/scripts/addons/io_export_anim_mesh_xna/export_xna.py
+===================================================================
+--- trunk/py/scripts/addons/io_export_anim_mesh_xna/export_xna.py	2011-05-15 21:56:30 UTC (rev 1931)
++++ trunk/py/scripts/addons/io_export_anim_mesh_xna/export_xna.py	2011-05-16 07:52:45 UTC (rev 1932)
+@@ -2777,9 +2777,8 @@
+ # ** User interface
+ 
+ from bpy.props import *
+-from io_utils import ExportHelper
++from bpy_extras.io_utils import ExportHelper
+ 
+-# io_utils is in the user folder .../2.55/scripts/modules 
+ 
+ class ExportFBXmodel(bpy.types.Operator, ExportHelper):
+     '''Export model data to an ASCII Autodesk FBX for import in to XNA'''
+
+Modified: trunk/py/scripts/addons/io_export_pc2.py
+===================================================================
+--- trunk/py/scripts/addons/io_export_pc2.py	2011-05-15 21:56:30 UTC (rev 1931)
++++ trunk/py/scripts/addons/io_export_pc2.py	2011-05-16 07:52:45 UTC (rev 1932)
+@@ -44,7 +44,7 @@
+ import mathutils, math, struct
+ from os import remove
+ import time
+-from io_utils import ExportHelper
++from bpy_extras.io_utils import ExportHelper
+ 
+ def getSampling(start, end, sampling):
+     samples = [start - sampling
+
+Modified: trunk/py/scripts/addons/io_import_images_as_planes.py
+===================================================================
+--- trunk/py/scripts/addons/io_import_images_as_planes.py	2011-05-15 21:56:30 UTC (rev 1931)
++++ trunk/py/scripts/addons/io_import_images_as_planes.py	2011-05-16 07:52:45 UTC (rev 1932)
+@@ -35,7 +35,7 @@
+ import bpy, os, mathutils
+ from bpy.props import *
+ from add_utils import *
+-from io_utils import ImportHelper, load_image
++from bpy_extras.io_utils import ImportHelper, load_image
+ 
+ ## GLOBAL VARS ##
+ EXT_LIST = {
+
+Modified: trunk/py/scripts/addons/io_import_scene_mhx.py
+===================================================================
+--- trunk/py/scripts/addons/io_import_scene_mhx.py	2011-05-15 21:56:30 UTC (rev 1931)
++++ trunk/py/scripts/addons/io_import_scene_mhx.py	2011-05-16 07:52:45 UTC (rev 1932)
+@@ -2617,7 +2617,7 @@
+ 
+ DEBUG = False
+ from bpy.props import StringProperty, FloatProperty, EnumProperty, BoolProperty -from io_utils import ImportHelper
++from bpy_extras.io_utils import ImportHelper
+ 
+ 
+ MhxBoolProps = [
+
+Modified: trunk/py/scripts/addons/io_mesh_ply/__init__.py
+===================================================================
+--- trunk/py/scripts/addons/io_mesh_ply/__init__.py	2011-05-15 21:56:30 UTC (rev 1931)
++++ trunk/py/scripts/addons/io_mesh_ply/__init__.py	2011-05-16 07:52:45 UTC (rev 1932)
+@@ -44,7 +44,7 @@
+ import os
+ import bpy
+
+@@ Diff output truncated at 10240 characters. @@ _______________________________________________
+Bf-extensions-cvs mailing list
+Bf-extensions-cvs@blender.org
+http://lists.blender.org/mailman/listinfo/bf-extensions-cvs
