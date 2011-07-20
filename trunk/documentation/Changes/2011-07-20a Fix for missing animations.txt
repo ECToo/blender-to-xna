@@ -1,0 +1,73 @@
+Revision: 2140
+          http://projects.blender.org/scm/viewvc.php?view=rev&root=bf-extensions&revision=2140
+Author:   campbellbarton
+Date:     2011-07-20 01:07:41 +0000 (Wed, 20 Jul 2011)
+Log Message:
+-----------
+fix [#27964] 2.58 FBX Export can result in missing data and lost animation(s)
+
+Modified Paths:
+--------------
+    trunk/py/scripts/addons/io_scene_fbx/export_fbx.py
+
+Modified: trunk/py/scripts/addons/io_scene_fbx/export_fbx.py
+===================================================================
+--- trunk/py/scripts/addons/io_scene_fbx/export_fbx.py	2011-07-19 14:34:58 UTC (rev 2139)
++++ trunk/py/scripts/addons/io_scene_fbx/export_fbx.py	2011-07-20 01:07:41 UTC (rev 2140)
+@@ -132,19 +132,6 @@
+     return '%.15f,%.15f,%.15f,%.15f,%.15f,%.15f,%.15f,%.15f,%.15f,%.15f,%.15f,%.15f,%.15f,%.15f,%.15f,%.15f' % tuple([f for v in mat for f in v])
+ 
+ 
+-# XXX not used
+-# duplicated in OBJ exporter
+-def getVertsFromGroup(me, group_index):
+-    ret = []
+-
+-    for i, v in enumerate(me.vertices):
+-        for g in v.groups:
+-            if g.group == group_index:
+-                ret.append((i, g.weight))
+-
+-        return ret
+-
+-
+ # ob must be OB_MESH
+ def BPyMesh_meshWeight2List(ob, me):
+     ''' Takes a mesh and return its group names and a list of lists, one list per vertex.
+@@ -164,16 +151,16 @@
+ 
+     for i, v in enumerate(me.vertices):
+         for g in v.groups:
+-            vWeightList[i][g.group] = g.weight
++            # possible weights are out of range
++            index = g.group
++            if index < len_groupNames:
++                vWeightList[i][index] = g.weight
+ 
+     return groupNames, vWeightList
+ 
+ 
+ def meshNormalizedWeights(ob, me):
+-    try:  # account for old bad BPyMesh
+-        groupNames, vWeightList = BPyMesh_meshWeight2List(ob, me)
+-    except:
+-        return [], []
++    groupNames, vWeightList = BPyMesh_meshWeight2List(ob, me)
+ 
+     if not groupNames:
+         return [], []
+@@ -1220,8 +1207,7 @@
+         else:
+             # Normal weight painted mesh
+             if my_bone.blenName in weights[0]:
+-                # Before we used normalized wright list
+-                #vgroup_data = me.getVertsFromGroup(bone.name, 1)
++                # Before we used normalized weight list
+                 group_index = weights[0].index(my_bone.blenName)
+                 vgroup_data = [(j, weight[group_index]) for j, weight in enumerate(weights[1]) if weight[group_index]]
+             else:
+
+_______________________________________________
+Bf-extensions-cvs mailing list
+Bf-extensions-cvs@blender.org
+http://lists.blender.org/mailman/listinfo/bf-extensions-cvs
