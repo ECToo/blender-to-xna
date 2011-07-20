@@ -1,0 +1,201 @@
+Revision: 2130
+          http://projects.blender.org/scm/viewvc.php?view=rev&root=bf-extensions&revision=2130
+Author:   campbellbarton
+Date:     2011-07-18 05:09:07 +0000 (Mon, 18 Jul 2011)
+Log Message:
+-----------
+fix for invalid axis being allowed on import/export
+
+Modified Paths:
+--------------
+    trunk/py/scripts/addons/io_anim_bvh/export_bvh.py
+    trunk/py/scripts/addons/io_scene_3ds/__init__.py
+    trunk/py/scripts/addons/io_scene_fbx/__init__.py
+    trunk/py/scripts/addons/io_scene_map/__init__.py
+    trunk/py/scripts/addons/io_scene_obj/__init__.py
+    trunk/py/scripts/addons/io_scene_x3d/__init__.py
+
+Modified: trunk/py/scripts/addons/io_anim_bvh/export_bvh.py
+===================================================================
+--- trunk/py/scripts/addons/io_anim_bvh/export_bvh.py	2011-07-18 04:02:17 UTC (rev 2129)
++++ trunk/py/scripts/addons/io_anim_bvh/export_bvh.py	2011-07-18 05:09:07 UTC (rev 2130)
+@@ -141,21 +141,21 @@
+     # so we can write motion
+ 
+     class DecoratedBone(object):
+-        __slots__ = (\
+-        "name",  # bone name, used as key in many places
+-        "parent",  # decorated bone parent, set in a later loop
+-        "rest_bone",  # blender armature bone
+-        "pose_bone",  # blender pose bone
+-        "pose_mat",  # blender pose matrix
+-        "rest_arm_mat",  # blender rest matrix (armature space)
+-        "rest_local_mat",  # blender rest batrix (local space)
+-        "pose_imat",  # pose_mat inverted
+-        "rest_arm_imat",  # rest_arm_mat inverted
+-        "rest_local_imat",  # rest_local_mat inverted
+-        "prev_euler",  # last used euler to preserve euler compability in between keyframes
+-        "connected",  # is the bone connected to the parent bone?
+-        "rot_order",
+-        "rot_order_str",
++        __slots__ = (
++            "name",  # bone name, used as key in many places
++            "parent",  # decorated bone parent, set in a later loop
++            "rest_bone",  # blender armature bone
++            "pose_bone",  # blender pose bone
++            "pose_mat",  # blender pose matrix
++            "rest_arm_mat",  # blender rest matrix (armature space)
++            "rest_local_mat",  # blender rest batrix (local space)
++            "pose_imat",  # pose_mat inverted
++            "rest_arm_imat",  # rest_arm_mat inverted
++            "rest_local_imat",  # rest_local_mat inverted
++            "prev_euler",  # last used euler to preserve euler compability in between keyframes
++            "connected",  # is the bone connected to the parent bone?
++            "rot_order",
++            "rot_order_str",
+         )
+ 
+         _eul_order_lookup = {
+
+Modified: trunk/py/scripts/addons/io_scene_3ds/__init__.py
+===================================================================
+--- trunk/py/scripts/addons/io_scene_3ds/__init__.py	2011-07-18 04:02:17 UTC (rev 2129)
++++ trunk/py/scripts/addons/io_scene_3ds/__init__.py	2011-07-18 05:09:07 UTC (rev 2130)
+@@ -82,6 +82,9 @@
+             default='Z',
+             )
+ 
++    def check(self, context):
++        return axis_conversion_ensure(self, "axis_forward", "axis_up")
++
+     def execute(self, context):
+         from . import import_3ds
+ 
+@@ -127,6 +130,9 @@
+             default='Z',
+             )
+ 
++    def check(self, context):
++        return axis_conversion_ensure(self, "axis_forward", "axis_up")
++
+     def execute(self, context):
+         from . import export_3ds
+ 
+
+Modified: trunk/py/scripts/addons/io_scene_fbx/__init__.py
+===================================================================
+--- trunk/py/scripts/addons/io_scene_fbx/__init__.py	2011-07-18 04:02:17 UTC (rev 2129)
++++ trunk/py/scripts/addons/io_scene_fbx/__init__.py	2011-07-18 05:09:07 UTC (rev 2130)
+@@ -41,9 +41,14 @@
+ 
+ import bpy
+ from bpy.props import StringProperty, BoolProperty, FloatProperty, EnumProperty -from bpy_extras.io_utils import ExportHelper, path_reference_mode, axis_conversion
+ 
++from bpy_extras.io_utils import (ExportHelper, 
++                                 path_reference_mode,
++                                 axis_conversion,
++                                 axis_conversion_ensure,
++                                 )
+ 
++
+ class ExportFBX(bpy.types.Operator, ExportHelper):
+     '''Selection to an ASCII Autodesk FBX'''
+     bl_idname = "export_scene.fbx"
+@@ -132,6 +137,9 @@
+     def check_extension(self):
+         return self.batch_mode == 'OFF'
+ 
++    def check(self, context):
++        return axis_conversion_ensure(self, "axis_forward", "axis_up")
++
+     def execute(self, context):
+         from mathutils import Matrix
+         if not self.filepath:
+
+Modified: trunk/py/scripts/addons/io_scene_map/__init__.py
+===================================================================
+--- trunk/py/scripts/addons/io_scene_map/__init__.py	2011-07-18 04:02:17 UTC (rev 2129)
++++ trunk/py/scripts/addons/io_scene_map/__init__.py	2011-07-18 05:09:07 UTC (rev 2130)
+@@ -53,6 +53,11 @@
+     filename_ext = ".map"
+     filter_glob = StringProperty(default="*.map", options={'HIDDEN'})
+ 
++    '''
++    def check(self, context):
++        return axis_conversion_ensure(self, "axis_forward", "axis_up")
++    '''
++
+     def execute(self, context):
+         # import math
+         # from mathutils import Matrix
+
+Modified: trunk/py/scripts/addons/io_scene_obj/__init__.py
+===================================================================
+--- trunk/py/scripts/addons/io_scene_obj/__init__.py	2011-07-18 04:02:17 UTC (rev 2129)
++++ trunk/py/scripts/addons/io_scene_obj/__init__.py	2011-07-18 05:09:07 UTC (rev 2130)
+@@ -43,9 +43,15 @@
+ 
+ import bpy
+ from bpy.props import BoolProperty, FloatProperty, StringProperty, EnumProperty -from bpy_extras.io_utils import ExportHelper, ImportHelper, path_reference_mode, axis_conversion
+ 
++from bpy_extras.io_utils import (ExportHelper,
++                                 ImportHelper,
++                                 path_reference_mode,
++                                 axis_conversion,
++                                 axis_conversion_ensure,
++                                 )
+ 
++
+ class ImportOBJ(bpy.types.Operator, ImportHelper):
+     '''Load a Wavefront OBJ File'''
+     bl_idname = "import_scene.obj"
+@@ -101,6 +107,9 @@
+     # fake prop, only disables split.
+     # keep_vertex_order = BoolProperty(name="Keep Vert Order", description="Keep vert and face order, disables split options, enable for morph targets", default= True)
+ 
++    def check(self, context):
++        return axis_conversion_ensure(self, "axis_forward", "axis_up")
++
+     def execute(self, context):
+         # print("Selected: " + context.active_object.name)
+         from . import import_obj
+@@ -213,6 +222,9 @@
+ 
+     path_mode = path_reference_mode
+ 
++    def check(self, context):
++        return axis_conversion_ensure(self, "axis_forward", "axis_up")
++
+     def execute(self, context):
+         from . import export_obj
+ 
+
+Modified: trunk/py/scripts/addons/io_scene_x3d/__init__.py
+===================================================================
+--- trunk/py/scripts/addons/io_scene_x3d/__init__.py	2011-07-18 04:02:17 UTC (rev 2129)
++++ trunk/py/scripts/addons/io_scene_x3d/__init__.py	2011-07-18 05:09:07 UTC (rev 2130)
+@@ -76,6 +76,9 @@
+             default='Y',
+             )
+ 
++    def check(self, context):
++        return axis_conversion_ensure(self, "axis_forward", "axis_up")
++
+     def execute(self, context):
+         from . import import_x3d
+ 
+@@ -128,6 +131,9 @@
+ 
+     path_mode = path_reference_mode
+ 
++    def check(self, context):
++        return axis_conversion_ensure(self, "axis_forward", "axis_up")
++
+     def execute(self, context):
+         from . import export_x3d
+ 
+
+_______________________________________________
+Bf-extensions-cvs mailing list
+Bf-extensions-cvs@blender.org
+http://lists.blender.org/mailman/listinfo/bf-extensions-cvs
