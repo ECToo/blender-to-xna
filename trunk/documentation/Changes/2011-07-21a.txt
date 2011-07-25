@@ -1,0 +1,181 @@
+Revision: 2151
+          http://projects.blender.org/scm/viewvc.php?view=rev&root=bf-extensions&revision=2151
+Author:   campbellbarton
+Date:     2011-07-21 05:01:24 +0000 (Thu, 21 Jul 2011)
+Log Message:
+-----------
+reduce the number of write commands, no functional changes.
+
+Modified Paths:
+--------------
+    trunk/py/scripts/addons/io_scene_fbx/export_fbx.py
+
+Modified: trunk/py/scripts/addons/io_scene_fbx/export_fbx.py
+===================================================================
+--- trunk/py/scripts/addons/io_scene_fbx/export_fbx.py	2011-07-21 04:38:19 UTC (rev 2150)
++++ trunk/py/scripts/addons/io_scene_fbx/export_fbx.py	2011-07-21 05:01:24 UTC (rev 2151)
+@@ -50,6 +50,7 @@
+ 
+ # Make sure reserved names are not used  sane_name_mapping_ob['Scene'] = 'Scene_'
++sane_name_mapping_ob_unique.add('Scene_')
+ 
+ 
+ def increment_string(t):
+@@ -553,11 +554,13 @@
+         # eEULER_ZXY
+         # eEULER_ZYX
+ 
+-        file.write('\n\t\t\tProperty: "RotationOffset", "Vector3D", "",0,0,0')
+-        file.write('\n\t\t\tProperty: "RotationPivot", "Vector3D", "",0,0,0')
+-        file.write('\n\t\t\tProperty: "ScalingOffset", "Vector3D", "",0,0,0')
+-        file.write('\n\t\t\tProperty: "ScalingPivot", "Vector3D", "",0,0,0')
+-        file.write('\n\t\t\tProperty: "TranslationActive", "bool", "",0')
++        file.write('\n\t\t\tProperty: "RotationOffset", "Vector3D", "",0,0,0'
++                   '\n\t\t\tProperty: "RotationPivot", "Vector3D", "",0,0,0'
++                   '\n\t\t\tProperty: "ScalingOffset", "Vector3D", "",0,0,0'
++                   '\n\t\t\tProperty: "ScalingPivot", "Vector3D", "",0,0,0'
++                   '\n\t\t\tProperty: "TranslationActive", "bool", "",0'
++                   )
++
+         file.write('\n\t\t\tProperty: "TranslationMin", "Vector3D", "",%.15g,%.15g,%.15g' % constraints["loc_min"])
+         file.write('\n\t\t\tProperty: "TranslationMax", "Vector3D", "",%.15g,%.15g,%.15g' % constraints["loc_max"])
+         file.write('\n\t\t\tProperty: "TranslationMinX", "bool", "",%d' % constraints["loc_limit"][0]) @@ -566,12 +569,15 @@
+         file.write('\n\t\t\tProperty: "TranslationMaxX", "bool", "",%d' % constraints["loc_limit"][3])
+         file.write('\n\t\t\tProperty: "TranslationMaxY", "bool", "",%d' % constraints["loc_limit"][4])
+         file.write('\n\t\t\tProperty: "TranslationMaxZ", "bool", "",%d' % constraints["loc_limit"][5])
+-        file.write('\n\t\t\tProperty: "RotationOrder", "enum", "",0')
+-        file.write('\n\t\t\tProperty: "RotationSpaceForLimitOnly", "bool", "",0')
+-        file.write('\n\t\t\tProperty: "AxisLen", "double", "",10')
+-        file.write('\n\t\t\tProperty: "PreRotation", "Vector3D", "",0,0,0')
+-        file.write('\n\t\t\tProperty: "PostRotation", "Vector3D", "",0,0,0')
+-        file.write('\n\t\t\tProperty: "RotationActive", "bool", "",0')
++
++        file.write('\n\t\t\tProperty: "RotationOrder", "enum", "",0'
++                   '\n\t\t\tProperty: "RotationSpaceForLimitOnly", "bool", "",0'
++                   '\n\t\t\tProperty: "AxisLen", "double", "",10'
++                   '\n\t\t\tProperty: "PreRotation", "Vector3D", "",0,0,0'
++                   '\n\t\t\tProperty: "PostRotation", "Vector3D", "",0,0,0'
++                   '\n\t\t\tProperty: "RotationActive", "bool", "",0'
++                   )
++
+         file.write('\n\t\t\tProperty: "RotationMin", "Vector3D", "",%.15g,%.15g,%.15g' % constraints["rot_min"])
+         file.write('\n\t\t\tProperty: "RotationMax", "Vector3D", "",%.15g,%.15g,%.15g' % constraints["rot_max"])
+         file.write('\n\t\t\tProperty: "RotationMinX", "bool", "",%d' % constraints["rot_limit"][0]) @@ -580,26 +586,29 @@
+         file.write('\n\t\t\tProperty: "RotationMaxX", "bool", "",%d' % constraints["rot_limit"][0])
+         file.write('\n\t\t\tProperty: "RotationMaxY", "bool", "",%d' % constraints["rot_limit"][1])
+         file.write('\n\t\t\tProperty: "RotationMaxZ", "bool", "",%d' % constraints["rot_limit"][2])
+-        file.write('\n\t\t\tProperty: "RotationStiffnessX", "double", "",0')
+-        file.write('\n\t\t\tProperty: "RotationStiffnessY", "double", "",0')
+-        file.write('\n\t\t\tProperty: "RotationStiffnessZ", "double", "",0')
+-        file.write('\n\t\t\tProperty: "MinDampRangeX", "double", "",0')
+-        file.write('\n\t\t\tProperty: "MinDampRangeY", "double", "",0')
+-        file.write('\n\t\t\tProperty: "MinDampRangeZ", "double", "",0')
+-        file.write('\n\t\t\tProperty: "MaxDampRangeX", "double", "",0')
+-        file.write('\n\t\t\tProperty: "MaxDampRangeY", "double", "",0')
+-        file.write('\n\t\t\tProperty: "MaxDampRangeZ", "double", "",0')
+-        file.write('\n\t\t\tProperty: "MinDampStrengthX", "double", "",0')
+-        file.write('\n\t\t\tProperty: "MinDampStrengthY", "double", "",0')
+-        file.write('\n\t\t\tProperty: "MinDampStrengthZ", "double", "",0')
+-        file.write('\n\t\t\tProperty: "MaxDampStrengthX", "double", "",0')
+-        file.write('\n\t\t\tProperty: "MaxDampStrengthY", "double", "",0')
+-        file.write('\n\t\t\tProperty: "MaxDampStrengthZ", "double", "",0')
+-        file.write('\n\t\t\tProperty: "PreferedAngleX", "double", "",0')
+-        file.write('\n\t\t\tProperty: "PreferedAngleY", "double", "",0')
+-        file.write('\n\t\t\tProperty: "PreferedAngleZ", "double", "",0')
+-        file.write('\n\t\t\tProperty: "InheritType", "enum", "",0')
+-        file.write('\n\t\t\tProperty: "ScalingActive", "bool", "",0')
++
++        file.write('\n\t\t\tProperty: "RotationStiffnessX", "double", "",0'
++                   '\n\t\t\tProperty: "RotationStiffnessY", "double", "",0'
++                   '\n\t\t\tProperty: "RotationStiffnessZ", "double", "",0'
++                   '\n\t\t\tProperty: "MinDampRangeX", "double", "",0'
++                   '\n\t\t\tProperty: "MinDampRangeY", "double", "",0'
++                   '\n\t\t\tProperty: "MinDampRangeZ", "double", "",0'
++                   '\n\t\t\tProperty: "MaxDampRangeX", "double", "",0'
++                   '\n\t\t\tProperty: "MaxDampRangeY", "double", "",0'
++                   '\n\t\t\tProperty: "MaxDampRangeZ", "double", "",0'
++                   '\n\t\t\tProperty: "MinDampStrengthX", "double", "",0'
++                   '\n\t\t\tProperty: "MinDampStrengthY", "double", "",0'
++                   '\n\t\t\tProperty: "MinDampStrengthZ", "double", "",0'
++                   '\n\t\t\tProperty: "MaxDampStrengthX", "double", "",0'
++                   '\n\t\t\tProperty: "MaxDampStrengthY", "double", "",0'
++                   '\n\t\t\tProperty: "MaxDampStrengthZ", "double", "",0'
++                   '\n\t\t\tProperty: "PreferedAngleX", "double", "",0'
++                   '\n\t\t\tProperty: "PreferedAngleY", "double", "",0'
++                   '\n\t\t\tProperty: "PreferedAngleZ", "double", "",0'
++                   '\n\t\t\tProperty: "InheritType", "enum", "",0'
++                   '\n\t\t\tProperty: "ScalingActive", "bool", "",0'
++                   )
++
+         file.write('\n\t\t\tProperty: "ScalingMin", "Vector3D", "",%.15g,%.15g,%.15g' % constraints["sca_min"])
+         file.write('\n\t\t\tProperty: "ScalingMax", "Vector3D", "",%.15g,%.15g,%.15g' % constraints["sca_max"])
+         file.write('\n\t\t\tProperty: "ScalingMinX", "bool", "",%d' % constraints["sca_limit"][0]) @@ -608,19 +617,23 @@
+         file.write('\n\t\t\tProperty: "ScalingMaxX", "bool", "",%d' % constraints["sca_limit"][3])
+         file.write('\n\t\t\tProperty: "ScalingMaxY", "bool", "",%d' % constraints["sca_limit"][4])
+         file.write('\n\t\t\tProperty: "ScalingMaxZ", "bool", "",%d' % constraints["sca_limit"][5])
+-        file.write('\n\t\t\tProperty: "GeometricTranslation", "Vector3D", "",0,0,0')
+-        file.write('\n\t\t\tProperty: "GeometricRotation", "Vector3D", "",0,0,0')
+-        file.write('\n\t\t\tProperty: "GeometricScaling", "Vector3D", "",1,1,1')
+-        file.write('\n\t\t\tProperty: "LookAtProperty", "object", ""')
+-        file.write('\n\t\t\tProperty: "UpVectorProperty", "object", ""')
+-        file.write('\n\t\t\tProperty: "Show", "bool", "",1')
+-        file.write('\n\t\t\tProperty: "NegativePercentShapeSupport", "bool", "",1')
+-        file.write('\n\t\t\tProperty: "DefaultAttributeIndex", "int", "",0')
++
++        file.write('\n\t\t\tProperty: "GeometricTranslation", "Vector3D", "",0,0,0'
++                   '\n\t\t\tProperty: "GeometricRotation", "Vector3D", "",0,0,0'
++                   '\n\t\t\tProperty: "GeometricScaling", "Vector3D", "",1,1,1'
++                   '\n\t\t\tProperty: "LookAtProperty", "object", ""'
++                   '\n\t\t\tProperty: "UpVectorProperty", "object", ""'
++                   '\n\t\t\tProperty: "Show", "bool", "",1'
++                   '\n\t\t\tProperty: "NegativePercentShapeSupport", "bool", "",1'
++                   '\n\t\t\tProperty: "DefaultAttributeIndex", "int", "",0'
++                   )
++
+         if ob and not isinstance(ob, bpy.types.Bone):
+             # Only mesh objects have color
+-            file.write('\n\t\t\tProperty: "Color", "Color", "A",0.8,0.8,0.8')
+-            file.write('\n\t\t\tProperty: "Size", "double", "",100')
+-            file.write('\n\t\t\tProperty: "Look", "enum", "",1')
++            file.write('\n\t\t\tProperty: "Color", "Color", "A",0.8,0.8,0.8'
++                       '\n\t\t\tProperty: "Size", "double", "",100'
++                       '\n\t\t\tProperty: "Look", "enum", "",1'
++                       )
+ 
+         return loc, rot, scale, matrix, matrix_rot
+ 
+@@ -648,15 +661,16 @@
+                    (my_bone.blenBone.head_local - my_bone.blenBone.tail_local).length)
+ 
+         #file.write('\n\t\t\tProperty: "LimbLength", "double", "",1')
+-        file.write('\n\t\t\tProperty: "Color", "ColorRGB", "",0.8,0.8,0.8')
+-        file.write('\n\t\t\tProperty: "Color", "Color", "A",0.8,0.8,0.8')
+-        file.write('\n\t\t}')
+-        file.write('\n\t\tMultiLayer: 0')
+-        file.write('\n\t\tMultiTake: 1')
+-        file.write('\n\t\tShading: Y')
+-        file.write('\n\t\tCulling: "CullingOff"')
+-        file.write('\n\t\tTypeFlags: "Skeleton"')
+-        file.write('\n\t}')
++        file.write('\n\t\t\tProperty: "Color", "ColorRGB", "",0.8,0.8,0.8'
++                   '\n\t\t\tProperty: "Color", "Color", "A",0.8,0.8,0.8'
++                   '\n\t\t}'
++                   '\n\t\tMultiLayer: 0'
++                   '\n\t\tMultiTake: 1'
++                   '\n\t\tShading: Y'
++                   '\n\t\tCulling: "CullingOff"'
++                   '\n\t\tTypeFlags: "Skeleton"'
++                   '\n\t}'
++                   )
+ 
+     def write_camera_switch():
+         file.write('''
+@@ -685,90 +699,99 @@
+         file.write('\n\t\tVersion: 232')
+         write_object_props(None, loc)
+ 
+
+@@ Diff output truncated at 10240 characters. @@ _______________________________________________
+Bf-extensions-cvs mailing list
+Bf-extensions-cvs@blender.org
+http://lists.blender.org/mailman/listinfo/bf-extensions-cvs
