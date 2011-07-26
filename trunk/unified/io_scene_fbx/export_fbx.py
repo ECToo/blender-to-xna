@@ -2491,7 +2491,7 @@ Connections:  {''')
             tmp_act_count = 0
             for my_arm in ob_arms:
 
-                # get the default name
+                # get the default name - this is the current action
                 if not blenActionDefault:
                     blenActionDefault = my_arm.blenAction
 
@@ -2538,30 +2538,38 @@ Takes:  {''')
                     print('\taction: "%s" has no armature using it, skipping' % blenAction.name)
                     continue
 
+            # XNA does not need a Default_Take (JCB)
+            take_name = "Default_Take"
             if blenAction is None:
                 # Warning, this only accounts for tmp_actions being [None]
-                file.write('\n\tTake: "Default Take" {')
                 act_start = start
                 act_end = end
             else:
                 # use existing name
                 if blenAction == blenActionDefault:  # have we already got the name
-                    file.write('\n\tTake: "%s" {' % sane_name_mapping_take[blenAction.name])
+                    take_name = sane_name_mapping_take[blenAction.name]
                 else:
-                    file.write('\n\tTake: "%s" {' % sane_takename(blenAction))
+                    take_name = sane_takename(blenAction)
 
                 act_start, act_end = blenAction.frame_range
                 act_start = int(act_start)
                 act_end = int(act_end)
 
+                # Start the take (JCB)
+                file.write('\n\tTake: "%s" {' % take_name)
+
                 # Set the action active
                 for my_arm in ob_arms:
                     if my_arm.blenObject.animation_data and blenAction in my_arm.blenActionList:
                         my_arm.blenObject.animation_data.action = blenAction
-                        # print('\t\tSetting Action!', blenAction)
-                # scene.update(1)
 
-            file.write('\n\t\tFileName: "Default_Take.tak"')  # ??? - not sure why this is needed
+            if use_default_take:
+                # No one knows why this is here! Can it be removed? (JCB)
+                file.write('\n\t\tFileName: "Default_Take.tak"')
+            else:
+                # XNA works best with individual action names (JCB)
+                file.write('\n\t\tFileName: "%s.tak"' % take_name)
+                
             file.write('\n\t\tLocalTime: %i,%i' % (fbx_time(act_start - 1), fbx_time(act_end - 1)))  # ??? - not sure why this is needed
             file.write('\n\t\tReferenceTime: %i,%i' % (fbx_time(act_start - 1), fbx_time(act_end - 1)))  # ??? - not sure why this is needed
 
@@ -2615,16 +2623,14 @@ Takes:  {''')
                             elif	TX_CHAN == 'S':
                                 context_bone_anim_vecs = [mtx[0].to_scale() for mtx in context_bone_anim_mats]
                             elif	TX_CHAN == 'R':
-                                # Was....
-                                # elif 	TX_CHAN=='R':	context_bone_anim_vecs = [mtx[1].to_euler()			for mtx in context_bone_anim_mats]
-                                #
-                                # ...but we need to use the previous euler for compatible conversion.
+                                # Need to use the previous euler for compatible conversion.
                                 context_bone_anim_vecs = []
                                 prev_eul = None
                                 for mtx in context_bone_anim_mats:
                                     if prev_eul:
                                         prev_eul = mtx[1].to_euler('XYZ', prev_eul)
                                     else:
+                                        # first pass only
                                         prev_eul = mtx[1].to_euler()
                                     context_bone_anim_vecs.append(tuple_rad_to_deg(prev_eul))
 
@@ -2908,12 +2914,12 @@ def save(operator, context,
 
 
 # TODO for XNA: (JCB)
-# done - Tick box to include ONLY animations
-#       This means two tick boxes, 'All Animations' and 'Only Include Animations'
-# done - Include the BIND_POSE line in the output
-# - Tick box to name the selected animation Default_Take, Include Default_Take
-#       XNA - Unnecessary take name is undesirable!
+# done - Tick box to include ONLY animations, smaller quicker export for individual XNA animations
+# done - Include the BIND_POSE line in the output - essential for XNA
+# done - Tick box to name the selected animation Default_Take.tak not needed for XNA
 # note - Leave the armature as an empty for now.  I think making it a limb node adds it as a bone unnecessarily.
+# TEST WITH XNA - the above might already work
+# - Change matrix rotation: see: TX_CHAN == 'R'
         
         
 
