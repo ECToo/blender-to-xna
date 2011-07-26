@@ -1,0 +1,121 @@
+Revision: 2169
+          http://projects.blender.org/scm/viewvc.php?view=rev&root=bf-extensions&revision=2169
+Author:   campbellbarton
+Date:     2011-07-25 02:02:10 +0000 (Mon, 25 Jul 2011)
+Log Message:
+-----------
+reverse matrix, vector multiplication order, previous order deprecated.
+
+Modified Paths:
+--------------
+    trunk/py/scripts/addons/io_scene_3ds/import_3ds.py
+    trunk/py/scripts/addons/io_scene_fbx/export_fbx.py
+    trunk/py/scripts/addons/io_scene_map/__init__.py
+    trunk/py/scripts/addons/io_scene_obj/export_obj.py
+    trunk/py/scripts/addons/io_scene_x3d/export_x3d.py
+
+Modified: trunk/py/scripts/addons/io_scene_3ds/import_3ds.py
+===================================================================
+--- trunk/py/scripts/addons/io_scene_3ds/import_3ds.py	2011-07-25 01:39:18 UTC (rev 2168)
++++ trunk/py/scripts/addons/io_scene_3ds/import_3ds.py	2011-07-25 02:02:10 UTC (rev 2169)
+@@ -767,7 +767,7 @@
+         if ob.type == 'MESH':
+             pivot = pivot_list[ind]
+             pivot_matrix = object_matrix.get(ob, mathutils.Matrix())  # unlikely to fail
+-            pivot_matrix = mathutils.Matrix.Translation(-pivot * pivot_matrix.to_3x3())
++            pivot_matrix = 
++ mathutils.Matrix.Translation(pivot_matrix.to_3x3() * -pivot)
+             ob.data.transform(pivot_matrix)
+ 
+ 
+
+Modified: trunk/py/scripts/addons/io_scene_fbx/export_fbx.py
+===================================================================
+--- trunk/py/scripts/addons/io_scene_fbx/export_fbx.py	2011-07-25 01:39:18 UTC (rev 2168)
++++ trunk/py/scripts/addons/io_scene_fbx/export_fbx.py	2011-07-25 02:02:10 UTC (rev 2169)
+@@ -374,7 +374,7 @@
+             if obj_type == 'LAMP':
+                 matrix_rot = matrix_rot * mtx_x90
+             elif obj_type == 'CAMERA':
+-                y = Vector((0.0, 1.0, 0.0)) * matrix_rot
++                y = matrix_rot * Vector((0.0, 1.0, 0.0))
+                 matrix_rot = Matrix.Rotation(math.pi / 2.0, 3, y) * matrix_rot
+ 
+             return matrix_rot
+@@ -467,7 +467,7 @@
+                 if ob and ob.type == 'LAMP':
+                     matrix_rot = matrix_rot * mtx_x90
+                 elif ob and ob.type == 'CAMERA':
+-                    y = Vector((0.0, 1.0, 0.0)) * matrix_rot
++                    y = matrix_rot * Vector((0.0, 1.0, 0.0))
+                     matrix_rot = Matrix.Rotation(math.pi / 2.0, 3, y) * matrix_rot
+                 # else do nothing.
+ 
+@@ -922,8 +922,8 @@
+                    )
+ 
+         file.write('\n\t\tPosition: %.6f,%.6f,%.6f' % loc)
+-        file.write('\n\t\tUp: %.6f,%.6f,%.6f' % tuple(Vector((0.0, 1.0, 0.0)) * matrix_rot))
+-        file.write('\n\t\tLookAt: %.6f,%.6f,%.6f' % tuple(Vector((0.0, 0.0, -1.0)) * matrix_rot))
++        file.write('\n\t\tUp: %.6f,%.6f,%.6f' % (matrix_rot * Vector((0.0, 1.0, 0.0)))[:])
++        file.write('\n\t\tLookAt: %.6f,%.6f,%.6f' % (matrix_rot * 
++ Vector((0.0, 0.0, -1.0)))[:])
+ 
+         #file.write('\n\t\tUp: 0,0,0' )
+         #file.write('\n\t\tLookAt: 0,0,0' )
+
+Modified: trunk/py/scripts/addons/io_scene_map/__init__.py
+===================================================================
+--- trunk/py/scripts/addons/io_scene_map/__init__.py	2011-07-25 01:39:18 UTC (rev 2168)
++++ trunk/py/scripts/addons/io_scene_map/__init__.py	2011-07-25 02:02:10 UTC (rev 2169)
+@@ -24,10 +24,11 @@
+     "blender": (2, 5, 7),
+     "api": 35622,
+     "location": "File > Export",
+-    "description": "Export MAP brushes, nurbs surfaces, lamps and empties as map nodes",
++    "description": ("Export MAP brushes, nurbs surfaces, "
++                    "lamps and empties as map nodes"),
+     "warning": "",
+-    "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.5/Py/"\
+-        "Scripts/Import-Export/Quake_MAP",
++    "wiki_url": ("http://wiki.blender.org/index.php/Extensions:2.5/Py/"
++                 "Scripts/Import-Export/Quake_MAP"),
+     "tracker_url": "",
+     "support": 'OFFICIAL',
+     "category": "Import-Export"}
+
+Modified: trunk/py/scripts/addons/io_scene_obj/export_obj.py
+===================================================================
+--- trunk/py/scripts/addons/io_scene_obj/export_obj.py	2011-07-25 01:39:18 UTC (rev 2168)
++++ trunk/py/scripts/addons/io_scene_obj/export_obj.py	2011-07-25 02:02:10 UTC (rev 2169)
+@@ -172,8 +172,7 @@
+         do_endpoints = (do_closed == 0) and nu.use_endpoint_u
+ 
+         for pt in nu.points:
+-            pt = pt.co.to_3d() * ob_mat
+-            file.write('v %.6f %.6f %.6f\n' % (pt[0], pt[1], pt[2]))
++            file.write('v %.6f %.6f %.6f\n' % (ob_mat * 
++ pt.co.to_3d())[:])
+             pt_num += 1
+         tot_verts += pt_num
+ 
+
+Modified: trunk/py/scripts/addons/io_scene_x3d/export_x3d.py
+===================================================================
+--- trunk/py/scripts/addons/io_scene_x3d/export_x3d.py	2011-07-25 01:39:18 UTC (rev 2168)
++++ trunk/py/scripts/addons/io_scene_x3d/export_x3d.py	2011-07-25 02:02:10 UTC (rev 2169)
+@@ -74,7 +74,7 @@
+ 
+ 
+ def matrix_direction_neg_z(matrix):
+-    return (mathutils.Vector((0.0, 0.0, -1.0)) * matrix.to_3x3()).normalized()[:]
++    return (matrix.to_3x3() * mathutils.Vector((0.0, 0.0, 
++ -1.0))).normalized()[:]
+ 
+ 
+ def prefix_quoted_str(value, prefix):
+
+_______________________________________________
+Bf-extensions-cvs mailing list
+Bf-extensions-cvs@blender.org
+http://lists.blender.org/mailman/listinfo/bf-extensions-cvs

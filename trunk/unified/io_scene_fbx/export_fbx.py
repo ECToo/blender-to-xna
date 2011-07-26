@@ -1362,10 +1362,13 @@ def save_single(operator, scene, filepath="",
             i += 1
 
         # write loose edges as faces.
+        # XNA - Loose edges cause intermittent errors when importing (JCB)
         for ed in me_edges:
             if ed.is_loose:
                 ed_val = ed.vertices[:]
                 ed_val = ed_val[0], ed_val[-1] ^ -1
+                # XNA - best to fix the model (JCB)
+                print('Warning: Lone edge found: Edges that are not part of a face cause intermittent errors with some importers!')
 
                 if i == -1:
                     file.write('%i,%i' % ed_val)
@@ -1377,6 +1380,7 @@ def save_single(operator, scene, filepath="",
                     file.write(',%i,%i' % ed_val)
             i += 1
 
+        # XNA does not need the edges (JCB) - no idea if they do any harm
         file.write('\n\t\tEdges: ')
         i = -1
         for ed in me_edges:
@@ -2865,17 +2869,22 @@ def save(operator, context,
         return {'FINISHED'}  # so the script wont run after we have batch exported.
 
 
-
+# TODO: (JCB)
+# - Drop down, Model with animations, Model with bind pose, Animations only 
+# - Tick box to name the selected animation Default_Take, Include Default_Take
+#       XNA - Unnecessary take name is undesirable!
+        
+        
 
 # NOTES (all line numbers correspond to original export_fbx.py (under release/scripts)
 # - Draw.PupMenu alternative in 2.5?, temporarily replaced PupMenu with print
 # - get rid of bpy.path.clean_name somehow
 # + fixed: isinstance(inst, bpy.types.*) doesn't work on RNA objects: line 565
 # + get rid of BPyObject_getObjectArmature, move it in RNA?
-# - BATCH_ENABLE and BATCH_GROUP options: line 327
+# - BATCH_ENABLE and BATCH_GROUP options: line 327 - Has this been done because they no longer exist in this file?
 # - implement all BPyMesh_* used here with RNA
 # - getDerivedObjects is not fully replicated with .dupli* funcs
-# - talk to Campbell, this code won't work? lines 1867-1875
+# - talk to Campbell, this code won't work? lines 1867-1875 - Out of date can this comment line be removed?
 # - don't know what those colbits are, do we need them? they're said to be deprecated in DNA_object_types.h: 1886-1893
 # - no hq normals: 1900-1901
 
