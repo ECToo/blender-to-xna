@@ -2919,6 +2919,9 @@ def save(operator, context,
 # done - Tick box to name the selected animation Default_Take.tak not needed for XNA
 # note - Leave the armature as an empty for now.  I think making it a limb node adds it as a bone unnecessarily.
 # TEST WITH XNA - the above might already work
+# - Find out why the take is still called Default_Take.tak and the name is Default Take
+# - Save relative filenames not full paths
+# - Change Limb to LimbNode
 # - Change matrix rotation: see: TX_CHAN == 'R'
         
         
