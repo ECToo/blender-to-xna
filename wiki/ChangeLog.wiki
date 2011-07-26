@@ -3,14 +3,12 @@
 
 == List of Changes ==
 
-* Added warning about lone edges
-
-* Added option to only output animations
-
-* Added the essential BIND_POSE line to the output
+  * Added warning about lone edges
+  * Added option to only output animations
+  * Added the essential BIND_POSE line to the output
 
 
 
 == Notes ==
 
-* Decided to leave the armature as an empty for now.  Previously I had changed this to a LimbNode but I think that adds it unecessarily as a bone!
+  * Decided to leave the armature as an empty for now.  Previously I had changed this to a LimbNode but I think that adds it unecessarily as a bone!
