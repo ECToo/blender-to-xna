@@ -8,6 +8,8 @@
   * Added warning about lone edges
   * Added option to only output animations
   * Added the essential BIND_POSE line to the output
+  * Option to exclude the Default_Take.tak name
+  * Use the action name for the .tak filename
 
 
 == Notes ==
