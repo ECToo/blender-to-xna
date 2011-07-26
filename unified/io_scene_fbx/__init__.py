@@ -21,10 +21,10 @@
 bl_info = {
     "name": "Autodesk FBX format",
     "author": "Campbell Barton",
-    "blender": (2, 5, 7),
-    "api": 35622,
+    "blender": (2, 5, 8),
+    "api": 38691,
     "location": "File > Import-Export",
-    "description": "Import-Export FBX meshes, UV's, vertex colors, materials, textures, cameras and lamps",
+    "description": "Export FBX meshes, UV's, vertex colors, materials, textures, cameras, lamps and actions",
     "warning": "",
     "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.5/Py/"\
         "Scripts/Import-Export/Autodesk_FBX",
@@ -62,8 +62,10 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
     # to the class instance from the operator settings before calling.
 
     use_selection = BoolProperty(name="Selected Objects", description="Export selected objects on visible layers", default=False)
-# 	EXP_OBS_SCENE = BoolProperty(name="Scene Objects", description="Export all objects in this scene", default=True)
-    global_scale = FloatProperty(name="Scale", description="Scale all data, (Note! some imports dont support scaled armatures)", min=0.01, max=1000.0, soft_min=0.01, soft_max=1000.0, default=1.0)
+    # XNA needs each animation in a separate FBX file but it does not need the model each time (JCB)
+    takes_only = BoolProperty(name="Only Animations", description="Export will not include any meshes", default=False)
+    # XNA does not support scaled armatures (JCB)
+    global_scale = FloatProperty(name="Scale", description="Scale all data. Some importers do not support scaled armatures!", min=0.01, max=1000.0, soft_min=0.01, soft_max=1000.0, default=1.0)
 
     axis_forward = EnumProperty(
             name="Forward",
@@ -118,7 +120,9 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
     ANIM_OPTIMIZE = BoolProperty(name="Optimize Keyframes", description="Remove double keyframes", default=True)
     ANIM_OPTIMIZE_PRECISSION = FloatProperty(name="Precision", description="Tolerence for comparing double keyframes (higher for greater accuracy)", min=1, max=16, soft_min=1, soft_max=16, default=6.0)
 # 	ANIM_ACTION_ALL = BoolProperty(name="Current Action", description="Use actions currently applied to the armatures (use scene start/end frame)", default=True)
-    ANIM_ACTION_ALL = BoolProperty(name="All Actions", description="Use all actions for armatures, if false, use current action", default=False)
+    ANIM_ACTION_ALL = BoolProperty(name="All Actions", description="Export all actions for armatures or just the currently selected action", default=False)
+    # XNA needs different names for each take having the first one always called Default_Take is unhelpful (JCB)
+    use_default_take = BoolProperty(name="Include Default_Take", description="Include an action called Default_Take", default=False)
 
     batch_mode = EnumProperty(
             name="Batch Mode",
@@ -137,6 +141,21 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
     def check_extension(self):
         return self.batch_mode == 'OFF'
 
+    def autoname_file(self):
+        if takes_only and not ANIM_ACTION_ALL:
+            # get the current action name
+            currentAction = ""
+            for arm_obj in bpy.context.scene.objects:
+                if arm_obj.type == 'ARMATURE':
+                    if arm_obj.animation_data:
+                        if currentAction == "":
+                            currentAction = arm_obj.animation_data.action.name
+            # XNA can only use one take per file so there will be a lot of FBX files for the same model (JCB)
+            default_path = os.path.splitext(bpy.data.filepath)[0] + "-" + currentAction + ".fbx"
+            return self.filepath = default_path
+        else:
+            return self.filepath
+    
     def check(self, context):
         return axis_conversion_ensure(self, "axis_forward", "axis_up")
 
