@@ -2870,7 +2870,8 @@ def save(operator, context,
 
 
 # TODO: (JCB)
-# - Drop down, Model with animations, Model with bind pose, Animations only 
+# - Tick box to include ONLY animations
+#       This means two tick boxes, 'All Animations' and 'Only Include Animations'
 # - Tick box to name the selected animation Default_Take, Include Default_Take
 #       XNA - Unnecessary take name is undesirable!
         
