@@ -137,11 +137,8 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
 
     path_mode = path_reference_mode
 
-    @property
-    def check_extension(self):
-        return self.batch_mode == 'OFF'
-
-    def autoname_file(self):
+    @classmethod
+    def poll(self, context):
         if takes_only and not ANIM_ACTION_ALL:
             # get the current action name
             currentAction = ""
@@ -151,11 +148,15 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
                         if currentAction == "":
                             currentAction = arm_obj.animation_data.action.name
             # XNA can only use one take per file so there will be a lot of FBX files for the same model (JCB)
-            default_path = os.path.splitext(bpy.data.filepath)[0] + "-" + currentAction + ".fbx"
-            return self.filepath = default_path
+            # use the action name as a suffix to the existing blend filename.
+            return self.filepath = os.path.splitext(bpy.data.filepath)[0] + "-" + currentAction + ".fbx"
         else:
             return self.filepath
     
+    @property
+    def check_extension(self):
+        return self.batch_mode == 'OFF'
+
     def check(self, context):
         return axis_conversion_ensure(self, "axis_forward", "axis_up")
 
