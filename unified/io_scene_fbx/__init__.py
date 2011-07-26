@@ -123,6 +123,8 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
     ANIM_ACTION_ALL = BoolProperty(name="All Actions", description="Export all actions for armatures or just the currently selected action", default=False)
     # XNA needs different names for each take having the first one always called Default_Take is unhelpful (JCB)
     use_default_take = BoolProperty(name="Include Default_Take", description="Include an action called Default_Take", default=False)
+    # XNA - there is at least one place where XNA requires a different format to others!!!  I think the others are wrong! (JCB)
+    xna_format = BoolProperty(name="XNA File Format", description="Slight format changes to the file to be compatible with Microsoft XNA", default=False)
 
     batch_mode = EnumProperty(
             name="Batch Mode",

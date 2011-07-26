@@ -202,6 +202,9 @@ def save_single(operator, scene, filepath="",
         ANIM_ACTION_ALL=False,
         use_metadata=True,
         path_mode='AUTO',
+        takes_only=False,
+        use_default_take=False,
+        xna_format=False,
     ):
 
     import bpy_extras.io_utils
@@ -2025,7 +2028,9 @@ def save_single(operator, scene, filepath="",
 
         # Not used at the moment
         # my_bone.calcRestMatrixLocal()
-        bone_deformer_count += len(my_bone.blenMeshes)
+        # Useful to export just takes (JCB)
+        if not takes_only:
+            bone_deformer_count += len(my_bone.blenMeshes)
 
     del my_bone_blenParent
 
@@ -2063,6 +2068,9 @@ def save_single(operator, scene, filepath="",
 
     del tmp_obmapping
     # Finished finding groups we use
+    
+    # == WRITE OBJECTS TO THE FILE ==
+    # == From now on we are building the FBX file from the information collected above (JCB)
 
     materials = [(sane_matname(mat_tex_pair), mat_tex_pair) for mat_tex_pair in materials.keys()]
     textures = [(sane_texname(tex), tex) for tex in textures.keys()  if tex]
@@ -2070,6 +2078,24 @@ def save_single(operator, scene, filepath="",
     textures.sort(key=lambda m: m[0])
 
     camera_count = 8
+    
+    # Ignore some objects when we only want animations (JCB)
+    if takes_only:
+        # Clear the things we do not want so the counts are valid (JCB)
+        ob_meshes = None
+        ob_lights = None
+        ob_cameras = None
+        materials = None
+        textures = None
+        # Add them back as empty to avoid script errors (JCB)
+        ob_meshes = []
+        ob_lights = []
+        ob_cameras = []
+        materials = []
+        textures = []
+        camera_count = 0
+    # XNA does not appear to care about the Definitions: counts, it loads regardless (JCB)
+    
     file.write('''
 
 ; Object definitions
@@ -2130,9 +2156,11 @@ Definitions:  {
         if my_mesh.fbxArm:
             tmp += 1
 
-    # Add subdeformers
-    for my_bone in ob_bones:
-        tmp += len(my_bone.blenMeshes)
+    # (JCB)
+    if not takes_only:
+        # Add subdeformers
+        for my_bone in ob_bones:
+            tmp += len(my_bone.blenMeshes)
 
     if tmp:
         file.write('''
@@ -2141,12 +2169,13 @@ Definitions:  {
 	}''' % tmp)
     del tmp
 
-    # we could avoid writing this possibly but for now just write it
-
-    file.write('''
-	ObjectType: "Pose" {
-		Count: 1
-	}''')
+    # (JCB)
+    if not takes_only:
+        # we could avoid writing this possibly but for now just write it
+        file.write('''
+        ObjectType: "Pose" {
+            Count: 1
+        }''')
 
     if groups:
         file.write('''
@@ -2167,8 +2196,10 @@ Definitions:  {
 
 Objects:  {''')
 
-    # To comply with other FBX FILES
-    write_camera_switch()
+    # (JCB)
+    if not takes_only:
+        # To comply with other FBX FILES
+        write_camera_switch()
 
     for my_null in ob_null:
         write_null(my_null)
@@ -2189,7 +2220,9 @@ Objects:  {''')
     for my_bone in ob_bones:
         write_bone(my_bone)
 
-    write_camera_default()
+    # (JCB)
+    if not takes_only:
+        write_camera_default()
 
     for matname, (mat, tex) in materials:
         write_material(matname, mat)  # We only need to have a material per image pair, but no need to write any image info into the material (dumb fbx standard)
@@ -2219,30 +2252,33 @@ Objects:  {''')
             else:
                 weights = meshNormalizedWeights(my_mesh.blenObject, my_mesh.blenData)
 
-            #for bonename, bone, obname, bone_mesh, armob in ob_bones:
-            for my_bone in ob_bones:
-                if me in iter(my_bone.blenMeshes.values()):
-                    write_sub_deformer_skin(my_mesh, my_bone, weights)
+            # (JCB)
+            if not takes_only:
+                for my_bone in ob_bones:
+                    if me in iter(my_bone.blenMeshes.values()):
+                        write_sub_deformer_skin(my_mesh, my_bone, weights)
 
-    # Write pose's really weird, only needed when an armature and mesh are used together
-    # each by themselves dont need pose data. for now only pose meshes and bones
+    # Write pose is really weird, only needed when an armature and mesh are used together
+    # each by themselves do not need pose data. For now only pose meshes and bones
 
-    file.write('''
-	Pose: "Pose::BIND_POSES", "BindPose" {
-		Type: "BindPose"
-		Version: 100
-		Properties60:  {
-		}
-		NbPoseNodes: ''')
-    file.write(str(len(pose_items)))
+    # (JCB)
+    if not takes_only:
+        file.write('''
+        Pose: "Pose::BIND_POSES", "BindPose" {
+            Type: "BindPose"
+            Version: 100
+            Properties60:  {
+            }
+            NbPoseNodes: ''')
+        file.write(str(len(pose_items)))
 
-    for fbxName, matrix in pose_items:
-        file.write('\n\t\tPoseNode:  {')
-        file.write('\n\t\t\tNode: "Model::%s"' % fbxName)
-        file.write('\n\t\t\tMatrix: %s' % mat4x4str(matrix if matrix else Matrix()))
-        file.write('\n\t\t}')
+        for fbxName, matrix in pose_items:
+            file.write('\n\t\tPoseNode:  {')
+            file.write('\n\t\t\tNode: "Model::%s"' % fbxName)
+            file.write('\n\t\t\tMatrix: %s' % mat4x4str(matrix if matrix else Matrix()))
+            file.write('\n\t\t}')
 
-    file.write('\n\t}')
+        file.write('\n\t}')
 
     # Finish Writing Objects
     # Write global settings
@@ -2321,14 +2357,17 @@ Relations:  {''')
         if my_mesh.fbxArm:
             file.write('\n\tDeformer: "Deformer::Skin %s", "Skin" {\n\t}' % my_mesh.fbxName)
 
-    #for bonename, bone, obname, me, armob in ob_bones:
-    for my_bone in ob_bones:
-        for fbxMeshObName in my_bone.blenMeshes:  # .keys() - fbxMeshObName
-            # is this bone effecting a mesh?
-            file.write('\n\tDeformer: "SubDeformer::Cluster %s %s", "Cluster" {\n\t}' % (fbxMeshObName, my_bone.fbxName))
+    # (JCB)
+    if not takes_only:
+        for my_bone in ob_bones:
+            for fbxMeshObName in my_bone.blenMeshes:  # .keys() - fbxMeshObName
+                # is this bone effecting a mesh?
+                file.write('\n\tDeformer: "SubDeformer::Cluster %s %s", "Cluster" {\n\t}' % (fbxMeshObName, my_bone.fbxName))
 
-    # This should be at the end
-    # file.write('\n\tPose: "Pose::BIND_POSES", "BindPose" {\n\t}')
+        # XNA requires the BIND_POSES line.  It is essential and stops the animations working without it! (JCB)
+        # It was commented out in the non-XNA version!  I do not know why! (JCB)
+        if xna_format:
+            file.write('\n\tPose: "Pose::BIND_POSES", "BindPose" {\n\t}')
 
     for groupname, group in groups:
         file.write('\n\tGroupSelection: "GroupSelection::%s", "Default" {\n\t}' % groupname)
@@ -2373,22 +2412,21 @@ Connections:  {''')
         for texname, tex in textures:
             file.write('\n\tConnect: "OO", "Video::%s", "Texture::%s"' % (texname, texname))
 
-    for my_mesh in ob_meshes:
-        if my_mesh.fbxArm:
-            file.write('\n\tConnect: "OO", "Deformer::Skin %s", "Model::%s"' % (my_mesh.fbxName, my_mesh.fbxName))
+    # (JCB)
+    if not takes_only:
+        for my_mesh in ob_meshes:
+            if my_mesh.fbxArm:
+                file.write('\n\tConnect: "OO", "Deformer::Skin %s", "Model::%s"' % (my_mesh.fbxName, my_mesh.fbxName))
 
-    #for bonename, bone, obname, me, armob in ob_bones:
-    for my_bone in ob_bones:
-        for fbxMeshObName in my_bone.blenMeshes:  # .keys()
-            file.write('\n\tConnect: "OO", "SubDeformer::Cluster %s %s", "Deformer::Skin %s"' % (fbxMeshObName, my_bone.fbxName, fbxMeshObName))
+        for my_bone in ob_bones:
+            for fbxMeshObName in my_bone.blenMeshes:  # .keys()
+                file.write('\n\tConnect: "OO", "SubDeformer::Cluster %s %s", "Deformer::Skin %s"' % (fbxMeshObName, my_bone.fbxName, fbxMeshObName))
 
-    # limbs -> deformers
-    # for bonename, bone, obname, me, armob in ob_bones:
-    for my_bone in ob_bones:
-        for fbxMeshObName in my_bone.blenMeshes:  # .keys()
-            file.write('\n\tConnect: "OO", "Model::%s", "SubDeformer::Cluster %s %s"' % (my_bone.fbxName, fbxMeshObName, my_bone.fbxName))
+        # limbs -> deformers
+        for my_bone in ob_bones:
+            for fbxMeshObName in my_bone.blenMeshes:  # .keys()
+                file.write('\n\tConnect: "OO", "Model::%s", "SubDeformer::Cluster %s %s"' % (my_bone.fbxName, fbxMeshObName, my_bone.fbxName))
 
-    #for bonename, bone, obname, me, armob in ob_bones:
     for my_bone in ob_bones:
         # Always parent to armature now
         if my_bone.parent:
@@ -2869,11 +2907,13 @@ def save(operator, context,
         return {'FINISHED'}  # so the script wont run after we have batch exported.
 
 
-# TODO: (JCB)
-# - Tick box to include ONLY animations
+# TODO for XNA: (JCB)
+# done - Tick box to include ONLY animations
 #       This means two tick boxes, 'All Animations' and 'Only Include Animations'
+# done - Include the BIND_POSE line in the output
 # - Tick box to name the selected animation Default_Take, Include Default_Take
 #       XNA - Unnecessary take name is undesirable!
+# note - Leave the armature as an empty for now.  I think making it a limb node adds it as a bone unnecessarily.
         
         
 
