@@ -1,12 +1,13 @@
-#summary List of changes as they are done.
+#summary List of changes as they are done to the unified FBX exporter
 #labels Phase-Implementation
+
+= Unified Exporter =
 
 == List of Changes ==
 
   * Added warning about lone edges
   * Added option to only output animations
   * Added the essential BIND_POSE line to the output
-
 
 
 == Notes ==
