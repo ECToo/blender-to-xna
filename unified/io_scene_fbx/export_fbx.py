@@ -377,7 +377,7 @@ def save_single(operator, scene, filepath="",
             # Lamps need to be rotated
             if obj_type == 'LAMP':
                 matrix_rot = matrix_rot * mtx_x90
-            elif obj_type == 'CAMERA':
+            #elif obj_type == 'CAMERA':
                 # ERROR: The following line errors if I include cameras! (JCB 27 July 2011)
                 #y = matrix_rot * Vector((0.0, 1.0, 0.0))
                 #matrix_rot = Matrix.Rotation(math.pi / 2.0, 3, y) * matrix_rot
@@ -2489,17 +2489,25 @@ Connections:  {''')
         # instead of tagging
         tagged_actions = []
 
-        if ANIM_ACTION_ALL:
-            tmp_actions = bpy.data.actions[:]
-
-            # find which actions are compatible with the armatures
-            # blenActions is not yet initialized so do it now.
-            tmp_act_count = 0
+        if xna_format:
+            # = I think this section could be used for all versions of the export (JCB)
+            
+            # get the current action first so we can use it if we only export one action (JCB)
             for my_arm in ob_arms:
-
-                # get the default name - this is the current action
                 if not blenActionDefault:
                     blenActionDefault = my_arm.blenAction
+            
+            if ANIM_ACTION_ALL:
+                tmp_actions = bpy.data.actions[:]
+            else:
+                # Export the current action (JCB)
+                tmp_actions.append(blenActionDefault)
+
+            # We need the following even if exporting only the current action (JCB)
+
+            # find which actions are compatible with the armatures
+            tmp_act_count = 0
+            for my_arm in ob_arms:
 
                 arm_bone_names = set([my_bone.blenName for my_bone in my_arm.fbxBones])
 
@@ -2512,17 +2520,56 @@ Connections:  {''')
                         tagged_actions.append(action.name)
                         tmp_act_count += 1
 
-                        # incase there is no actions applied to armatures
-                        action_lastcompat = action
+                    # Corrected tab level (JCB)
+                    # incase there are no actions applied to armatures
+                    action_lastcompat = action
 
             if tmp_act_count:
                 # unlikely to ever happen but if no actions applied to armatures, just use the last compatible armature.
                 if not blenActionDefault:
                     blenActionDefault = action_lastcompat
+            # = I think the above could be used for all versions (JCB)
+        else:
+            # = I think the following could be replaced by the above XNA version (JCB)
+            if ANIM_ACTION_ALL:
+                tmp_actions = bpy.data.actions[:]
+
+                # find which actions are compatible with the armatures
+                # blenActions is not yet initialized so do it now.
+                tmp_act_count = 0
+                for my_arm in ob_arms:
+
+                    # get the default name - this is the current action
+                    if not blenActionDefault:
+                        blenActionDefault = my_arm.blenAction
+
+                    arm_bone_names = set([my_bone.blenName for my_bone in my_arm.fbxBones])
+
+                    for action in tmp_actions:
+
+                        action_chan_names = arm_bone_names.intersection(set([g.name for g in action.groups]))
+
+                        if action_chan_names:  # at least one channel matches.
+                            my_arm.blenActionList.append(action)
+                            tagged_actions.append(action.name)
+                            tmp_act_count += 1
+
+                        # Corrected tab level (JCB)
+                        # incase there is no actions applied to armatures
+                        action_lastcompat = action
+
+                if tmp_act_count:
+                    # unlikely to ever happen but if no actions applied to armatures, just use the last compatible armature.
+                    if not blenActionDefault:
+                        blenActionDefault = action_lastcompat
+            # = End of block that I think could be replaced by the XNA version (JCB)
+        
 
         del action_lastcompat
 
-        tmp_actions.insert(0, None)  # None is the default action
+        if use_default_take:
+            # For XNA we need each take to have its own name (JCB)
+            tmp_actions.insert(0, None)  # None is the default action
 
         file.write('''
 ;Takes and animation section

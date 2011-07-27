@@ -79,16 +79,16 @@ def validate_xna_options(self):
             self.xna_format = True
             self.global_scale = 1.0
             self.mesh_smooth_type = 'OFF'
-        if not self.all_same_folder or self.use_default_take:
+        if not self.all_same_folder or self.use_default_take or self.ANIM_OPTIMIZE:
             changed = True
             self.all_same_folder = True
             self.use_default_take = False
-        if 'CAMERA' in self.object_types:
+            self.ANIM_OPTIMIZE = False
+        if 'CAMERA' in self.object_types or 'LAMP' in self.object_types:
             changed = True
-            self.object_types.remove('CAMERA')
-        if 'LAMP' in self.object_types:
-            changed = True
-            self.object_types.remove('LAMP')
+            # I could not get .remove to work
+            #self.object_types.remove('CAMERA')
+            self.object_types={'EMPTY', 'ARMATURE', 'MESH'}
         return changed
     else:
         return False
@@ -215,7 +215,8 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
         global_matrix = global_matrix * axis_conversion(to_forward=self.axis_forward, to_up=self.axis_up).to_4x4()
 
         # XNA - Tempoarily while testing force the rotation to nothing - Identity Matrix (JCB)
-        global_matrix = Matrix(((1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)))
+        if self.xna_validate:
+            global_matrix = Matrix(((1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)))
         
         keywords = self.as_keywords(ignore=("axis_forward", "axis_up", "global_scale", "check_existing", "filter_glob", "xna_validate"))
         keywords["global_matrix"] = global_matrix
