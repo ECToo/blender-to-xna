@@ -13,6 +13,7 @@
   * Added more descriptive instructions to the existing options
   * Added validation for XNA options to the UI
   * Added option to use the same folder for textures as the fbx is in
+  * Output the selected action with its own name instead of Default_Take
 
 
 == Notes ==
