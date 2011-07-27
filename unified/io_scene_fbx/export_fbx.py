@@ -205,7 +205,7 @@ def save_single(operator, scene, filepath="",
         takes_only=False,
         use_default_take=False,
         xna_format=False,
-        no_texturepath = False,
+        all_same_folder = False,
     ):
 
     import bpy_extras.io_utils
@@ -1132,6 +1132,8 @@ def save_single(operator, scene, filepath="",
         if tex:
             fname_rel = bpy_extras.io_utils.path_reference(tex.filepath, base_src, base_dst, path_mode, "", copy_set)
             fname_strip = bpy.path.basename(fname_rel)
+            if all_same_folder:
+                fname_rel = fname_strip
         else:
             fname_strip = fname_rel = ""
 
@@ -1191,6 +1193,8 @@ def save_single(operator, scene, filepath="",
         if tex:
             fname_rel = bpy_extras.io_utils.path_reference(tex.filepath, base_src, base_dst, path_mode, "", copy_set)
             fname_strip = bpy.path.basename(bpy.path.abspath(fname_rel))
+            if all_same_folder:
+                fname_rel = fname_strip
         else:
             fname_strip = fname_rel = ""
 
@@ -2914,19 +2918,23 @@ def save(operator, context,
         return {'FINISHED'}  # so the script wont run after we have batch exported.
 
 
-# TODO for XNA: (JCB)
+# TODO for XNA July 2011: (JCB)
 # done - Tick box to include ONLY animations, smaller quicker export for individual XNA animations
 # done - Include the BIND_POSE line in the output - essential for XNA
 # done - Tick box to name the selected animation Default_Take.tak not needed for XNA
 # note - Leave the armature as an empty for now.  I think making it a limb node adds it as a bone unnecessarily.
-# TEST WITH XNA - the above might already work - Fail - does not load the takes or perhaps the armature!
+# note - Do not change Limb to LimbNode because the bones load even though the animation is distorted.
+# done - Save relative filenames not full paths (all_same_folder)
+# TEST WITH XNA
+# - Find out what is missing that prevents the animations loading at all now!
+#       I think XNA needs a proper bind pose.
 # - Find out why the take is still called Default_Take.tak and the name is Default Take
-# - Save relative filenames not full paths (no_texturepath)
-# - Change Limb to LimbNode
 # - Change matrix rotation: see: TX_CHAN == 'R'
-# - Do not include the armature object at all.  Parent the first root bone to the scene instead.
-        
-        
+# - Do not include the armature object at all.  Parent the root bone (Limb or LimbNode) to the scene instead.
+
+
+# NOTE TO Campbell - 
+#   Can any or all of the following notes be removed because they have been here for a long time? (JCB 27 July 2011)
 
 # NOTES (all line numbers correspond to original export_fbx.py (under release/scripts)
 # - Draw.PupMenu alternative in 2.5?, temporarily replaced PupMenu with print
@@ -2941,7 +2949,6 @@ def save(operator, context,
 # - no hq normals: 1900-1901
 
 # TODO
-
 # - bpy.data.remove_scene: line 366
 # - bpy.sys.time move to bpy.sys.util?
 # - new scene creation, activation: lines 327-342, 368
