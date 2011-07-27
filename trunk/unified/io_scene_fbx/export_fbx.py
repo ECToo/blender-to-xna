@@ -2973,13 +2973,16 @@ def save(operator, context,
 # note - Leave the armature as an empty for now.  I think making it a limb node adds it as a bone unnecessarily.
 # note - Do not change Limb to LimbNode because the bones load even though the animation is distorted.
 # done - Save relative filenames not full paths (all_same_folder)
+# done - save the currect action with its own name instead of Default_Take
+# note - commented out camera rotation because it errors!
 # TEST WITH XNA
-# - Find out what is missing that prevents the animations loading at all now!
-#       I think XNA needs a proper bind pose.
-# - Find out why the take is still called Default_Take.tak and the name is Default Take
 # - Change matrix rotation: see: TX_CHAN == 'R'
 # - Do not include the armature object at all.  Parent the root bone (Limb or LimbNode) to the scene instead.
+# - Include a different bind pose based on the rest pose.
 
+# TODO:  Probably for Campbell
+# - The camera rotation causes an error - currently commented out (JCB 27 July 2011)
+#           Search the code for: y = matrix_rot * Vector(
 
 # NOTE TO Campbell - 
 #   Can any or all of the following notes be removed because they have been here for a long time? (JCB 27 July 2011)
