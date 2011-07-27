@@ -19,3 +19,4 @@
 
   * Decided to leave the armature as an empty for now.  Previously I had changed this to a LimbNode but I think that adds it unecessarily as a bone!
   * Might try not including the armature object at all as it does not appear to be needed by XNA and just adds an extra bone or a warning message depending on how it is included!
+  * For the time being I have decided not to change 'Limb' to 'LimbNode' because as far as I can tell the bones load with either name.  The problem at the moment is that they are distorted.
