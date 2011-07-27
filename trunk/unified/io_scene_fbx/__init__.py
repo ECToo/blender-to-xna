@@ -79,9 +79,9 @@ def validate_xna_options(self)
             self.xna_format = True
             self.global_scale = 1.0
             self.mesh_smooth_type = 'OFF':
-        if not self.no_texturepath or self.use_default_take:
+        if not self.all_same_folder or self.use_default_take:
             changed = True
-            self.no_texturepath = True
+            self.all_same_folder = True
             self.use_default_take = False
         if 'CAMERA' in self.object_types:
             changed = True
@@ -169,11 +169,12 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
     ANIM_OPTIMIZE_PRECISSION = FloatProperty(name="Precision", description="Tolerence for comparing double keyframes (higher for greater accuracy)", min=1, max=16, soft_min=1, soft_max=16, default=6.0)
     # XNA needs different names for each take having the first one always called Default_Take is unhelpful (JCB)
     use_default_take = BoolProperty(name="Include Default_Take", description="Include an action called Default_Take", default=False)
-    # XNA requires the texture to be stored in a path relative to the fbx file (JCB)
-    no_texturepath = BoolProperty(name="Same Folder", description="The FBX file will expect the textures to be in the same folder.", default=False)
-    # XNA - there is at least one place where XNA requires a different format to others!!!  I think the others are wrong! (JCB)
+    # XNA usually errors if the textures are not in the same folder as the FBX file (JCB)
+    all_same_folder = BoolProperty(name="Same Folder", description="The FBX importer will expect the textures to be in the same folder as the FBX file.", default=False)
+    # XNA has requirements that might be incompatible with other implimentations! (JCB)
     xna_format = BoolProperty(name="XNA File Format", description="Slight format changes to the file to be compatible with Microsoft XNA", default=False)
-    # XNA - validation to avoid incompatible settings.  I will understand if this is not kept in. (JCB)
+    # XNA - validation to avoid incompatible settings.  I will understand if this is not kept in the generic version. (JCB)
+    # It would be handy to have this for XNA, UDK, Unity and Sunburn if others could provide the details. (JCB)
     xna_validate = BoolProperty(name="XNA Strict Options", description="Make sure other options are compatible with Microsoft XNA", default=False)
 
     batch_mode = EnumProperty(
@@ -193,12 +194,13 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
     def check_extension(self):
         return self.batch_mode == 'OFF'
 
-    # Cannot find any description of how to use this method in the API documentation.  (JCB)
-    # Should check() return True if something has changed and False if nothing has changed? (JCB)
+    # I cannot find any description of how to use this method in the API documentation.  (JCB)
+    # I have assumed that check() returns True if something has changed and False if nothing has changed? (JCB)
     def check(self, context):
-        one = add_action_to_filepath(self)
-        two = axis_conversion_ensure(self, "axis_forward", "axis_up")
-        if one or two:
+        one = validate_xna_options(self)
+        two = add_action_to_filepath(self)
+        three = axis_conversion_ensure(self, "axis_forward", "axis_up")
+        if one or two or three:
             return True
         else:
             return False
