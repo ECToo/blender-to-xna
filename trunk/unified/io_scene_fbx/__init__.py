@@ -48,7 +48,52 @@ from bpy_extras.io_utils import (ExportHelper,
                                  axis_conversion_ensure,
                                  )
 
+# XNA can only use one take per file so there will be a lot of FBX files for the same model (JCB)
+# Rename the file based on the action name (JCB)
+def add_action_to_filepath(self):
+    import os
+    if ANIM_ENABLE and self.takes_only and not self.ANIM_ACTION_ALL:
+        existing_name = self.filepath
+        # get the current action name
+        currentAction = ""
+        for arm_obj in bpy.context.scene.objects:
+            if arm_obj.type == 'ARMATURE':
+                if arm_obj.animation_data:
+                    if currentAction == "":
+                        currentAction = arm_obj.animation_data.action.name
+        # use the action name as a suffix to the existing blend filename.
+        self.filepath = os.path.splitext(bpy.data.filepath)[0] + "-" + currentAction + ".fbx"
+        if existing_name != self.filepath:
+            return True
+        else:
+            return False
+    else:
+        return False
+             
+# Validate that the options are compatible with XNA (JCB)
+def validate_xna_options(self)
+    if self.xna_validate:
+        changed = False
+        if not self.xna_format or self.global_scale != 1.0 or self.mesh_smooth_type != 'OFF':
+            changed = True
+            self.xna_format = True
+            self.global_scale = 1.0
+            self.mesh_smooth_type = 'OFF':
+        if not self.no_texturepath or self.use_default_take:
+            changed = True
+            self.no_texturepath = True
+            self.use_default_take = False
+        if 'CAMERA' in self.object_types:
+            changed = True
+            self.object_types.remove('CAMERA')
+        if 'LAMP' in self.object_types:
+            changed = True
+            self.object_types.remove('LAMP')
+        return changed
+    else:
+        return False
 
+             
 class ExportFBX(bpy.types.Operator, ExportHelper):
     '''Selection to an ASCII Autodesk FBX'''
     bl_idname = "export_scene.fbx"
@@ -62,18 +107,17 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
     # to the class instance from the operator settings before calling.
 
     use_selection = BoolProperty(name="Selected Objects", description="Export selected objects on visible layers", default=False)
-    # XNA needs each animation in a separate FBX file but it does not need the model each time (JCB)
-    takes_only = BoolProperty(name="Only Animations", description="Export will not include any meshes", default=False)
     # XNA does not support scaled armatures (JCB)
     global_scale = FloatProperty(name="Scale", description="Scale all data. Some importers do not support scaled armatures!", min=0.01, max=1000.0, soft_min=0.01, soft_max=1000.0, default=1.0)
 
     axis_forward = EnumProperty(
             name="Forward",
+            description="Select the axis to be rotated to forwards then one of the other axes to be up.",
             items=(('X', "X Forward", ""),
                    ('Y', "Y Forward", ""),
                    ('Z', "Z Forward", ""),
                    ('-X', "-X Forward", ""),
-                   ('-Y', "-Y Forward", ""),
+                   ('-Y', "-Y Forward (Blender)", ""),
                    ('-Z', "-Z Forward", ""),
                    ),
             default='-Z',
@@ -81,9 +125,10 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
 
     axis_up = EnumProperty(
             name="Up",
+            description="Must select the forward axis before selecting the up axis.",
             items=(('X', "X Up", ""),
                    ('Y', "Y Up", ""),
-                   ('Z', "Z Up", ""),
+                   ('Z', "Z Up (Blender)", ""),
                    ('-X', "-X Up", ""),
                    ('-Y', "-Y Up", ""),
                    ('-Z', "-Z Up", ""),
@@ -117,14 +162,19 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
 #    EXP_MESH_HQ_NORMALS = BoolProperty(name="HQ Normals", description="Generate high quality normals", default=True)
     # armature animation
     ANIM_ENABLE = BoolProperty(name="Enable Animation", description="Export keyframe animation", default=True)
+    # XNA needs each animation in a separate FBX file but it does not need the model each time (JCB)
+    takes_only = BoolProperty(name="Only Animations", description="Export will not include any meshes", default=False)
+    ANIM_ACTION_ALL = BoolProperty(name="All Actions", description="Export all actions for armatures or just the currently selected action", default=False)
     ANIM_OPTIMIZE = BoolProperty(name="Optimize Keyframes", description="Remove double keyframes", default=True)
     ANIM_OPTIMIZE_PRECISSION = FloatProperty(name="Precision", description="Tolerence for comparing double keyframes (higher for greater accuracy)", min=1, max=16, soft_min=1, soft_max=16, default=6.0)
-# 	ANIM_ACTION_ALL = BoolProperty(name="Current Action", description="Use actions currently applied to the armatures (use scene start/end frame)", default=True)
-    ANIM_ACTION_ALL = BoolProperty(name="All Actions", description="Export all actions for armatures or just the currently selected action", default=False)
     # XNA needs different names for each take having the first one always called Default_Take is unhelpful (JCB)
     use_default_take = BoolProperty(name="Include Default_Take", description="Include an action called Default_Take", default=False)
+    # XNA requires the texture to be stored in a path relative to the fbx file (JCB)
+    no_texturepath = BoolProperty(name="Same Folder", description="The FBX file will expect the textures to be in the same folder.", default=False)
     # XNA - there is at least one place where XNA requires a different format to others!!!  I think the others are wrong! (JCB)
     xna_format = BoolProperty(name="XNA File Format", description="Slight format changes to the file to be compatible with Microsoft XNA", default=False)
+    # XNA - validation to avoid incompatible settings.  I will understand if this is not kept in. (JCB)
+    xna_validate = BoolProperty(name="XNA Strict Options", description="Make sure other options are compatible with Microsoft XNA", default=False)
 
     batch_mode = EnumProperty(
             name="Batch Mode",
@@ -139,29 +189,19 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
 
     path_mode = path_reference_mode
 
-    '''@ classmethod
-    def po ll(self, context):
-        if sel f.takes_only and not self.ANIM_ACTION_ALL:
-            # get the current action name
-            currentAction = ""
-            for arm_obj in bpy.context.scene.objects:
-                if arm_obj.type == 'ARMATURE':
-                    if arm_obj.animation_data:
-                        if currentAction == "":
-                            currentAction = arm_obj.animation_data.action.name
-            # XNA can only use one take per file so there will be a lot of FBX files for the same model (JCB)
-            # use the action name as a suffix to the existing blend filename.
-            self.filepath = os.path.splitext(bpy.data.filepath)[0] + "-" + currentAction + ".fbx"
-            return
-        else:
-            return'''
-    
     @property
     def check_extension(self):
         return self.batch_mode == 'OFF'
 
+    # Cannot find any description of how to use this method in the API documentation.  (JCB)
+    # Should check() return True if something has changed and False if nothing has changed? (JCB)
     def check(self, context):
-        return axis_conversion_ensure(self, "axis_forward", "axis_up")
+        one = add_action_to_filepath(self)
+        two = axis_conversion_ensure(self, "axis_forward", "axis_up")
+        if one or two:
+            return True
+        else:
+            return False
 
     def execute(self, context):
         from mathutils import Matrix
@@ -172,7 +212,10 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
         global_matrix[0][0] = global_matrix[1][1] = global_matrix[2][2] = self.global_scale
         global_matrix = global_matrix * axis_conversion(to_forward=self.axis_forward, to_up=self.axis_up).to_4x4()
 
-        keywords = self.as_keywords(ignore=("axis_forward", "axis_up", "global_scale", "check_existing", "filter_glob"))
+        # XNA - Tempoarily while testing force the rotation to nothing - Identity Matrix (JCB)
+        global_matrix = Matrix(((1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)))
+        
+        keywords = self.as_keywords(ignore=("axis_forward", "axis_up", "global_scale", "check_existing", "filter_glob", "xna_validate"))
         keywords["global_matrix"] = global_matrix
 
         from . import export_fbx

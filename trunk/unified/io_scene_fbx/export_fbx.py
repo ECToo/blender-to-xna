@@ -205,6 +205,7 @@ def save_single(operator, scene, filepath="",
         takes_only=False,
         use_default_take=False,
         xna_format=False,
+        no_texturepath = False,
     ):
 
     import bpy_extras.io_utils
@@ -2920,7 +2921,7 @@ def save(operator, context,
 # note - Leave the armature as an empty for now.  I think making it a limb node adds it as a bone unnecessarily.
 # TEST WITH XNA - the above might already work - Fail - does not load the takes or perhaps the armature!
 # - Find out why the take is still called Default_Take.tak and the name is Default Take
-# - Save relative filenames not full paths
+# - Save relative filenames not full paths (no_texturepath)
 # - Change Limb to LimbNode
 # - Change matrix rotation: see: TX_CHAN == 'R'
 # - Do not include the armature object at all.  Parent the first root bone to the scene instead.
