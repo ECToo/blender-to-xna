@@ -52,7 +52,7 @@ from bpy_extras.io_utils import (ExportHelper,
 # Rename the file based on the action name (JCB)
 def add_action_to_filepath(self):
     import os
-    if ANIM_ENABLE and self.takes_only and not self.ANIM_ACTION_ALL:
+    if self.ANIM_ENABLE and self.takes_only and not self.ANIM_ACTION_ALL:
         existing_name = self.filepath
         # get the current action name
         currentAction = ""
@@ -71,14 +71,14 @@ def add_action_to_filepath(self):
         return False
              
 # Validate that the options are compatible with XNA (JCB)
-def validate_xna_options(self)
+def validate_xna_options(self):
     if self.xna_validate:
         changed = False
         if not self.xna_format or self.global_scale != 1.0 or self.mesh_smooth_type != 'OFF':
             changed = True
             self.xna_format = True
             self.global_scale = 1.0
-            self.mesh_smooth_type = 'OFF':
+            self.mesh_smooth_type = 'OFF'
         if not self.all_same_folder or self.use_default_take:
             changed = True
             self.all_same_folder = True
@@ -161,7 +161,7 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
 
 #    EXP_MESH_HQ_NORMALS = BoolProperty(name="HQ Normals", description="Generate high quality normals", default=True)
     # armature animation
-    ANIM_ENABLE = BoolProperty(name="Enable Animation", description="Export keyframe animation", default=True)
+    ANIM_ENABLE = BoolProperty(name="Include Animation", description="Export keyframe animation", default=True)
     # XNA needs each animation in a separate FBX file but it does not need the model each time (JCB)
     takes_only = BoolProperty(name="Only Animations", description="Export will not include any meshes", default=False)
     ANIM_ACTION_ALL = BoolProperty(name="All Actions", description="Export all actions for armatures or just the currently selected action", default=False)

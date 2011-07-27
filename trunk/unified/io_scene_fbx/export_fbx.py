@@ -378,8 +378,9 @@ def save_single(operator, scene, filepath="",
             if obj_type == 'LAMP':
                 matrix_rot = matrix_rot * mtx_x90
             elif obj_type == 'CAMERA':
-                y = matrix_rot * Vector((0.0, 1.0, 0.0))
-                matrix_rot = Matrix.Rotation(math.pi / 2.0, 3, y) * matrix_rot
+                # ERROR: The following line errors if I include cameras! (JCB 27 July 2011)
+                #y = matrix_rot * Vector((0.0, 1.0, 0.0))
+                #matrix_rot = Matrix.Rotation(math.pi / 2.0, 3, y) * matrix_rot
 
             return matrix_rot
 
