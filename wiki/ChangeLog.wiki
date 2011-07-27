@@ -10,8 +10,12 @@
   * Added the essential BIND_POSE line to the output
   * Option to exclude the Default_Take.tak name
   * Use the action name for the .tak filename
+  * Added more descriptive instructions to the existing options
+  * Added validation for XNA options to the UI
+  * Added option to use the same folder for textures as the fbx is in
 
 
 == Notes ==
 
   * Decided to leave the armature as an empty for now.  Previously I had changed this to a LimbNode but I think that adds it unecessarily as a bone!
+  * Might try not including the armature object at all as it does not appear to be needed by XNA and just adds an extra bone or a warning message depending on how it is included!
