@@ -16,6 +16,7 @@
   * Output the selected action with its own name instead of Default_Take
   * Removed all rotations
 
+At the moment the model loads with an animation but when animated the model leans to one side and the fingers and arms are twisted.
 
 == Notes ==
 
