@@ -212,6 +212,11 @@ def save_single(operator, scene, filepath="",
 
     mtx_x90 = Matrix.Rotation(math.pi / 2.0, 3, 'X')
     mtx4_z90 = Matrix.Rotation(math.pi / 2.0, 4, 'Z')
+    # Rotation does not work for XNA animations.  I do not know why but they end up a mess! (JCB)
+    if xna_format:
+        # Set rotations to Matrix Identity for XNA (JCB)
+        mtx_x90 = Matrix(((1,0,0), (0,1,0), (0,0,1)))
+        mtx4_z90 = Matrix(((1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)))
 
     if global_matrix is None:
         global_matrix = Matrix()
@@ -377,10 +382,9 @@ def save_single(operator, scene, filepath="",
             # Lamps need to be rotated
             if obj_type == 'LAMP':
                 matrix_rot = matrix_rot * mtx_x90
-            #elif obj_type == 'CAMERA':
-                # ERROR: The following line errors if I include cameras! (JCB 27 July 2011)
-                #y = matrix_rot * Vector((0.0, 1.0, 0.0))
-                #matrix_rot = Matrix.Rotation(math.pi / 2.0, 3, y) * matrix_rot
+            elif obj_type == 'CAMERA':
+                y = matrix_rot * Vector((0.0, 1.0, 0.0))
+                matrix_rot = Matrix.Rotation(math.pi / 2.0, 3, y) * matrix_rot
 
             return matrix_rot
 
@@ -454,6 +458,11 @@ def save_single(operator, scene, filepath="",
             loc = tuple(loc)
             rot = tuple(rot.to_euler())  # quat -> euler
             scale = tuple(scale)
+            
+            # XNA return the original matrix (JCB)
+            if xna_format:
+                matrix = ob.matrix_local
+
         else:
             # This is bad because we need the parent relative matrix from the fbx parent (if we have one), dont use anymore
             #if ob and not matrix: matrix = ob.matrix_world * global_matrix
@@ -1810,9 +1819,10 @@ def save_single(operator, scene, filepath="",
 ## XXX
 
     if 'ARMATURE' in object_types:
-        # This is needed so applying modifiers dosnt apply the armature deformation, its also needed
+        # This is needed so applying modifiers does not apply the armature deformation, its also needed
         # ...so mesh objects return their rest worldspace matrix when bone-parents are exported as weighted meshes.
         # set every armature to its rest, backup the original values so we done mess up the scene
+        # Save the original settings and revert back at the end of the script.
         ob_arms_orig_rest = [arm.pose_position for arm in bpy.data.armatures]
 
         for arm in bpy.data.armatures:
@@ -1964,8 +1974,13 @@ def save_single(operator, scene, filepath="",
 
     if 'ARMATURE' in object_types:
         # now we have the meshes, restore the rest arm position
-        for i, arm in enumerate(bpy.data.armatures):
-            arm.pose_position = ob_arms_orig_rest[i]
+        if xna_format:
+            # XNA requires the model to be in POSE mode for most of the script so the animations are correct (JCB)
+            for arm in bpy.data.armatures:
+                arm.pose_position = 'POSE'
+        else:
+            for i, arm in enumerate(bpy.data.armatures):
+                arm.pose_position = ob_arms_orig_rest[i]
 
         if ob_arms_orig_rest:
             for ob_base in bpy.data.objects:
@@ -2315,6 +2330,10 @@ Relations:  {''')
         file.write('\n\tModel: "Model::%s", "Null" {\n\t}' % my_null.fbxName)
 
     for my_arm in ob_arms:
+        # (JCB)
+        #if xna_format:
+        #    file.write('\n\tModel: "Model::%s", "Limb" {\n\t}' % my_arm.fbxName)
+        #else:
         file.write('\n\tModel: "Model::%s", "Null" {\n\t}' % my_arm.fbxName)
 
     for my_mesh in ob_meshes:
@@ -2680,6 +2699,10 @@ Takes:  {''')
                                 context_bone_anim_vecs = []
                                 prev_eul = None
                                 for mtx in context_bone_anim_mats:
+                                    # Required for XNA (JCB)
+                                    #if xna_format:
+                                    #    prev_eul = mtx[0].to_euler()
+                                    #else:
                                     if prev_eul:
                                         prev_eul = mtx[1].to_euler('XYZ', prev_eul)
                                     else:
@@ -2706,6 +2729,10 @@ Takes:  {''')
 
                                         # Curve types are 'C,n' for constant, 'L' for linear
                                         # C,n is for bezier? - linear is best for now so we can do simple keyframe removal
+                                        # For XNA (JCB)
+                                        #if xna_format:
+                                        #    file.write('\n\t\t\t\t\t\t\t%i,%.15f,C,n'  % (fbx_time(frame-1), context_bone_anim_vecs[frame - act_start][i]))
+                                        #else:
                                         file.write('\n\t\t\t\t\t\t\t%i,%.15f,L' % (fbx_time(frame - 1), context_bone_anim_vecs[frame - act_start][i]))
                                         frame += 1
                                 else:
@@ -2780,7 +2807,7 @@ Takes:  {''')
             file.write('\n\t}')
 
             # end action loop. set original actions
-            # do this after every loop incase actions effect eachother.
+            # do this after every loop incase actions effect each other.
             for my_arm in ob_arms:
                 if my_arm.blenObject.animation_data:
                     my_arm.blenObject.animation_data.action = my_arm.blenAction
@@ -2869,6 +2896,20 @@ Takes:  {''')
 
     file.close()
 
+    # Revert the model back to where it was because we needed it in POSE mode for XNA (JCB)
+    if 'ARMATURE' in object_types:
+        # now we have the meshes, restore the rest arm position
+        for i, arm in enumerate(bpy.data.armatures):
+            arm.pose_position = ob_arms_orig_rest[i]
+
+        if ob_arms_orig_rest:
+            for ob_base in bpy.data.objects:
+                if ob_base.type == 'ARMATURE':
+                    ob_base.update_tag()
+            # This causes the makeDisplayList command to effect the mesh
+            scene.frame_set(scene.frame_current)
+    
+    
     # copy all collected files.
     bpy_extras.io_utils.path_reference_copy(copy_set)
 
@@ -2975,17 +3016,20 @@ def save(operator, context,
 # done - Save relative filenames not full paths (all_same_folder)
 # done - save the currect action with its own name instead of Default_Take
 # note - commented out camera rotation because it errors!
+# note - v2.58a has a different Vector multiplication order to the latest revision so Camera rotation errors
+# does not matter either works - Change matrix rotation: see: TX_CHAN == 'R'
+# does not matter either works - Change from Linear to Curve takes output
+# no change - Try armature as a Limb instead of a null
+# no change - Connect: "OO", "Model::Skeleton", "Model::Scene"  is added twice!
+# done - Try settings and leaving in POSE mode for the entire script, see line 1977
 # TEST WITH XNA
-# - Change matrix rotation: see: TX_CHAN == 'R'
+# - Try the order that the connections are listed in
 # - Do not include the armature object at all.  Parent the root bone (Limb or LimbNode) to the scene instead.
-# - Include a different bind pose based on the rest pose.
+#       If the parent of the bone is the armture then connect to the scene.
 
-# TODO:  Probably for Campbell
-# - The camera rotation causes an error - currently commented out (JCB 27 July 2011)
-#           Search the code for: y = matrix_rot * Vector(
 
 # NOTE TO Campbell - 
-#   Can any or all of the following notes be removed because they have been here for a long time? (JCB 27 July 2011)
+#   Can any or all of the following notes be removed because some have been here for a long time? (JCB 27 July 2011)
 
 # NOTES (all line numbers correspond to original export_fbx.py (under release/scripts)
 # - Draw.PupMenu alternative in 2.5?, temporarily replaced PupMenu with print
