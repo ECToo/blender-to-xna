@@ -23,5 +23,5 @@
   * Might try not including the armature object at all as it does not appear to be needed by XNA and just adds an extra bone or a warning message depending on how it is included!
   * For the time being I have decided not to change 'Limb' to 'LimbNode' because as far as I can tell the bones load with either name.  The problem at the moment is that they are distorted.
   * Linear or curve L or c,n make no difference to the output.
-  * The calculation of the Rotation of the takes makes no difference.
+  * The calculation of the Rotation (TX_CHAN == 'R') of the takes makes no difference.
   * The armature as a Limb or null makes no difference.
