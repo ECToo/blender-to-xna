@@ -238,7 +238,7 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
 
 
 def menu_func(self, context):
-    self.layout.operator(ExportFBX.bl_idname, text="Autodesk FBX (.fbx)")
+    self.layout.operator(ExportFBX.bl_idname, text="XNA Format FBX (.fbx)")
 
 
 def register():
