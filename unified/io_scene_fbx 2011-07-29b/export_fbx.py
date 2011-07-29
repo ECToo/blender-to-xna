@@ -204,21 +204,19 @@ def save_single(operator, scene, filepath="",
         path_mode='AUTO',
         takes_only=False,
         use_default_take=False,
+        xna_format=False,
         all_same_folder = False,
         include_edges=False,
-        enable_rotation=True,
-        armature_limb=False,
     ):
 
     import bpy_extras.io_utils
 
-    # Only used for Camera and lamp rotations
     mtx_x90 = Matrix.Rotation(math.pi / 2.0, 3, 'X')
-    # Used for mesh and armature rotations
     mtx4_z90 = Matrix.Rotation(math.pi / 2.0, 4, 'Z')
     # Rotation does not work for XNA animations.  I do not know why but they end up a mess! (JCB)
-    if not enable_rotation:
-        # Set rotation to Matrix Identity for XNA (JCB)
+    if xna_format:
+        # Set rotations to Matrix Identity for XNA (JCB)
+        mtx_x90 = Matrix(((1,0,0), (0,1,0), (0,0,1)))
         mtx4_z90 = Matrix(((1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)))
 
     if global_matrix is None:
@@ -446,6 +444,7 @@ def save_single(operator, scene, filepath="",
         if isinstance(ob, bpy.types.Bone):
 
             # we know we have a matrix
+            # matrix = mtx4_z90 * (ob.matrix['ARMATURESPACE'] * matrix_mod)
             matrix = ob.matrix_local * mtx4_z90  # dont apply armature matrix anymore
 
             parent = ob.parent
@@ -460,11 +459,11 @@ def save_single(operator, scene, filepath="",
             loc = tuple(loc)
             rot = tuple(rot.to_euler())  # quat -> euler
             scale = tuple(scale)
-                
-            # Essential for XNA to use the original matrix not rotated nor scaled (JCB)
-            if not enable_rotation:
-                matrix = ob.matrix_local
             
+            # Essential for XNA return the original matrix (JCB)
+            if xna_format:
+                matrix = ob.matrix_local
+
         else:
             # This is bad because we need the parent relative matrix from the fbx parent (if we have one), dont use anymore
             #if ob and not matrix: matrix = ob.matrix_world * global_matrix
@@ -1415,9 +1414,8 @@ def save_single(operator, scene, filepath="",
                 # XNA - show the warning even though not included in the file - best to fix the model (JCB)
                 print('Warning: Lone edge found: Edges that are not part of a face cause intermittent errors with some importers!')
 
-                # Exclude lone edges when edges are not needed (JCB)
-                if not include_edges:
-                    print('Lone edge excluded!')
+                if xna_format:
+                    print('XNA: Lone edge excluded to avoid intermittent errors in the import pipeline!')
                 else:
                     if i == -1:
                         file.write('%i,%i' % ed_val)
@@ -1430,7 +1428,7 @@ def save_single(operator, scene, filepath="",
             i += 1
 
         # XNA does not need the edges (JCB) - no idea if they do any harm
-        if include_edges:
+        if not xna_format:
             file.write('\n\t\tEdges: ')
             i = -1
             for ed in me_edges:
@@ -2250,7 +2248,7 @@ Objects:  {''')
         write_camera_switch()
 
     # XNA requires the armature to be a Limb (JCB)
-    if armature_limb:
+    if xna_format:
         for my_arm in ob_arms:
             write_arm(my_arm)
     else:        
@@ -2359,7 +2357,7 @@ Objects:  {''')
 Relations:  {''')
 
     # Nulls are likely to cause problems for XNA (JCB)
-    if armature_limb:
+    if xna_format:
         for my_arm in ob_arms:
             # Armature must be a Limb for XNA (JCB)
             file.write('\n\tModel: "Model::%s", "Limb" {\n\t}' % my_arm.fbxName)
@@ -2499,7 +2497,7 @@ Connections:  {''')
                 for fbxGroupName in ob_base.fbxGroupNames:
                     file.write('\n\tConnect: "OO", "Model::%s", "GroupSelection::%s"' % (ob_base.fbxName, fbxGroupName))
                     
-    if not armature_limb:
+    if not xna_format:
         # I think this always duplicates the armature connection because it is also in ob_generic above! (JCB)
         for my_arm in ob_arms:
             file.write('\n\tConnect: "OO", "Model::%s", "Model::Scene"' % my_arm.fbxName)
@@ -2542,8 +2540,8 @@ Connections:  {''')
         # instead of tagging
         tagged_actions = []
 
-        if not use_default_take:
-            # === I think this section could be used for all versions of the export (JCB)
+        if xna_format:
+            # = I think this section could be used for all versions of the export (JCB)
             
             # get the current action first so we can use it if we only export one action (JCB)
             for my_arm in ob_arms:
@@ -2581,9 +2579,9 @@ Connections:  {''')
                 # unlikely to ever happen but if no actions applied to armatures, just use the last compatible armature.
                 if not blenActionDefault:
                     blenActionDefault = action_lastcompat
-            # === I think the above could be used for all versions (JCB)
+            # = I think the above could be used for all versions (JCB)
         else:
-            # == I think the following could be replaced by the above non-default take version (JCB)
+            # = I think the following could be replaced by the above XNA version (JCB)
             if ANIM_ACTION_ALL:
                 tmp_actions = bpy.data.actions[:]
 
@@ -2615,7 +2613,7 @@ Connections:  {''')
                     # unlikely to ever happen but if no actions applied to armatures, just use the last compatible armature.
                     if not blenActionDefault:
                         blenActionDefault = action_lastcompat
-            # == End of block that I think could be replaced by the XNA version (JCB)
+            # = End of block that I think could be replaced by the XNA version (JCB)
         
 
         del action_lastcompat
@@ -3023,9 +3021,7 @@ def save(operator, context,
 # - Armature must be parented to the scene
 # - Armature must be a 'Limb' never a 'null'.  This is in several places.
 # - First bone must be parented to the armature.
-# - Rotation must be completely disabled including
-#       always returning the original matrix in In object_tx().
-#       It is the animation that gets distorted during rotation!
+# - In object_tx() the bones must return their own matrix.
 # - Lone edges cause intermittent errors in the XNA content pipeline!
 #       I have added a warning message and excluded them.
 

@@ -74,12 +74,9 @@ def add_action_to_filepath(self):
 def validate_xna_options(self):
     if self.xna_validate:
         changed = False
-        if self.enable_rotation or not self.armature_limb:
+        if not self.xna_format or self.global_scale != 1.0 or self.mesh_smooth_type != 'OFF':
             changed = True
-            self.enable_rotation = False
-            self.armature_limb = True
-        if self.global_scale != 1.0 or self.mesh_smooth_type != 'OFF':
-            changed = True
+            self.xna_format = True
             self.global_scale = 1.0
             self.mesh_smooth_type = 'OFF'
         if not self.all_same_folder or self.use_default_take or self.ANIM_OPTIMIZE or self.include_edges:
@@ -88,11 +85,11 @@ def validate_xna_options(self):
             self.use_default_take = False
             self.ANIM_OPTIMIZE = False
             self.include_edges = False
-        if 'CAMERA' in self.object_types or 'LAMP' in self.object_types or 'EMPTY' in self.object_types:
+        if 'CAMERA' in self.object_types or 'LAMP' in self.object_types:
             changed = True
             # I could not get .remove to work
             #self.object_types.remove('CAMERA')
-            self.object_types={'ARMATURE', 'MESH'}
+            self.object_types={'EMPTY', 'ARMATURE', 'MESH'}
         return changed
     else:
         return False
@@ -113,8 +110,6 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
     use_selection = BoolProperty(name="Selected Objects", description="Export selected objects on visible layers", default=False)
     # XNA does not support scaled armatures (JCB)
     global_scale = FloatProperty(name="Scale", description="Scale all data. Some importers do not support scaled armatures!", min=0.01, max=1000.0, soft_min=0.01, soft_max=1000.0, default=1.0)
-    # The armature rotation does not work for XNA and setting the global matrix to identity is not sufficient on its own (JCB)
-    enable_rotation = BoolProperty(name="Enable Rotation", description="Must be on for rotation settings to be applied.", default=True)
 
     axis_forward = EnumProperty(
             name="Forward",
@@ -167,7 +162,7 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
 
 
     # XNA does not use the edge information (JCB)
-    include_edges = BoolProperty(name="Include Edges", description="Edges may not be necessary and can cause errors with some importers!", default=False)
+    include_edges = BoolProperty(name="Include Edges", description="Information about edges may not be necessary.", default=False)
 #    EXP_MESH_HQ_NORMALS = BoolProperty(name="HQ Normals", description="Generate high quality normals", default=True)
     # armature animation
     ANIM_ENABLE = BoolProperty(name="Include Animation", description="Export keyframe animation", default=True)
@@ -177,11 +172,11 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
     ANIM_OPTIMIZE = BoolProperty(name="Optimize Keyframes", description="Remove double keyframes", default=True)
     ANIM_OPTIMIZE_PRECISSION = FloatProperty(name="Precision", description="Tolerence for comparing double keyframes (higher for greater accuracy)", min=1, max=16, soft_min=1, soft_max=16, default=6.0)
     # XNA needs different names for each take having the first one always called Default_Take is unhelpful (JCB)
-    use_default_take = BoolProperty(name="Include Default_Take", description="Compatibility: Include an action called Default_Take", default=False)
+    use_default_take = BoolProperty(name="Include Default_Take", description="Include an action called Default_Take", default=False)
     # XNA usually errors if the textures are not in the same folder as the FBX file (JCB)
     all_same_folder = BoolProperty(name="Same Folder", description="The FBX importer will expect the textures to be in the same folder as the FBX file.", default=False)
-    # XNA requires the armature to be included as the root limb and that the first bone is parented to the armature limb! (JCB)
-    armature_limb = BoolProperty(name="Armature Include As Bone", description="Compatibility: Include the armature object as the root bone for the skeleton.", default=False)
+    # XNA has requirements that might be incompatible with other implimentations! (JCB)
+    xna_format = BoolProperty(name="XNA File Format", description="Slight format changes to the file to be compatible with Microsoft XNA", default=False)
     # XNA - validation to avoid incompatible settings.  I will understand if this is not kept in the generic version. (JCB)
     # It would be handy to have this for XNA, UDK, Unity and Sunburn if others could provide the details. (JCB)
     xna_validate = BoolProperty(name="XNA Strict Options", description="Make sure other options are compatible with Microsoft XNA", default=False)
@@ -219,14 +214,13 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
         if not self.filepath:
             raise Exception("filepath not set")
 
-        # Armature rotation causes a mess in XNA there are also other changes in the main script to avoid rotation (JCB)
         global_matrix = Matrix()
-        if self.enable_rotation:
-            global_matrix[0][0] = global_matrix[1][1] = global_matrix[2][2] = self.global_scale
-            global_matrix = global_matrix * axis_conversion(to_forward=self.axis_forward, to_up=self.axis_up).to_4x4()
-        else:
-            global_matrix[0][0] = global_matrix[1][1] = global_matrix[2][2] = self.global_scale
-            global_matrix = global_matrix.to_4x4()
+        global_matrix[0][0] = global_matrix[1][1] = global_matrix[2][2] = self.global_scale
+        global_matrix = global_matrix * axis_conversion(to_forward=self.axis_forward, to_up=self.axis_up).to_4x4()
+
+        # XNA - Tempoarily while testing force the rotation to nothing - Identity Matrix (JCB)
+        if self.xna_validate:
+            global_matrix = Matrix(((1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)))
         
         keywords = self.as_keywords(ignore=("axis_forward", "axis_up", "global_scale", "check_existing", "filter_glob", "xna_validate"))
         keywords["global_matrix"] = global_matrix
