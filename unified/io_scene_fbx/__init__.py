@@ -183,8 +183,8 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
     # XNA requires the armature to be included as the root limb and that the first bone is parented to the armature limb! (JCB)
     armature_limb = BoolProperty(name="Armature Include As Bone", description="Compatibility: Include the armature object as the root bone for the skeleton.", default=False)
     # XNA - validation to avoid incompatible settings.  I will understand if this is not kept in the generic version. (JCB)
-    # It would be handy to have this for XNA, UDK, Unity and Sunburn if others could provide the details. (JCB)
-    xna_validate = BoolProperty(name="XNA Strict Options", description="Make sure other options are compatible with Microsoft XNA", default=False)
+    # It would be nice to have this for XNA, UDK, Unity and Sunburn if others could provide the details. (JCB)
+    xna_validate = BoolProperty(name="XNA Strict Options", description="Make sure options are compatible with Microsoft XNA", default=False)
 
     batch_mode = EnumProperty(
             name="Batch Mode",
