@@ -19,19 +19,21 @@
 # <pep8 compliant>
 
 bl_info = {
-    "name": "Autodesk FBX format",
-    "author": "Campbell Barton",
-    "blender": (2, 5, 8),
+    "name": "Autodesk FBX format for XNA",
+    "author": "John C Brown, JCBDigger (@MistyManor)",
+    "blender": (2, 5, 9),
     "api": 38691,
     "location": "File > Import-Export",
-    "description": "Export FBX meshes, UV's, vertex colors, materials, textures, cameras, lamps and actions",
+    "description": "Export FBX models and animations for use in XNA",
     "warning": "",
     "wiki_url": "http://wiki.blender.org/index.php/Extensions:2.5/Py/"\
-        "Scripts/Import-Export/Autodesk_FBX",
-    "tracker_url": "",
-    "support": 'OFFICIAL',
+        "Scripts/Import-Export/Blender-toXNA",
+    "tracker_url": "https://projects.blender.org/tracker/index.php?"\
+        "func=detail&aid=25013",
     "category": "Import-Export"}
 
+# This is the same as the OFFICIAL version but with the defaults set for XNA
+    
 # To support reload properly, try to access a package var, if it's there, reload everything
 if "bpy" in locals():
     import imp
@@ -114,7 +116,7 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
     # XNA does not support scaled armatures (JCB)
     global_scale = FloatProperty(name="Scale", description="Scale all data. Some importers do not support scaled armatures!", min=0.01, max=1000.0, soft_min=0.01, soft_max=1000.0, default=1.0)
     # The armature rotation does not work for XNA and setting the global matrix to identity is not sufficient on its own (JCB)
-    enable_rotation = BoolProperty(name="Enable Rotation", description="Must be on for rotation settings to be applied.", default=True)
+    enable_rotation = BoolProperty(name="Enable Rotation", description="Must be on for rotation settings to be applied.", default=False)
 
     axis_forward = EnumProperty(
             name="Forward",
@@ -151,7 +153,7 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
                    ('ARMATURE', "Armature", ""),
                    ('MESH', "Mesh", ""),
                    ),
-            default={'EMPTY', 'CAMERA', 'LAMP', 'ARMATURE', 'MESH'},
+            default={'ARMATURE', 'MESH'},
             )
 
     mesh_apply_modifiers = BoolProperty(name="Apply Modifiers", description="Apply modifiers to mesh objects", default=True)
@@ -162,7 +164,7 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
                    ('FACE', "Face", "Write face smoothing"),
                    ('EDGE', "Edge", "Write edge smoothing"),
                    ),
-            default='FACE',
+            default='OFF',
             )
 
 
@@ -174,17 +176,17 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
     # XNA needs each animation in a separate FBX file but it does not need the model each time (JCB)
     takes_only = BoolProperty(name="Only Animations", description="Export will not include any meshes", default=False)
     ANIM_ACTION_ALL = BoolProperty(name="All Actions", description="Export all actions for armatures or just the currently selected action", default=False)
-    ANIM_OPTIMIZE = BoolProperty(name="Optimize Keyframes", description="Remove double keyframes", default=True)
+    ANIM_OPTIMIZE = BoolProperty(name="Optimize Keyframes", description="Remove double keyframes", default=False)
     ANIM_OPTIMIZE_PRECISSION = FloatProperty(name="Precision", description="Tolerence for comparing double keyframes (higher for greater accuracy)", min=1, max=16, soft_min=1, soft_max=16, default=6.0)
     # XNA needs different names for each take having the first one always called Default_Take is unhelpful (JCB)
     use_default_take = BoolProperty(name="Include Default_Take", description="Compatibility: Include an action called Default_Take", default=False)
     # XNA usually errors if the textures are not in the same folder as the FBX file (JCB)
-    all_same_folder = BoolProperty(name="Same Folder", description="The FBX importer will expect the textures to be in the same folder as the FBX file.", default=False)
+    all_same_folder = BoolProperty(name="Same Folder", description="The FBX importer will expect the textures to be in the same folder as the FBX file.", default=True)
     # XNA requires the armature to be included as the root limb and that the first bone is parented to the armature limb! (JCB)
-    armature_limb = BoolProperty(name="Armature Include As Bone", description="Compatibility: Include the armature object as the root bone for the skeleton.", default=False)
+    armature_limb = BoolProperty(name="Armature Include As Bone", description="Compatibility: Include the armature object as the root bone for the skeleton.", default=True)
     # XNA - validation to avoid incompatible settings.  I will understand if this is not kept in the generic version. (JCB)
     # It would be nice to have this for XNA, UDK, Unity and Sunburn if others could provide the details. (JCB)
-    xna_validate = BoolProperty(name="XNA Strict Options", description="Make sure options are compatible with Microsoft XNA", default=False)
+    xna_validate = BoolProperty(name="XNA Strict Options", description="Make sure options are compatible with Microsoft XNA", default=True)
 
     batch_mode = EnumProperty(
             name="Batch Mode",
