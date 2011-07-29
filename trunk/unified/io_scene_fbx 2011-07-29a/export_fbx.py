@@ -460,7 +460,7 @@ def save_single(operator, scene, filepath="",
             rot = tuple(rot.to_euler())  # quat -> euler
             scale = tuple(scale)
             
-            # Essential for XNA return the original matrix (JCB)
+            # XNA return the original matrix (JCB)
             if xna_format:
                 matrix = ob.matrix_local
 
@@ -1049,7 +1049,6 @@ def save_single(operator, scene, filepath="",
 		TypeFlags: "Null"
 	}''')
 
-    # Essential for XNA the armature must be a Limb and part of the skeleton (JCB)
     def write_arm(my_null=None, fbxName=None):
         # ob can be null
         if not fbxName:
@@ -2004,8 +2003,13 @@ def save_single(operator, scene, filepath="",
 
     if 'ARMATURE' in object_types:
         # now we have the meshes, restore the rest arm position
-        for i, arm in enumerate(bpy.data.armatures):
-            arm.pose_position = ob_arms_orig_rest[i]
+        if xna_format:
+            # XNA requires the model to be in POSE mode for most of the script so the animations are correct (JCB)
+            for arm in bpy.data.armatures:
+                arm.pose_position = 'POSE'
+        else:
+            for i, arm in enumerate(bpy.data.armatures):
+                arm.pose_position = ob_arms_orig_rest[i]
 
         if ob_arms_orig_rest:
             for ob_base in bpy.data.objects:
@@ -2247,11 +2251,11 @@ Objects:  {''')
         # To comply with other FBX FILES
         write_camera_switch()
 
-    # XNA requires the armature to be a Limb (JCB)
+    # Nulls cause problems for XNA (JCB)
     if xna_format:
         for my_arm in ob_arms:
             write_arm(my_arm)
-    else:        
+    else:
         for my_null in ob_null:
             write_null(my_null)
 
@@ -2357,15 +2361,15 @@ Objects:  {''')
 Relations:  {''')
 
     # Nulls are likely to cause problems for XNA (JCB)
-    if xna_format:
-        for my_arm in ob_arms:
-            # Armature must be a Limb for XNA (JCB)
-            file.write('\n\tModel: "Model::%s", "Limb" {\n\t}' % my_arm.fbxName)
-    else:
+    if not xna_format:
         for my_null in ob_null:
             file.write('\n\tModel: "Model::%s", "Null" {\n\t}' % my_null.fbxName)
 
-        for my_arm in ob_arms:
+    for my_arm in ob_arms:
+        # Armature must be a Limb for XNA (JCB)
+        if xna_format:
+            file.write('\n\tModel: "Model::%s", "Limb" {\n\t}' % my_arm.fbxName)
+        else:
             file.write('\n\tModel: "Model::%s", "Null" {\n\t}' % my_arm.fbxName)
 
     for my_mesh in ob_meshes:
@@ -2421,7 +2425,10 @@ Relations:  {''')
                 # is this bone effecting a mesh?
                 file.write('\n\tDeformer: "SubDeformer::Cluster %s %s", "Cluster" {\n\t}' % (fbxMeshObName, my_bone.fbxName))
 
-        #file.write('\n\tPose: "Pose::BIND_POSES", "BindPose" {\n\t}')
+        # XNA requires the BIND_POSES line.  It is essential and stops the animations working without it! (JCB)
+        # It was commented out in the non-XNA version!  I do not know why! (JCB)
+        if xna_format:
+            file.write('\n\tPose: "Pose::BIND_POSES", "BindPose" {\n\t}')
 
     for groupname, group in groups:
         file.write('\n\tGroupSelection: "GroupSelection::%s", "Default" {\n\t}' % groupname)
@@ -2434,11 +2441,11 @@ Relations:  {''')
 
 Connections:  {''')
 
-    # NOTE - The FBX SDK does not care about the order but some importers DO!
+    # NOTE - The FBX SDK dosnt care about the order but some importers DO!
     # for instance, defining the material->mesh connection
     # before the mesh->parent crashes cinema4d
 
-    # Includes the armature (JCB)
+    # Includes the armature (JCB) - Testing this theory
     for ob_generic in ob_all_typegroups:  # all blender 'Object's we support
         for my_ob in ob_generic:
             # for deformed meshes, don't have any parents or they can get twice transformed.
@@ -2446,6 +2453,20 @@ Connections:  {''')
                 file.write('\n\tConnect: "OO", "Model::%s", "Model::%s"' % (my_ob.fbxName, my_ob.fbxParent.fbxName))
             else:
                 file.write('\n\tConnect: "OO", "Model::%s", "Model::Scene"' % my_ob.fbxName)
+
+    if xna_format:
+        # XNA wants the bone connections first! (JCB) - Testing this theory
+        #for my_arm in ob_arms:
+        #    file.write('\n\tConnect: "OO", "Model::%s", "Model::Scene"' % my_arm.fbxName)
+
+        for my_bone in ob_bones:
+            # Always parent to armature now
+            if my_bone.parent:
+                file.write('\n\tConnect: "OO", "Model::%s", "Model::%s"' % (my_bone.fbxName, my_bone.parent.fbxName))
+            else:
+                # the armature object is written as an empty and all root level bones connect to it
+                # TO TEST: try parenting with the scene for XNA! (JCB)
+                file.write('\n\tConnect: "OO", "Model::%s", "Model::%s"' % (my_bone.fbxName, my_bone.fbxArm.fbxName))
 
     if materials:
         for my_mesh in ob_meshes:
@@ -2482,13 +2503,14 @@ Connections:  {''')
             for fbxMeshObName in my_bone.blenMeshes:  # .keys()
                 file.write('\n\tConnect: "OO", "Model::%s", "SubDeformer::Cluster %s %s"' % (my_bone.fbxName, fbxMeshObName, my_bone.fbxName))
 
-    for my_bone in ob_bones:
-        # Always parent to armature now
-        if my_bone.parent:
-            file.write('\n\tConnect: "OO", "Model::%s", "Model::%s"' % (my_bone.fbxName, my_bone.parent.fbxName))
-        else:
-            # the armature object is written as an empty and all root level bones connect to it
-            file.write('\n\tConnect: "OO", "Model::%s", "Model::%s"' % (my_bone.fbxName, my_bone.fbxArm.fbxName))
+    if not xna_format:
+        for my_bone in ob_bones:
+            # Always parent to armature now
+            if my_bone.parent:
+                file.write('\n\tConnect: "OO", "Model::%s", "Model::%s"' % (my_bone.fbxName, my_bone.parent.fbxName))
+            else:
+                # the armature object is written as an empty and all root level bones connect to it
+                file.write('\n\tConnect: "OO", "Model::%s", "Model::%s"' % (my_bone.fbxName, my_bone.fbxArm.fbxName))
 
     # groups
     if groups:
@@ -2496,9 +2518,7 @@ Connections:  {''')
             for ob_base in ob_generic:
                 for fbxGroupName in ob_base.fbxGroupNames:
                     file.write('\n\tConnect: "OO", "Model::%s", "GroupSelection::%s"' % (ob_base.fbxName, fbxGroupName))
-                    
     if not xna_format:
-        # I think this always duplicates the armature connection because it is also in ob_generic above! (JCB)
         for my_arm in ob_arms:
             file.write('\n\tConnect: "OO", "Model::%s", "Model::Scene"' % my_arm.fbxName)
 
@@ -2731,6 +2751,10 @@ Takes:  {''')
                                 context_bone_anim_vecs = []
                                 prev_eul = None
                                 for mtx in context_bone_anim_mats:
+                                    # Required for XNA (JCB)
+                                    #if xna_format:
+                                    #    prev_eul = mtx[0].to_euler()
+                                    #else:
                                     if prev_eul:
                                         prev_eul = mtx[1].to_euler('XYZ', prev_eul)
                                     else:
@@ -2757,6 +2781,10 @@ Takes:  {''')
 
                                         # Curve types are 'C,n' for constant, 'L' for linear
                                         # C,n is for bezier? - linear is best for now so we can do simple keyframe removal
+                                        # For XNA (JCB)
+                                        #if xna_format:
+                                        #    file.write('\n\t\t\t\t\t\t\t%i,%.15f,C,n'  % (fbx_time(frame-1), context_bone_anim_vecs[frame - act_start][i]))
+                                        #else:
                                         file.write('\n\t\t\t\t\t\t\t%i,%.15f,L' % (fbx_time(frame - 1), context_bone_anim_vecs[frame - act_start][i]))
                                         frame += 1
                                 else:
@@ -2920,6 +2948,20 @@ Takes:  {''')
 
     file.close()
 
+    # Revert the model back to where it was because we needed it in POSE mode for XNA (JCB)
+    if 'ARMATURE' in object_types:
+        # now we have the meshes, restore the rest arm position
+        for i, arm in enumerate(bpy.data.armatures):
+            arm.pose_position = ob_arms_orig_rest[i]
+
+        if ob_arms_orig_rest:
+            for ob_base in bpy.data.objects:
+                if ob_base.type == 'ARMATURE':
+                    ob_base.update_tag()
+            # This causes the makeDisplayList command to effect the mesh
+            scene.frame_set(scene.frame_current)
+    
+    
     # copy all collected files.
     bpy_extras.io_utils.path_reference_copy(copy_set)
 
@@ -3017,41 +3059,29 @@ def save(operator, context,
         return {'FINISHED'}  # so the script wont run after we have batch exported.
 
 
-# XNA FBX Requirements (JCB 29 July 2011)
-# - Armature must be parented to the scene
-# - Armature must be a 'Limb' never a 'null'.  This is in several places.
-# - First bone must be parented to the armature.
-# - In object_tx() the bones must return their own matrix.
-# - Lone edges cause intermittent errors in the XNA content pipeline!
-#       I have added a warning message and excluded them.
-
-
-# Helpers for the XNA Pipeline (JCB 29 July 2011)
-# - Export just animations without the mesh
-# - Each action to have its own name NOT 'Default_Take'
-# - Automatic naming of the output file to include the selected 
-#       action because each animation must be saved to its own file
-# - At the moment the script is set to not rotate the animations.  
-#       This needs more testing to see if it is necessary.
-# Typical settings for XNA export
-#   No Cameras, No Lamps, No Edges, No face smoothing, No Default_Take
-
 # TODO for XNA July 2011: (JCB)
 # done - Tick box to include ONLY animations, smaller quicker export for individual XNA animations
-# reverted - Include the BIND_POSE line in the output - not necessary
+# done - Include the BIND_POSE line in the output - essential for XNA
 # done - Tick box to name the selected animation Default_Take.tak not needed for XNA
-# note - Limb and LimbNode do the same thing.  Either term can be used.
+# note - Leave the armature as an empty for now.  I think making it a limb node adds it as a bone unnecessarily.
+# note - Do not change Limb to LimbNode because the bones load even though the animation is distorted.
 # done - Save relative filenames not full paths (all_same_folder)
 # done - save the currect action with its own name instead of Default_Take
+# note - commented out camera rotation because it errors!
+# note - v2.58a has a different Vector multiplication order to the latest revision so Camera rotation errors
 # does not matter either works - Change matrix rotation: see: TX_CHAN == 'R'
 # does not matter either works - Change from Linear to Curve takes output
-# done - armature must be a Limb instead of a null in several places
-# done - removed duplicate Connect: "OO", "Model::Skeleton", "Model::Scene"
-# reverted - Being in POSE mode for the entire script - not necessary
-# essential - Armature object MUST be a Limb not a null!  In both relations and it own definition.
-# not done - The armature does not need to be included as a bone in the animations.  It always has a zero rotation.
-# essential - in object_tx() the bones must return their own matrix.
+# no change inityially but after other changes this is essential - Try armature as a Limb instead of a null
+# no change - Connect: "OO", "Model::Skeleton", "Model::Scene"  is added twice!
+# does not matter - Try settings and leaving in POSE mode for the entire script, see line 1977
+# TEST WITH XNA
+# This - Try the order that the connections are listed in
+# And This - Armature object MUST be a Limb not a null!  In both relations and it own definition
+# - Do not include the armature object at all.  Parent the root bone (Limb or LimbNode) to the scene instead.
+#       If the parent of the bone is the armture then connect to the scene.
 
+# At a guess the order of the connections and the Skeleton type being a Limb 
+# both have to be correct for XNA! (JCB)
 
 # NOTE TO Campbell - 
 #   Can any or all of the following notes be removed because some have been here for a long time? (JCB 27 July 2011)
