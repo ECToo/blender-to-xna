@@ -15,6 +15,7 @@
   * Added option to use the same folder for textures as the fbx is in
   * Output the selected action with its own name instead of Default_Take
   * Removed all rotations
+  * Bones return their own matrix in object_tx()
   * Made the Armature a Limb
 
 
