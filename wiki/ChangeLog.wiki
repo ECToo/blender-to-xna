@@ -15,14 +15,16 @@
   * Added option to use the same folder for textures as the fbx is in
   * Output the selected action with its own name instead of Default_Take
   * Removed all rotations
+  * Made the Armature a Limb
+  * Changed the order of the connections so that the bones are before the defomations
 
-At the moment the model loads with an animation but when animated the model leans to one side and the fingers and arms are twisted.
 
 == Notes ==
 
-  * Decided to leave the armature as an empty for now.  Previously I had changed this to a LimbNode but I think that adds it unecessarily as a bone!
-  * Might try not including the armature object at all as it does not appear to be needed by XNA and just adds an extra bone or a warning message depending on how it is included!
-  * For the time being I have decided not to change 'Limb' to 'LimbNode' because as far as I can tell the bones load with either name.  The problem at the moment is that they are distorted.
+  * The armature must be a Limb.
+  * Limb and LimbNode do the same thing as far as I can tell.
+  * The armature must be parented to the scene.
+  * The first bone must be parented to the armature.
   * Linear or curve L or c,n make no difference to the output.
   * The calculation of the Rotation (TX_CHAN == 'R') of the takes makes no difference.
-  * The armature as a Limb or null makes no difference.
+  * I don't think the armature needs to be included as a bone in the animations because it always has a rotation of zero but I can't work out how to exclude it in the script!
