@@ -2503,10 +2503,10 @@ Connections:  {''')
                 for fbxGroupName in ob_base.fbxGroupNames:
                     file.write('\n\tConnect: "OO", "Model::%s", "GroupSelection::%s"' % (ob_base.fbxName, fbxGroupName))
 
-    if not armature_limb:
-        # I think this always duplicates the armature connection because it is also in ob_generic above! (JCB)
-        for my_arm in ob_arms:
-            file.write('\n\tConnect: "OO", "Model::%s", "Model::Scene"' % my_arm.fbxName)
+
+    # I think the following always duplicates the armature connection because it is also in ob_all_typegroups above! (JCB)
+    #for my_arm in ob_arms:
+    #    file.write('\n\tConnect: "OO", "Model::%s", "Model::Scene"' % my_arm.fbxName)
 
     file.write('\n}')
 

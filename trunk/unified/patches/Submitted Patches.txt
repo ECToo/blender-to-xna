@@ -31,7 +31,7 @@ Reply 30-07-2011:
 Thanks for showing me the correct usage in the code.
 
 * The takes_only option was the first thing I added before making any other changes.  XNA only supports one animation per file so being able to output individual takes quickly and test the import quickly is important for my use of the script.  
-All it does is exclude large sections of the FBX output.  It should be fairly easy to follow.  I have also tested with and without it a lot during testing of the script.
+All it does is exclude large sections of the FBX output.  It should be fairly easy to follow.  In most cases it is the same code indented one level.  I have also tested with and without it a lot during testing of the script.
 
 * 222: I do not know what mtx4_z90 does.  I thought it was you that had written it!  As far as I am concerned it breaks armature rotation which is why I set it to indentity() and disable rotation altogether.
 I have tried several times to work out the maths for the armature rotation but failed.
@@ -44,3 +44,6 @@ I have changed it to allow for other applications.  Nulls are included if 'EMPTY
 
 * 2549... (was 2545...): I agree.  I have removed the prior code in this latest patch.
 
+* 2570-2509:  Please check that my thinking is correct.  Armatures are already listed by ob_all_typegroups at line 2448.  Adding them at line 2570 as well duplicates the same connection!
+
+- JCB
