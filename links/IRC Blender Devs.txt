@@ -1,0 +1,6 @@
+Freenode
+#blendercoders
+#blenderpython
+
+Application:
+YChat
