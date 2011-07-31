@@ -205,8 +205,8 @@ def save_single(operator, scene, filepath="",
         takes_only=False,
         use_default_take=False,
         all_same_folder = False,
-        include_edges=False,
-        enable_rotation=True,
+        use_edges=False,
+        use_rotate_workaround=False,
         armature_limb=False,
     ):
 
@@ -217,9 +217,9 @@ def save_single(operator, scene, filepath="",
     # Used for mesh and armature rotations
     mtx4_z90 = Matrix.Rotation(math.pi / 2.0, 4, 'Z')
     # Rotation does not work for XNA animations.  I do not know why but they end up a mess! (JCB)
-    if not enable_rotation:
+    if use_rotate_workaround:
         # Set rotation to Matrix Identity for XNA (JCB)
-        mtx4_z90 = Matrix(((1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)))
+        mtx4_z90.identity()
 
     if global_matrix is None:
         global_matrix = Matrix()
@@ -462,7 +462,7 @@ def save_single(operator, scene, filepath="",
             scale = tuple(scale)
                 
             # Essential for XNA to use the original matrix not rotated nor scaled (JCB)
-            if not enable_rotation:
+            if use_rotate_workaround:
                 matrix = ob.matrix_local
             
         else:
@@ -1416,7 +1416,7 @@ def save_single(operator, scene, filepath="",
                 print('Warning: Lone edge found: Edges that are not part of a face cause intermittent errors with some importers!')
 
                 # Exclude lone edges when edges are not needed (JCB)
-                if not include_edges:
+                if not use_edges:
                     print('Lone edge excluded!')
                 else:
                     if i == -1:
@@ -1430,7 +1430,7 @@ def save_single(operator, scene, filepath="",
             i += 1
 
         # XNA does not need the edges (JCB) - no idea if they do any harm
-        if include_edges:
+        if use_edges:
             file.write('\n\t\tEdges: ')
             i = -1
             for ed in me_edges:
@@ -2221,9 +2221,9 @@ Definitions:  {
     if not takes_only:
         # we could avoid writing this possibly but for now just write it
         file.write('''
-        ObjectType: "Pose" {
-            Count: 1
-        }''')
+	ObjectType: "Pose" {
+		Count: 1
+	}''')
 
     if groups:
         file.write('''
@@ -2253,6 +2253,10 @@ Objects:  {''')
     if armature_limb:
         for my_arm in ob_arms:
             write_arm(my_arm)
+            
+        if 'EMPTY' in object_types:
+            for my_null in ob_null:
+                write_null(my_null)
     else:        
         for my_null in ob_null:
             write_null(my_null)
@@ -2318,11 +2322,11 @@ Objects:  {''')
     if not takes_only:
         file.write('''
         Pose: "Pose::BIND_POSES", "BindPose" {
-            Type: "BindPose"
-            Version: 100
-            Properties60:  {
-            }
-            NbPoseNodes: ''')
+		Type: "BindPose"
+		Version: 100
+		Properties60:  {
+		}
+		NbPoseNodes: ''')
         file.write(str(len(pose_items)))
 
         for fbxName, matrix in pose_items:
@@ -2498,7 +2502,7 @@ Connections:  {''')
             for ob_base in ob_generic:
                 for fbxGroupName in ob_base.fbxGroupNames:
                     file.write('\n\tConnect: "OO", "Model::%s", "GroupSelection::%s"' % (ob_base.fbxName, fbxGroupName))
-                    
+
     if not armature_limb:
         # I think this always duplicates the armature connection because it is also in ob_generic above! (JCB)
         for my_arm in ob_arms:
@@ -2542,81 +2546,42 @@ Connections:  {''')
         # instead of tagging
         tagged_actions = []
 
-        if not use_default_take:
-            # === I think this section could be used for all versions of the export (JCB)
-            
-            # get the current action first so we can use it if we only export one action (JCB)
-            for my_arm in ob_arms:
-                if not blenActionDefault:
-                    blenActionDefault = my_arm.blenAction
-            
-            if ANIM_ACTION_ALL:
-                tmp_actions = bpy.data.actions[:]
-            else:
-                # Export the current action (JCB)
-                tmp_actions.append(blenActionDefault)
-
-            # We need the following even if exporting only the current action (JCB)
-
-            # find which actions are compatible with the armatures
-            tmp_act_count = 0
-            for my_arm in ob_arms:
-
-                arm_bone_names = set([my_bone.blenName for my_bone in my_arm.fbxBones])
-
-                for action in tmp_actions:
-
-                    action_chan_names = arm_bone_names.intersection(set([g.name for g in action.groups]))
-
-                    if action_chan_names:  # at least one channel matches.
-                        my_arm.blenActionList.append(action)
-                        tagged_actions.append(action.name)
-                        tmp_act_count += 1
-
-                    # Corrected tab level (JCB)
-                    # incase there are no actions applied to armatures
-                    action_lastcompat = action
-
-            if tmp_act_count:
-                # unlikely to ever happen but if no actions applied to armatures, just use the last compatible armature.
-                if not blenActionDefault:
-                    blenActionDefault = action_lastcompat
-            # === I think the above could be used for all versions (JCB)
-        else:
-            # == I think the following could be replaced by the above non-default take version (JCB)
-            if ANIM_ACTION_ALL:
-                tmp_actions = bpy.data.actions[:]
-
-                # find which actions are compatible with the armatures
-                # blenActions is not yet initialized so do it now.
-                tmp_act_count = 0
-                for my_arm in ob_arms:
-
-                    # get the default name - this is the current action
-                    if not blenActionDefault:
-                        blenActionDefault = my_arm.blenAction
-
-                    arm_bone_names = set([my_bone.blenName for my_bone in my_arm.fbxBones])
-
-                    for action in tmp_actions:
-
-                        action_chan_names = arm_bone_names.intersection(set([g.name for g in action.groups]))
-
-                        if action_chan_names:  # at least one channel matches.
-                            my_arm.blenActionList.append(action)
-                            tagged_actions.append(action.name)
-                            tmp_act_count += 1
-
-                        # Corrected tab level (JCB)
-                        # incase there is no actions applied to armatures
-                        action_lastcompat = action
-
-                if tmp_act_count:
-                    # unlikely to ever happen but if no actions applied to armatures, just use the last compatible armature.
-                    if not blenActionDefault:
-                        blenActionDefault = action_lastcompat
-            # == End of block that I think could be replaced by the XNA version (JCB)
+        # get the current action first so we can use it if we only export one action (JCB)
+        for my_arm in ob_arms:
+            if not blenActionDefault:
+                blenActionDefault = my_arm.blenAction
         
+        if ANIM_ACTION_ALL:
+            tmp_actions = bpy.data.actions[:]
+        else:
+            # Export the current action (JCB)
+            tmp_actions.append(blenActionDefault)
+
+        # We need the following even if exporting only the current action (JCB)
+
+        # find which actions are compatible with the armatures
+        tmp_act_count = 0
+        for my_arm in ob_arms:
+
+            arm_bone_names = set([my_bone.blenName for my_bone in my_arm.fbxBones])
+
+            for action in tmp_actions:
+
+                action_chan_names = arm_bone_names.intersection(set([g.name for g in action.groups]))
+
+                if action_chan_names:  # at least one channel matches.
+                    my_arm.blenActionList.append(action)
+                    tagged_actions.append(action.name)
+                    tmp_act_count += 1
+
+                # Corrected tab level (JCB)
+                # incase there are no actions applied to armatures
+                action_lastcompat = action
+
+        if tmp_act_count:
+            # unlikely to ever happen but if no actions applied to armatures, just use the last compatible armature.
+            if not blenActionDefault:
+                blenActionDefault = action_lastcompat
 
         del action_lastcompat
 
@@ -2669,12 +2634,8 @@ Takes:  {''')
                     if my_arm.blenObject.animation_data and blenAction in my_arm.blenActionList:
                         my_arm.blenObject.animation_data.action = blenAction
 
-            if use_default_take:
-                # No one knows why this is here! Can it be removed? (JCB)
-                file.write('\n\t\tFileName: "Default_Take.tak"')
-            else:
-                # XNA works best with individual action names (JCB)
-                file.write('\n\t\tFileName: "%s.tak"' % take_name)
+            # XNA works best with individual action names (JCB)
+            file.write('\n\t\tFileName: "%s.tak"' % take_name)
                 
             file.write('\n\t\tLocalTime: %i,%i' % (fbx_time(act_start - 1), fbx_time(act_end - 1)))  # ??? - not sure why this is needed
             file.write('\n\t\tReferenceTime: %i,%i' % (fbx_time(act_start - 1), fbx_time(act_end - 1)))  # ??? - not sure why this is needed
@@ -3018,6 +2979,9 @@ def save(operator, context,
 
         return {'FINISHED'}  # so the script wont run after we have batch exported.
 
+# APPLICATION REQUIREMENTS
+# Please update the lists for UDK, Unity, XNA etc. on the following web page:
+#   http://wiki.blender.org/index.php/Dev:2.5/Py/Scripts/Import-Export/UnifiedFBX
 
 # XNA FBX Requirements (JCB 29 July 2011)
 # - Armature must be parented to the scene
@@ -3028,52 +2992,15 @@ def save(operator, context,
 #       It is the animation that gets distorted during rotation!
 # - Lone edges cause intermittent errors in the XNA content pipeline!
 #       I have added a warning message and excluded them.
-
-
-# Helpers for the XNA Pipeline (JCB 29 July 2011)
-# - Export just animations without the mesh
-# - Each action to have its own name NOT 'Default_Take'
-# - Automatic naming of the output file to include the selected 
-#       action because each animation must be saved to its own file
-# - At the moment the script is set to not rotate the animations.  
-#       This needs more testing to see if it is necessary.
 # Typical settings for XNA export
-#   No Cameras, No Lamps, No Edges, No face smoothing, No Default_Take
-
-# TODO for XNA July 2011: (JCB)
-# done - Tick box to include ONLY animations, smaller quicker export for individual XNA animations
-# reverted - Include the BIND_POSE line in the output - not necessary
-# done - Tick box to name the selected animation Default_Take.tak not needed for XNA
-# note - Limb and LimbNode do the same thing.  Either term can be used.
-# done - Save relative filenames not full paths (all_same_folder)
-# done - save the currect action with its own name instead of Default_Take
-# does not matter either works - Change matrix rotation: see: TX_CHAN == 'R'
-# does not matter either works - Change from Linear to Curve takes output
-# done - armature must be a Limb instead of a null in several places
-# done - removed duplicate Connect: "OO", "Model::Skeleton", "Model::Scene"
-# reverted - Being in POSE mode for the entire script - not necessary
-# essential - Armature object MUST be a Limb not a null!  In both relations and it own definition.
-# not done - The armature does not need to be included as a bone in the animations.  It always has a zero rotation.
-# essential - in object_tx() the bones must return their own matrix.
-
+#   No Cameras, No Lamps, No Edges, No face smoothing, No Default_Take, Armature as bone, Disable rotation
 
 # NOTE TO Campbell - 
 #   Can any or all of the following notes be removed because some have been here for a long time? (JCB 27 July 2011)
-
 # NOTES (all line numbers correspond to original export_fbx.py (under release/scripts)
-# - Draw.PupMenu alternative in 2.5?, temporarily replaced PupMenu with print
 # - get rid of bpy.path.clean_name somehow
-# + fixed: isinstance(inst, bpy.types.*) doesn't work on RNA objects: line 565
 # + get rid of BPyObject_getObjectArmature, move it in RNA?
-# - BATCH_ENABLE and BATCH_GROUP options: line 327 - Has this been done because they no longer exist in this file?
 # - implement all BPyMesh_* used here with RNA
 # - getDerivedObjects is not fully replicated with .dupli* funcs
-# - talk to Campbell, this code won't work? lines 1867-1875 - Out of date can this comment line be removed?
 # - don't know what those colbits are, do we need them? they're said to be deprecated in DNA_object_types.h: 1886-1893
 # - no hq normals: 1900-1901
-
-# TODO
-# - bpy.data.remove_scene: line 366
-# - bpy.sys.time move to bpy.sys.util?
-# - new scene creation, activation: lines 327-342, 368
-# - uses bpy.path.abspath, *.relpath - replace at least relpath

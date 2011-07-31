@@ -42,62 +42,13 @@ if "bpy" in locals():
 import bpy
 from bpy.props import StringProperty, BoolProperty, FloatProperty, EnumProperty
 
-from bpy_extras.io_utils import (ExportHelper, 
+from bpy_extras.io_utils import (ExportHelper,
                                  path_reference_mode,
                                  axis_conversion,
                                  axis_conversion_ensure,
                                  )
 
-# XNA can only use one take per file so there will be a lot of FBX files for the same model (JCB)
-# Rename the file based on the action name (JCB)
-def add_action_to_filepath(self):
-    import os
-    if self.ANIM_ENABLE and self.takes_only and not self.ANIM_ACTION_ALL:
-        existing_name = self.filepath
-        # get the current action name
-        currentAction = ""
-        for arm_obj in bpy.context.scene.objects:
-            if arm_obj.type == 'ARMATURE':
-                if arm_obj.animation_data:
-                    if currentAction == "":
-                        currentAction = arm_obj.animation_data.action.name
-        # use the action name as a suffix to the existing blend filename.
-        self.filepath = os.path.splitext(bpy.data.filepath)[0] + "-" + currentAction + ".fbx"
-        if existing_name != self.filepath:
-            return True
-        else:
-            return False
-    else:
-        return False
-             
-# Validate that the options are compatible with XNA (JCB)
-def validate_xna_options(self):
-    if self.xna_validate:
-        changed = False
-        if self.enable_rotation or not self.armature_limb:
-            changed = True
-            self.enable_rotation = False
-            self.armature_limb = True
-        if self.global_scale != 1.0 or self.mesh_smooth_type != 'OFF':
-            changed = True
-            self.global_scale = 1.0
-            self.mesh_smooth_type = 'OFF'
-        if not self.all_same_folder or self.use_default_take or self.ANIM_OPTIMIZE or self.include_edges:
-            changed = True
-            self.all_same_folder = True
-            self.use_default_take = False
-            self.ANIM_OPTIMIZE = False
-            self.include_edges = False
-        if 'CAMERA' in self.object_types or 'LAMP' in self.object_types or 'EMPTY' in self.object_types:
-            changed = True
-            # I could not get .remove to work
-            #self.object_types.remove('CAMERA')
-            self.object_types={'ARMATURE', 'MESH'}
-        return changed
-    else:
-        return False
 
-             
 class ExportFBX(bpy.types.Operator, ExportHelper):
     '''Selection to an ASCII Autodesk FBX'''
     bl_idname = "export_scene.fbx"
@@ -114,11 +65,10 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
     # XNA does not support scaled armatures (JCB)
     global_scale = FloatProperty(name="Scale", description="Scale all data. Some importers do not support scaled armatures!", min=0.01, max=1000.0, soft_min=0.01, soft_max=1000.0, default=1.0)
     # The armature rotation does not work for XNA and setting the global matrix to identity is not sufficient on its own (JCB)
-    enable_rotation = BoolProperty(name="Enable Rotation", description="Must be on for rotation settings to be applied.", default=True)
+    use_rotate_workaround = BoolProperty(name="Disable Rotation", description="Disable global rotation, for XNA compatibility", default=False)
 
     axis_forward = EnumProperty(
             name="Forward",
-            description="Select the axis to be rotated to forwards then one of the other axes to be up.",
             items=(('X', "X Forward", ""),
                    ('Y', "Y Forward", ""),
                    ('Z', "Z Forward", ""),
@@ -131,7 +81,6 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
 
     axis_up = EnumProperty(
             name="Up",
-            description="Must select the forward axis before selecting the up axis.",
             items=(('X', "X Up", ""),
                    ('Y', "Y Up", ""),
                    ('Z', "Z Up (Blender)", ""),
@@ -167,7 +116,7 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
 
 
     # XNA does not use the edge information (JCB)
-    include_edges = BoolProperty(name="Include Edges", description="Edges may not be necessary and can cause errors with some importers!", default=False)
+    use_edges = BoolProperty(name="Include Edges", description="Edges may not be necessary and can cause errors with some importers!", default=False)
 #    EXP_MESH_HQ_NORMALS = BoolProperty(name="HQ Normals", description="Generate high quality normals", default=True)
     # armature animation
     ANIM_ENABLE = BoolProperty(name="Include Animation", description="Export keyframe animation", default=True)
@@ -181,7 +130,7 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
     # XNA usually errors if the textures are not in the same folder as the FBX file (JCB)
     all_same_folder = BoolProperty(name="Same Folder", description="The FBX importer will expect the textures to be in the same folder as the FBX file.", default=False)
     # XNA requires the armature to be included as the root limb and that the first bone is parented to the armature limb! (JCB)
-    armature_limb = BoolProperty(name="Armature Include As Bone", description="Compatibility: Include the armature object as the root bone for the skeleton.", default=False)
+    armature_limb = BoolProperty(name="Armature Include As A Bone", description="Compatibility: Include the armature object as the root bone for the skeleton.", default=False)
     # XNA - validation to avoid incompatible settings.  I will understand if this is not kept in the generic version. (JCB)
     # It would be nice to have this for XNA, UDK, Unity and Sunburn if others could provide the details. (JCB)
     xna_validate = BoolProperty(name="XNA Strict Options", description="Make sure options are compatible with Microsoft XNA", default=False)
@@ -199,17 +148,61 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
 
     path_mode = path_reference_mode
 
+    # XNA can only use one take per file so there will be a lot of FBX files for the same model (JCB)
+    # Rename the file based on the action name (JCB)
+    def _add_action_to_filepath(self):
+        import os
+        if self.ANIM_ENABLE and self.takes_only and not self.ANIM_ACTION_ALL:
+            existing_name = self.filepath
+            # get the current action name
+            currentAction = ""
+            for arm_obj in bpy.context.scene.objects:
+                if arm_obj.type == 'ARMATURE':
+                    if arm_obj.animation_data:
+                        if currentAction == "":
+                            currentAction = arm_obj.animation_data.action.name
+            # use the action name as a suffix to the existing blend filename.
+            self.filepath = os.path.splitext(bpy.data.filepath)[0] + "-" + currentAction + ".fbx"
+            if existing_name != self.filepath:
+                return True
+            else:
+                return False
+        else:
+            return False
+
+    # Validate that the options are compatible with XNA (JCB)
+    def _validate_xna_options(self):
+        if not self.xna_validate:
+            return False
+        changed = False
+        if (self.use_rotate_workaround == False) or not self.armature_limb:
+            changed = True
+            self.use_rotate_workaround = True
+            self.armature_limb = True
+        if self.global_scale != 1.0 or self.mesh_smooth_type != 'OFF':
+            changed = True
+            self.global_scale = 1.0
+            self.mesh_smooth_type = 'OFF'
+        if not self.all_same_folder or self.use_default_take or self.ANIM_OPTIMIZE or self.use_edges:
+            changed = True
+            self.all_same_folder = True
+            self.use_default_take = False
+            self.ANIM_OPTIMIZE = False
+            self.use_edges = False
+        if self.object_types & {'CAMERA', 'LAMP', 'EMPTY'}:
+            changed = True
+            self.object_types -= {'CAMERA', 'LAMP', 'EMPTY'}
+        return changed
+
     @property
     def check_extension(self):
         return self.batch_mode == 'OFF'
 
-    # I cannot find any description of how to use this method in the API documentation.  (JCB)
-    # I have assumed that check() returns True if something has changed and False if nothing has changed? (JCB)
     def check(self, context):
-        one = validate_xna_options(self)
-        two = add_action_to_filepath(self)
-        three = axis_conversion_ensure(self, "axis_forward", "axis_up")
-        if one or two or three:
+        is_xna_change = self._validate_xna_options()
+        is_filepath_change = self._add_action_to_filepath()
+        is_axis_change = axis_conversion_ensure(self, "axis_forward", "axis_up")
+        if is_xna_change or is_filepath_change or is_axis_change:
             return True
         else:
             return False
@@ -221,7 +214,7 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
 
         # Armature rotation causes a mess in XNA there are also other changes in the main script to avoid rotation (JCB)
         global_matrix = Matrix()
-        if self.enable_rotation:
+        if not self.use_rotate_workaround:
             global_matrix[0][0] = global_matrix[1][1] = global_matrix[2][2] = self.global_scale
             global_matrix = global_matrix * axis_conversion(to_forward=self.axis_forward, to_up=self.axis_up).to_4x4()
         else:

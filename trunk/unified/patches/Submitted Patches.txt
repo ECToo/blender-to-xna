@@ -1,3 +1,46 @@
 http://projects.blender.org/tracker/?atid=127&group_id=9&func=browse
 
 #28118 29-07-2011
+
+Message 30-07-2011:
+Attached a slightly updated patch, it changes...
+* invert enable_rotation to use_rotate_workaround, options like this should be 'False'.
+
+* some indentation was changed for FBX output when it only needed to be changed for the write funcs.
+
+* move add_action_to_filepath and validate_xna_options to private class methods and addressed one of the issues in you;re comments about set usage.
+
+
+Review (issues numbered from the result of having my modified patch applied).
+
+* Would have preferred if the "takes_only" option not be apart of this patch since it seems its not essential for XNA compatibility and makes the patch harder to review, Could you split this patch? - XNA compat at first, after add features which are convenient.
+
+* 222: Making mtx4_z90 and identity matrix seems to be needed, but does this work for XNA and break other cases?, if its not needed perhaps it can be made an identity() every time?
+
+* 466: Setting the matrix to be ob.matrix_local does not ensure its not rotated or scaled, Im not sure what you are trying to do here.
+  infact because the matrix is from "matrix = ob.matrix_local * mtx4_z90", and mtx4_z90 is an identity matrix I dont think this is needed at all.
+
+* 2257: When armature_limb is enabled, normal empty objects are not exported, is this intentional?. looks like this could be moved out of the 'if'
+
+* 2545 -> 2618: This block of code has been duplicated and edited but seems to contain very similar code, rather not do this if possible.
+
+- Campbell
+
+
+Reply 30-07-2011:
+Thanks for showing me the correct usage in the code.
+
+* The takes_only option was the first thing I added before making any other changes.  XNA only supports one animation per file so being able to output individual takes quickly and test the import quickly is important for my use of the script.  
+All it does is exclude large sections of the FBX output.  It should be fairly easy to follow.  I have also tested with and without it a lot during testing of the script.
+
+* 222: I do not know what mtx4_z90 does.  I thought it was you that had written it!  As far as I am concerned it breaks armature rotation which is why I set it to indentity() and disable rotation altogether.
+I have tried several times to work out the maths for the armature rotation but failed.
+
+* 466: See line 455 which in some cases changes it to matrix = par_matrix.inverted() * matrix
+That does not work for XNA so I had to have the special case.  I tested this several times and always XNA needs matrix = ob.matrix_local
+
+* 2253 (was 2257):  Yes it was deliberate not to export any nulls.  XNA has no concept of an empty or null object.  
+I have changed it to allow for other applications.  Nulls are included if 'EMPTY' is selected
+
+* 2549... (was 2545...): I agree.  I have removed the prior code in this latest patch.
+
