@@ -57,8 +57,6 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
 
     filename_ext = ".fbx"
     filter_glob = StringProperty(default="*.fbx", options={'HIDDEN'})
-    
-    validated_name = False
 
     # List of operator properties, the attributes will be assigned
     # to the class instance from the operator settings before calling.
@@ -116,11 +114,14 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
             default='FACE',
             )
 
+
     # XNA does not use the edge information (JCB)
     use_edges = BoolProperty(name="Include Edges", description="Edges may not be necessary and can cause errors with some importers!", default=False)
 #    EXP_MESH_HQ_NORMALS = BoolProperty(name="HQ Normals", description="Generate high quality normals", default=True)
     # armature animation
     ANIM_ENABLE = BoolProperty(name="Include Animation", description="Export keyframe animation", default=True)
+    # XNA needs each animation in a separate FBX file but it does not need the model each time (JCB)
+    takes_only = BoolProperty(name="Only Animations", description="Export will not include any meshes", default=False)
     ANIM_ACTION_ALL = BoolProperty(name="All Actions", description="Export all actions for armatures or just the currently selected action", default=False)
     ANIM_OPTIMIZE = BoolProperty(name="Optimize Keyframes", description="Remove double keyframes", default=True)
     ANIM_OPTIMIZE_PRECISSION = FloatProperty(name="Precision", description="Tolerence for comparing double keyframes (higher for greater accuracy)", min=1, max=16, soft_min=1, soft_max=16, default=6.0)
@@ -151,8 +152,7 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
     # Rename the file based on the action name (JCB)
     def _add_action_to_filepath(self):
         import os
-        if not self.validated_name and self.ANIM_ENABLE and 'MESH' not in self.object_types and not self.ANIM_ACTION_ALL:
-            self.validated_name = True
+        if self.ANIM_ENABLE and self.takes_only and not self.ANIM_ACTION_ALL:
             existing_name = self.filepath
             # get the current action name
             currentAction = ""
@@ -194,24 +194,15 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
             self.object_types -= {'CAMERA', 'LAMP', 'EMPTY'}
         return changed
 
-    def _validate_takes_options(self):
-        if not self.ANIM_ENABLE:
-            return False
-        if not self.object_types & {'ARMATURE'}:
-            self.object_types |= {'ARMATURE'}
-            return True
-        return False
-        
     @property
     def check_extension(self):
         return self.batch_mode == 'OFF'
 
     def check(self, context):
         is_xna_change = self._validate_xna_options()
-        is_takes_change = self._validate_takes_options()
         is_filepath_change = self._add_action_to_filepath()
         is_axis_change = axis_conversion_ensure(self, "axis_forward", "axis_up")
-        if is_xna_change or is_takes_change or is_filepath_change or is_axis_change:
+        if is_xna_change or is_filepath_change or is_axis_change:
             return True
         else:
             return False

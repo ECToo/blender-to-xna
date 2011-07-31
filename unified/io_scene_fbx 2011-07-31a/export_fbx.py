@@ -202,6 +202,7 @@ def save_single(operator, scene, filepath="",
         ANIM_ACTION_ALL=False,
         use_metadata=True,
         path_mode='AUTO',
+        takes_only=False,
         use_default_take=False,
         all_same_folder = False,
         use_edges=False,
@@ -2075,8 +2076,8 @@ def save_single(operator, scene, filepath="",
 
         # Not used at the moment
         # my_bone.calcRestMatrixLocal()
-        # (JCB)
-        if 'MESH' in object_types:
+        # Useful to export just takes (JCB)
+        if not takes_only:
             bone_deformer_count += len(my_bone.blenMeshes)
 
     del my_bone_blenParent
@@ -2126,23 +2127,22 @@ def save_single(operator, scene, filepath="",
 
     camera_count = 8
     
-    # Clear the things we do not want so the counts are valid (JCB)
-    # Add them back as an empty array to avoid script errors (JCB)
-    if 'MESH' not in object_types:
+    # Ignore some objects when we only want animations (JCB)
+    if takes_only:
+        # Clear the things we do not want so the counts are valid (JCB)
         ob_meshes = None
+        ob_lights = None
+        ob_cameras = None
         materials = None
         textures = None
+        # Add them back as empty to avoid script errors (JCB)
         ob_meshes = []
+        ob_lights = []
+        ob_cameras = []
         materials = []
         textures = []
-    if 'LAMP' not in object_types:
-        ob_lights = None
-        ob_lights = []
-    if 'CAMERA' not in object_types:
-        ob_cameras = None
-        ob_cameras = []
         camera_count = 0
-    # Not sure if anything cares about the Definitions: counts, but they must be in the file for a reason! (JCB)
+    # XNA does not appear to care about the Definitions: counts, it loads regardless (JCB)
     
     file.write('''
 
@@ -2205,7 +2205,7 @@ Definitions:  {
             tmp += 1
 
     # (JCB)
-    if 'MESH' in object_types:
+    if not takes_only:
         # Add subdeformers
         for my_bone in ob_bones:
             tmp += len(my_bone.blenMeshes)
@@ -2217,8 +2217,10 @@ Definitions:  {
 	}''' % tmp)
     del tmp
 
-    # Bind pose is essential for XNA if the 'MESH' is included (JCB)
-    file.write('''
+    # (JCB)
+    if not takes_only:
+        # we could avoid writing this possibly but for now just write it
+        file.write('''
 	ObjectType: "Pose" {
 		Count: 1
 	}''')
@@ -2243,7 +2245,7 @@ Definitions:  {
 Objects:  {''')
 
     # (JCB)
-    if 'CAMERA' in object_types:
+    if not takes_only:
         # To comply with other FBX FILES
         write_camera_switch()
 
@@ -2276,7 +2278,7 @@ Objects:  {''')
         write_bone(my_bone)
 
     # (JCB)
-    if 'CAMERA' in object_types:
+    if not takes_only:
         write_camera_default()
 
     for matname, (mat, tex) in materials:
@@ -2308,7 +2310,7 @@ Objects:  {''')
                 weights = meshNormalizedWeights(my_mesh.blenObject, my_mesh.blenData)
 
             # (JCB)
-            if 'MESH' in object_types:
+            if not takes_only:
                 for my_bone in ob_bones:
                     if me in iter(my_bone.blenMeshes.values()):
                         write_sub_deformer_skin(my_mesh, my_bone, weights)
@@ -2316,23 +2318,24 @@ Objects:  {''')
     # Write pose is really weird, only needed when an armature and mesh are used together
     # each by themselves do not need pose data. For now only pose meshes and bones
 
-    # Bind pose is essential for XNA if the 'MESH' is included (JCB)
-    file.write('''
+    # (JCB)
+    if not takes_only:
+        file.write('''
         Pose: "Pose::BIND_POSES", "BindPose" {
 		Type: "BindPose"
 		Version: 100
 		Properties60:  {
 		}
 		NbPoseNodes: ''')
-    file.write(str(len(pose_items)))
+        file.write(str(len(pose_items)))
 
-    for fbxName, matrix in pose_items:
-        file.write('\n\t\tPoseNode:  {')
-        file.write('\n\t\t\tNode: "Model::%s"' % fbxName)
-        file.write('\n\t\t\tMatrix: %s' % mat4x4str(matrix if matrix else Matrix()))
-        file.write('\n\t\t}')
+        for fbxName, matrix in pose_items:
+            file.write('\n\t\tPoseNode:  {')
+            file.write('\n\t\t\tNode: "Model::%s"' % fbxName)
+            file.write('\n\t\t\tMatrix: %s' % mat4x4str(matrix if matrix else Matrix()))
+            file.write('\n\t\t}')
 
-    file.write('\n\t}')
+        file.write('\n\t}')
 
     # Finish Writing Objects
     # Write global settings
@@ -2418,7 +2421,7 @@ Relations:  {''')
             file.write('\n\tDeformer: "Deformer::Skin %s", "Skin" {\n\t}' % my_mesh.fbxName)
 
     # (JCB)
-    if 'MESH' in object_types:
+    if not takes_only:
         for my_bone in ob_bones:
             for fbxMeshObName in my_bone.blenMeshes:  # .keys() - fbxMeshObName
                 # is this bone effecting a mesh?
@@ -2471,7 +2474,7 @@ Connections:  {''')
             file.write('\n\tConnect: "OO", "Video::%s", "Texture::%s"' % (texname, texname))
 
     # (JCB)
-    if 'MESH' in object_types:
+    if not takes_only:
         for my_mesh in ob_meshes:
             if my_mesh.fbxArm:
                 file.write('\n\tConnect: "OO", "Deformer::Skin %s", "Model::%s"' % (my_mesh.fbxName, my_mesh.fbxName))
@@ -2989,7 +2992,6 @@ def save(operator, context,
 #       It is the animation that gets distorted during rotation!
 # - Lone edges cause intermittent errors in the XNA content pipeline!
 #       I have added a warning message and excluded them.
-# - Bind pose must be included with the 'MESH'
 # Typical settings for XNA export
 #   No Cameras, No Lamps, No Edges, No face smoothing, No Default_Take, Armature as bone, Disable rotation
 

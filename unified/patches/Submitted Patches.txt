@@ -47,3 +47,15 @@ I have changed it to allow for other applications.  Nulls are included if 'EMPTY
 * 2570-2509:  Please check that my thinking is correct.  Armatures are already listed by ob_all_typegroups at line 2448.  Adding them at line 2570 as well duplicates the same connection!
 
 - JCB
+
+Reply 31-07-2011
+I've e-mailed the file to Campbell (ideasman_42) because I do not have permission to upload the patch here!!!!!!!
+fbx_xna_unified-2011-07-31b_jcbdigger.patch
+
+The 'takes_only' option has been removed from the patch.
+Bug fix included: I have now excluded some sections where they are not applicable if 'MESH' or 'CAMERA' have not been selected as output types.
+
+I have added additional validation to the UI so that it is not possible to output animations without the armature.  Campbell, thanks for the syntax help on that today.
+
+Regards
+- JCB
