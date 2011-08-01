@@ -60,19 +60,25 @@ I have added additional validation to the UI so that it is not possible to outpu
 Regards
 - JCB
 
-Reply 01-08-2011
+Reply 01-08-2011:
 I've e-mailed the file to Campbell (ideasman_42) because I still do not have permission to upload the patch here!
 fbx_xna_unified-2011-08-01a_jcbdigger.patch
 
+Minor changes to the UI to move the order of options slightly.  
+Trying to keep the most frequently used options near the top.  
+That means the XNA compatible options are near the botton with Batch options last.
+Renamed the 'Rotate Fix' to make it clearer that it is only needed to fix animations.
+
+* 2485 -> 2551:
 I have decided to REMOVE 'Default_Take' from the exporter instead of making it an option.
 I can find no reason for it being there!  Anyone who needs the name 'Default_Take' can add an action with that name.
 Most FBX files I have looked at use the name 'Take_001' instead and the only reference to 'Default_Take' is always about Blender.
-As mentioned above, in my opinion, removibg 'Default_Take' is essential to the XNA pipeline.  
+As mentioned above, in my opinion, removing 'Default_Take' is essential to the XNA pipeline.  
 
 I searched using Google and I even searched the FBX SDK.
 The nearest reference to it was in a May 2010 Readme for the 2011.3 version of the FBX SDK.
 http://infiniteengine.googlecode.com/svn/trunk/depends/fbx/readme.txt
-In that the behaviour was changed so the default take and current take are no longer set.
+In that the behaviour was changed so the 'default take and current take are no longer set.'
 Other people struggling with the name 'Default_Take':
 Unity user(s) (might be the same person):
 http://www.blender.org/forum/viewtopic.php?p=87860&sid=274cb607a61b141a214ea15e94b02c25
@@ -80,3 +86,9 @@ http://blenderartists.org/forum/showthread.php?223123-quot-Default-Take-quot-wit
 XNA users commenting on the work round for 'Default_Take':
 http://forums.create.msdn.com/forums/t/66942.aspx
 
+* was 2506 -> 2516: I have removed these because they were pointless.  
+The action_lastcompat was only set at the same time the count was incremented.  
+Therefore the following if condition was only ever met if action_lastcompat was also still empty!
+
+Regards
+- JCB
