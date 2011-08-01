@@ -86,7 +86,7 @@ http://blenderartists.org/forum/showthread.php?223123-quot-Default-Take-quot-wit
 XNA users commenting on the work round for 'Default_Take':
 http://forums.create.msdn.com/forums/t/66942.aspx
 
-* was 2506 -> 2516: I have removed these because they were pointless.  
+* was 2490, 2506 -> 2516: I have removed these because they were pointless.  
 The action_lastcompat was only set at the same time the count was incremented.  
 Therefore the following if condition was only ever met if action_lastcompat was also still empty!
 

@@ -2482,33 +2482,40 @@ Connections:  {''')
         # instead of tagging
         tagged_actions = []
 
-        # get the current action first so we can use it if we only export one action (JCB)
-        for my_arm in ob_arms:
-            if not blenActionDefault:
-                blenActionDefault = my_arm.blenAction
-        
         if use_anim_action_all:
-            # Export All actions
             tmp_actions = bpy.data.actions[:]
-        else:
-            if blenActionDefault:
-                # Export the current action (JCB)
-                tmp_actions.append(blenActionDefault)
 
-        # We need the following even if exporting only the current action (JCB)
+            # find which actions are compatible with the armatures
+            # blenActions is not yet initialized so do it now.
+            tmp_act_count = 0
+            for my_arm in ob_arms:
 
-        # find which actions are compatible with the armatures
-        for my_arm in ob_arms:
+                # get the default name
+                if not blenActionDefault:
+                    blenActionDefault = my_arm.blenAction
 
-            arm_bone_names = set([my_bone.blenName for my_bone in my_arm.fbxBones])
+                arm_bone_names = set([my_bone.blenName for my_bone in my_arm.fbxBones])
 
-            for action in tmp_actions:
+                for action in tmp_actions:
 
-                action_chan_names = arm_bone_names.intersection(set([g.name for g in action.groups]))
+                    action_chan_names = arm_bone_names.intersection(set([g.name for g in action.groups]))
 
-                if action_chan_names:  # at least one channel matches.
-                    my_arm.blenActionList.append(action)
-                    tagged_actions.append(action.name)
+                    if action_chan_names:  # at least one channel matches.
+                        my_arm.blenActionList.append(action)
+                        tagged_actions.append(action.name)
+                        tmp_act_count += 1
+
+                        # incase there is no actions applied to armatures
+                        action_lastcompat = action
+
+            if tmp_act_count:
+                # unlikely to ever happen but if no actions applied to armatures, just use the last compatible armature.
+                if not blenActionDefault:
+                    blenActionDefault = action_lastcompat
+
+        del action_lastcompat
+
+        tmp_actions.insert(0, None)  # None is the default action
 
         file.write('''
 ;Takes and animation section
@@ -2516,10 +2523,10 @@ Connections:  {''')
 
 Takes:  {''')
 
-        # It should be OK for the takes section to be empty if there are no actions (JCB)
-        
         if blenActionDefault:
             file.write('\n\tCurrent: "%s"' % sane_takename(blenActionDefault))
+        else:
+            file.write('\n\tCurrent: "Default Take"')
 
         for blenAction in tmp_actions:
             # we have tagged all actious that are used be selected armatures
@@ -2530,25 +2537,30 @@ Takes:  {''')
                     print('\taction: "%s" has no armature using it, skipping' % blenAction.name)
                     continue
 
-            # Use the action name for the take name and the take file name (JCB)
-            if blenAction == blenActionDefault:
-                # We have already used the name for the Current: name above so get that name (JCB)
-                take_name = sane_name_mapping_take[blenAction.name]
+            if blenAction is None:
+                # Warning, this only accounts for tmp_actions being [None]
+                file.write('\n\tTake: "Default Take" {')
+                act_start = start
+                act_end = end
             else:
-                take_name = sane_takename(blenAction)
+                # use existing name
+                if blenAction == blenActionDefault:  # have we already got the name
+                    file.write('\n\tTake: "%s" {' % sane_name_mapping_take[blenAction.name])
+                else:
+                    file.write('\n\tTake: "%s" {' % sane_takename(blenAction))
 
-            act_start, act_end = blenAction.frame_range
-            act_start = int(act_start)
-            act_end = int(act_end)
+                act_start, act_end = blenAction.frame_range
+                act_start = int(act_start)
+                act_end = int(act_end)
 
-            # Set the action active
-            for my_arm in ob_arms:
-                if my_arm.blenObject.animation_data and blenAction in my_arm.blenActionList:
-                    my_arm.blenObject.animation_data.action = blenAction
+                # Set the action active
+                for my_arm in ob_arms:
+                    if my_arm.blenObject.animation_data and blenAction in my_arm.blenActionList:
+                        my_arm.blenObject.animation_data.action = blenAction
+                        # print('\t\tSetting Action!', blenAction)
+                # scene.update(1)
 
-            # Start the take (JCB)
-            file.write('\n\tTake: "%s" {' % take_name)
-            file.write('\n\t\tFileName: "%s.tak"' % take_name)
+            file.write('\n\t\tFileName: "Default_Take.tak"')  # ??? - not sure why this is needed
             file.write('\n\t\tLocalTime: %i,%i' % (fbx_time(act_start - 1), fbx_time(act_end - 1)))  # ??? - not sure why this is needed
             file.write('\n\t\tReferenceTime: %i,%i' % (fbx_time(act_start - 1), fbx_time(act_end - 1)))  # ??? - not sure why this is needed
 
