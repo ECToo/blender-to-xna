@@ -62,7 +62,7 @@ Regards
 
 Reply 01-08-2011:
 I've e-mailed the file to Campbell (ideasman_42) because I still do not have permission to upload the patch here!
-fbx_xna_unified-2011-08-01a_jcbdigger.patch
+fbx_xna_unified-2011-08-01b_jcbdigger.patch
 
 Minor changes to the UI to move the order of options slightly.  
 Trying to keep the most frequently used options near the top.  
