@@ -59,3 +59,24 @@ I have added additional validation to the UI so that it is not possible to outpu
 
 Regards
 - JCB
+
+Reply 01-08-2011
+I've e-mailed the file to Campbell (ideasman_42) because I still do not have permission to upload the patch here!
+fbx_xna_unified-2011-08-01a_jcbdigger.patch
+
+I have decided to REMOVE 'Default_Take' from the exporter instead of making it an option.
+I can find no reason for it being there!  Anyone who needs the name 'Default_Take' can add an action with that name.
+Most FBX files I have looked at use the name 'Take_001' instead and the only reference to 'Default_Take' is always about Blender.
+As mentioned above, in my opinion, removibg 'Default_Take' is essential to the XNA pipeline.  
+
+I searched using Google and I even searched the FBX SDK.
+The nearest reference to it was in a May 2010 Readme for the 2011.3 version of the FBX SDK.
+http://infiniteengine.googlecode.com/svn/trunk/depends/fbx/readme.txt
+In that the behaviour was changed so the default take and current take are no longer set.
+Other people struggling with the name 'Default_Take':
+Unity user(s) (might be the same person):
+http://www.blender.org/forum/viewtopic.php?p=87860&sid=274cb607a61b141a214ea15e94b02c25
+http://blenderartists.org/forum/showthread.php?223123-quot-Default-Take-quot-with-unity-engine-after-fbx-export-from-blender-2.58
+XNA users commenting on the work round for 'Default_Take':
+http://forums.create.msdn.com/forums/t/66942.aspx
+

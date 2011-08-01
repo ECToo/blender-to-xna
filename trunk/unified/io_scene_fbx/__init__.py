@@ -120,13 +120,14 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
     ANIM_ACTION_ALL = BoolProperty(name="All Actions", description="Export all actions for armatures or just the currently selected action", default=True)
     ANIM_OPTIMIZE = BoolProperty(name="Optimize Keyframes", description="Remove double keyframes", default=True)
     ANIM_OPTIMIZE_PRECISSION = FloatProperty(name="Precision", description="Tolerence for comparing double keyframes (higher for greater accuracy)", min=1, max=16, soft_min=1, soft_max=16, default=6.0)
+    # XNA usually errors if the textures are not in the same folder as the FBX file.  Use 'SPLIT' path. (JCB)
+    path_mode = path_reference_mode
     # XNA needs different names for each take having the first one always called Default_Take is unhelpful (JCB)
-    # XNA usually errors if the textures are not in the same folder as the FBX file (JCB)
-    # XNA - validation to avoid incompatible settings.  I will understand if this is not kept in the generic version. (JCB)
+    # The armature rotation does not work for XNA and setting the global matrix to identity is not sufficient on its own (JCB)
+    use_rotate_workaround = BoolProperty(name="Rotate Animation Fix", description="Disable global rotation for XNA compatibility", default=False)
+    # XNA - validation to avoid incompatible settings. (JCB)
     # It would be nice to have this for XNA, UDK, Unity and Sunburn if others could provide the details. (JCB)
     xna_validate = BoolProperty(name="XNA Strict Options", description="Make sure options are compatible with Microsoft XNA", default=False)
-    # The armature rotation does not work for XNA and setting the global matrix to identity is not sufficient on its own (JCB)
-    use_rotate_workaround = BoolProperty(name="XNA Rotate Fix", description="Disable global rotation, for XNA compatibility", default=False)
 
     batch_mode = EnumProperty(
             name="Batch Mode",
@@ -139,7 +140,6 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
     BATCH_OWN_DIR = BoolProperty(name="Own Dir", description="Create a dir for each exported file", default=True)
     use_metadata = BoolProperty(name="Use Metadata", default=True, options={'HIDDEN'})
 
-    path_mode = path_reference_mode
 
     # Validate that the options are compatible with XNA (JCB)
     def _validate_xna_options(self):
@@ -160,6 +160,9 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
         if self.object_types & {'CAMERA', 'LAMP', 'EMPTY'}:
             changed = True
             self.object_types -= {'CAMERA', 'LAMP', 'EMPTY'}
+        if self.path_mode != 'SPLIT':
+            changed = True
+            self.path_mode = 'SPLIT'
         return changed
 
     @property
