@@ -1,0 +1,133 @@
+Index: __init__.py
+===================================================================
+--- __init__.py	(revision 2210)
++++ __init__.py	(working copy)
+@@ -155,6 +155,11 @@
+             default=6.0,
+             )
+     path_mode = path_reference_mode
++    use_default_take = BoolProperty(
++            name="Include Default_Take", 
++            description="Use for non-armature animations and to export all frames in a scene.", 
++            default=False
++            )
+     use_rotate_workaround = BoolProperty(
+             name="Rotate Animation Fix",
+             description="Disable global rotation, for XNA compatibility",
+@@ -203,6 +208,9 @@
+         if self.use_mesh_edges:
+             changed = True
+             self.use_mesh_edges = False
++        if self.use_default_take:
++            changed = True
++            self.use_default_take = False
+         if self.object_types & {'CAMERA', 'LAMP', 'EMPTY'}:
+             changed = True
+             self.object_types -= {'CAMERA', 'LAMP', 'EMPTY'}
+Index: export_fbx.py
+===================================================================
+--- export_fbx.py	(revision 2210)
++++ export_fbx.py	(working copy)
+@@ -204,6 +204,7 @@
+         path_mode='AUTO',
+         use_mesh_edges=True,
+         use_rotate_workaround=False,
++        use_default_take=False,
+     ):
+ 
+     import bpy_extras.io_utils
+@@ -2482,18 +2483,23 @@
+         # instead of tagging
+         tagged_actions = []
+ 
++        # get the current action first so we can use it if we only export one action (JCB)
++        for my_arm in ob_arms:
++            if not blenActionDefault:
++                blenActionDefault = my_arm.blenAction
++            
+         if use_anim_action_all:
+             tmp_actions = bpy.data.actions[:]
++        elif not use_default_take:
++            if blenActionDefault:
++                # Export the current action (JCB)
++                tmp_actions.append(blenActionDefault)
+ 
++        if tmp_actions:
+             # find which actions are compatible with the armatures
+-            # blenActions is not yet initialized so do it now.
+             tmp_act_count = 0
+             for my_arm in ob_arms:
+ 
+-                # get the default name
+-                if not blenActionDefault:
+-                    blenActionDefault = my_arm.blenAction
+-
+                 arm_bone_names = set([my_bone.blenName for my_bone in my_arm.fbxBones])
+ 
+                 for action in tmp_actions:
+@@ -2505,7 +2511,8 @@
+                         tagged_actions.append(action.name)
+                         tmp_act_count += 1
+ 
+-                        # incase there is no actions applied to armatures
++                        # incase there are no actions applied to armatures
++                        # for example, when a user deletes the current action.
+                         action_lastcompat = action
+ 
+             if tmp_act_count:
+@@ -2515,7 +2522,8 @@
+ 
+         del action_lastcompat
+ 
+-        tmp_actions.insert(0, None)  # None is the default action
++        if use_default_take:
++            tmp_actions.insert(0, None)  # None is the default action
+ 
+         file.write('''
+ ;Takes and animation section
+@@ -2523,10 +2531,10 @@
+ 
+ Takes:  {''')
+ 
+-        if blenActionDefault:
++        if blenActionDefault and not use_default_take:
+             file.write('\n\tCurrent: "%s"' % sane_takename(blenActionDefault))
+         else:
+-            file.write('\n\tCurrent: "Default Take"')
++            file.write('\n\tCurrent: "Default_Take"')
+ 
+         for blenAction in tmp_actions:
+             # we have tagged all actious that are used be selected armatures
+@@ -2539,15 +2547,15 @@
+ 
+             if blenAction is None:
+                 # Warning, this only accounts for tmp_actions being [None]
+-                file.write('\n\tTake: "Default Take" {')
++                take_name = "Default_Take"
+                 act_start = start
+                 act_end = end
+             else:
+                 # use existing name
+                 if blenAction == blenActionDefault:  # have we already got the name
+-                    file.write('\n\tTake: "%s" {' % sane_name_mapping_take[blenAction.name])
++                    take_name = sane_name_mapping_take[blenAction.name]
+                 else:
+-                    file.write('\n\tTake: "%s" {' % sane_takename(blenAction))
++                    take_name = sane_takename(blenAction)
+ 
+                 act_start, act_end = blenAction.frame_range
+                 act_start = int(act_start)
+@@ -2557,10 +2565,10 @@
+                 for my_arm in ob_arms:
+                     if my_arm.blenObject.animation_data and blenAction in my_arm.blenActionList:
+                         my_arm.blenObject.animation_data.action = blenAction
+-                        # print('\t\tSetting Action!', blenAction)
+-                # scene.update(1)
+ 
+-            file.write('\n\t\tFileName: "Default_Take.tak"')  # ??? - not sure why this is needed
++            # Use the action name as the take name and the take filename (JCB)
++            file.write('\n\tTake: "%s" {' % take_name)
++            file.write('\n\t\tFileName: "%s.tak"' % take_name)
+             file.write('\n\t\tLocalTime: %i,%i' % (fbx_time(act_start - 1), fbx_time(act_end - 1)))  # ??? - not sure why this is needed
+             file.write('\n\t\tReferenceTime: %i,%i' % (fbx_time(act_start - 1), fbx_time(act_end - 1)))  # ??? - not sure why this is needed
+ 

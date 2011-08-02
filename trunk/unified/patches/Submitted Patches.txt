@@ -92,3 +92,23 @@ Therefore the following if condition was only ever met if action_lastcompat was 
 
 Regards
 - JCB
+
+Reply 02-08-2011:
+I've e-mailed the patch file to Campbell (ideasman_42)
+fbx_xna_unified-2011-08-02a_jcbdigger.patch
+
+* was 2490, 2506 -> 2516: Sorry, I did not allow for that possible scenario.
+That information was also important for the other changes that follow.
+
+Added use_default_take to the UI.
+
+* 2485 -> 2534:  Use either all actions or the current action. processed the same way.
+Only the 'Default_Take' option is treaded separately and only included when chosen.
+
+* 2536, 2549: Renamed 'Default Take' to 'Default_Take' so the filename and the take name are the same.
+Not important but I like things consistent.
+
+* 2549 -> 2570: Slight changes to use the action name for the take name and the take file name.
+
+Regards
+- JCB
