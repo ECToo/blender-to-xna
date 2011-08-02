@@ -1,0 +1,105 @@
+{{ScriptInfo
+|name= Autodesk FBX Exporter
+|tooltip= Export animated FBX models
+|menu= Export
+|usage= Export animated models in Autodesk FBX format
+|version= 2.58
+|author= Campbell Barton (ideasman_42) with additions by others.
+|blender= 2.58
+|license= GNU General Public License (GPL)
+|exe= Default Autodesk FBX exporter
+|download= None
+|bugtracker= None
+|link= None
+|releaselog= [[Dev:2.5/Py/Scripts/Import-Export/UnifiedFBX]]
+}}
+
+== Autodesk FBX Exporter ==
+
+Autodesk FBX is a commonly supported file format for interchange of 3D models and animations between applications.
+
+This script attempts to be compatible with several different implimentations.
+It is known to work with:
+* Unity
+* UDK
+* XNA (including animations from 2.59)
+
+The script includes several options to assist with compatibility.
+
+== Exporting Models ==
+
+Select to output the entire scene or just the selected model.
+
+[[File:Fbx_default2011-08-02.jpg]]
+
+You can rotate the output suitable for whatever application you will be using the result in.  
+
+It is necessary to select the Forward axis BEFORE selecting the Up axis.  The Up axis can only be chosen from the other two axes.
+
+Warning: Rotating Animated models does not work properly with all applications.
+
+=== File Locations ===
+
+The file location of the textures used on the model are stored within the fbx file.  The full path or the relative path can be selected or no path at all.
+
+[[File:Fbx_pathmodes2011-08-02.jpg]]
+
+If you use the 'Strip Path' option, no path is included so the images will need to be in the same folder as the FBX file.  This can make it easier when moving files about between computers or including them in other projects.
+
+== Saving Just Animations ==
+
+The FBX file format supports files that only contain takes.  It is up to you to keep track of which animations go with which model.
+
+The animation that will be output is whatever the currently selected action is within the action editor.
+
+To reduce the file size, turn off the exporting of any parts you do not want and untick 'All Actions'.  
+
+[[File:Fbx_noallactions2011-08-02.jpg]]
+
+For boned animations typically you just leave the armature enabled which is necessary for that type of animation.
+
+[[File:Fbx_armatureonly2011-08-02.jpg]]
+
+Reducing what is output makes the export and future import much quicker.
+
+Normally each action will have its own name but they can be forced to be called 'Default Take'.  Typically ensure that option remains off.
+
+[[File:Fbx_nodefaulttake2011-08-02.jpg]]
+
+== Exporting Animated Models To XNA ==
+
+Version 2.58 and prior need to use a separate script.  See the following:
+[[Extensions:2.5/Py/Scripts/Import-Export/Blender-toXNA]]
+
+As from release 2.59 the official Autodesk FBX exporter will support the format required by Microsoft XNA.
+
+The format is now compatible where possible but several options still have to be set in the exporter to get a suitable output file.
+
+The main requirement is that the animations must not be rotated however it is not as simple as setting no rotation.  There is a specific 'Rotate Animation Fix' option that must be enabled.
+
+There are also problematic options, such as edges and 'Empty' objects which are not supported and can cause importing errors.  Smoothing is not normally used and Cameras and Lamps are not used and it is must easier if every action has its own name, so do not use 'Default Take'.
+
+Optimised keyframes might remove deliberately duplicated frames so try it out before using that option.
+
+In most cases it is also necessary to have the images in the same folder as the FBX file.  This requires using the Path Mode setting it to 'Strip Path'.
+
+To make this easier there is a convenient tick box to force the XNA compatible options.
+
+[[File:Fbx_xna_strict2011-08-02.jpg]]
+
+It is not essential to use the 'XNA Strict Options' but is convenient.
+
+[[File:Fbx_notxnastrict2011-08-02.jpg]]
+
+It is also advisable to remove the tick from 'All Actions' because XNA can only import the first take from any FBX file.
+
+See the above instructions for outputing individual takes.
+
+Note:  The following development page has more information on the differences with the file format for XNA.:
+[[Dev:2.5/Py/Scripts/Import-Export/UnifiedFBX]]
+
+== Installation of Updates ==
+
+If you are not using the bundled script see the following for where and how to install scripts.
+
+* [[Doc:2.5/Manual/Extensions/Python/Add-Ons|Using Add-ons]] - Information on how to use add-ons.
