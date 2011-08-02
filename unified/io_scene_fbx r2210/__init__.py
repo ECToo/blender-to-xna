@@ -155,11 +155,6 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
             default=6.0,
             )
     path_mode = path_reference_mode
-    use_default_take = BoolProperty(
-            name="Include Default_Take", 
-            description="Use for non-armature animations and to export all frames in a scene.", 
-            default=False
-            )
     use_rotate_workaround = BoolProperty(
             name="Rotate Animation Fix",
             description="Disable global rotation, for XNA compatibility",
@@ -208,9 +203,6 @@ class ExportFBX(bpy.types.Operator, ExportHelper):
         if self.use_mesh_edges:
             changed = True
             self.use_mesh_edges = False
-        if self.use_default_take:
-            changed = True
-            self.use_default_take = False
         if self.object_types & {'CAMERA', 'LAMP', 'EMPTY'}:
             changed = True
             self.object_types -= {'CAMERA', 'LAMP', 'EMPTY'}
