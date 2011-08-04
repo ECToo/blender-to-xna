@@ -198,13 +198,13 @@ def save_single(operator, scene, filepath="",
         mesh_smooth_type='FACE',
         use_anim=True,
         use_anim_optimize=True,
-        anim_optimize_precission=6,
+        anim_optimize_precision=6,
         use_anim_action_all=False,
         use_metadata=True,
         path_mode='AUTO',
         use_mesh_edges=True,
         use_rotate_workaround=False,
-        use_default_take=False,
+        use_default_take=True,
     ):
 
     import bpy_extras.io_utils
@@ -2479,7 +2479,7 @@ Connections:  {''')
         frame_orig = scene.frame_current
 
         if use_anim_optimize:
-            ANIM_OPTIMIZE_PRECISSION_FLOAT = 0.1 ** anim_optimize_precission
+            ANIM_OPTIMIZE_PRECISSION_FLOAT = 0.1 ** anim_optimize_precision
 
         # default action, when no actions are avaioable
         tmp_actions = []
@@ -2560,9 +2560,8 @@ Takes:  {''')
                 act_end = end
             else:
                 # use existing name
-                if blenAction == blenActionDefault:  # have we already got the name
-                    take_name = sane_name_mapping_take[blenAction.name]
-                else:
+                take_name = sane_name_mapping_take.get(blenAction.name)
+                if take_name is None:
                     take_name = sane_takename(blenAction)
 
                 act_start, act_end = blenAction.frame_range
@@ -2832,13 +2831,27 @@ Takes:  {''')
     return {'FINISHED'}
 
 
+# defaults for applications, currently only unity but could add others.
+def defaults_unity3d():
+    return dict(global_matrix=Matrix.Rotation(-math.pi / 2.0, 4, 'X'),
+                use_selection=False,
+                object_types={'ARMATURE', 'EMPTY', 'MESH'},
+                use_mesh_modifiers=True,
+                use_anim=True,
+                use_anim_optimize=False,
+                use_anim_action_all=True,
+                batch_mode='OFF',
+                use_default_take=True,
+                )
+
+
 def save(operator, context,
-          filepath="",
-          use_selection=True,
-          batch_mode='OFF',
-          use_batch_own_dir=False,
-          **kwargs
-          ):
+         filepath="",
+         use_selection=False,
+         batch_mode='OFF',
+         use_batch_own_dir=False,
+         **kwargs
+         ):
 
     if bpy.ops.object.mode_set.poll():
         bpy.ops.object.mode_set(mode='OBJECT')
