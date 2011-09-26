@@ -3,9 +3,9 @@
 |tooltip= Export animated FBX models
 |menu= Export
 |usage= Export animated models in Autodesk FBX format
-|version= 2.58
+|version= 2.59
 |author= Campbell Barton (ideasman_42) with additions by others.
-|blender= 2.58
+|blender= 2.59
 |license= GNU General Public License (GPL)
 |exe= Default Autodesk FBX exporter
 |download= None
@@ -22,7 +22,7 @@ This script attempts to be compatible with several different implimentations.
 It is known to work with:
 * Unity
 * UDK
-* XNA (including animations from 2.59)
+* XNA
 
 The script includes several options to assist with compatibility.
 
@@ -62,22 +62,26 @@ For boned animations typically you just leave the armature enabled which is nece
 
 Reducing what is output makes the export and future import much quicker.
 
-Normally each action will have its own name but they can be forced to be called 'Default Take'.  Typically ensure that option remains off.
+Normally each action will have its own name but the current or only take can be forced to be called 'Default Take'.  Typically ensure that option remains off.
 
 [[File:Fbx_nodefaulttake2011-08-02.jpg]]
 
 == Exporting Animated Models To XNA ==
 
-Version 2.58 and prior need to use a separate script.  See the following:
-[[Extensions:2.5/Py/Scripts/Import-Export/Blender-toXNA]]
+The exporter in Blender 2.5 is compatible with Microsoft XNA 4.  If you are still using an older version of XNA you will need to use Blender 2.49b and an external addon.
 
-As from release 2.59 the official Autodesk FBX exporter will support the format required by Microsoft XNA.
+As from release 2.59 the official Autodesk FBX exporter supports the format required by Microsoft XNA 4.
 
-The format is now compatible where possible but several options still have to be set in the exporter to get a suitable output file.
+The format is compatible where possible but several options still have to be set in the exporter to get a suitable output file.
 
 The main requirement is that the animations must not be rotated however it is not as simple as setting no rotation.  There is a specific 'Rotate Animation Fix' option that must be enabled.
 
-There are also problematic options, such as edges and 'Empty' objects which are not supported and can cause importing errors.  Smoothing is not normally used and Cameras and Lamps are not used and it is must easier if every action has its own name, so do not use 'Default Take'.
+There are also problematic options:
+
+* Edges and 'Empty' objects are not supported and can cause importing errors.  
+* Smoothing is not normally used 
+* Cameras and Lamps are not used
+* It is much easier if every action has its own name, so do not use 'Default Take'.
 
 Optimised keyframes might remove deliberately duplicated frames so try it out before using that option.
 
@@ -91,11 +95,20 @@ It is not essential to use the 'XNA Strict Options' but is convenient.
 
 [[File:Fbx_notxnastrict2011-08-02.jpg]]
 
-It is also advisable to remove the tick from 'All Actions' because XNA can only import the first take from any FBX file.
+It is also advisable to remove the tick from 'All Actions' because XNA can only import the first take from any FBX file. (This is reported to be fixed in the next update to XNA currently in beta Aug.2011.)
 
 See the above instructions for outputing individual takes.
 
-Note:  The following development page has more information on the differences with the file format for XNA.:
+
+{{Note|More Information On Using Blender With XNA|
+* [http://blog.diabolicalgame.co.uk/2011/07/before-animating-with-blender.html Before Animating With Blender]
+* [http://blog.diabolicalgame.co.uk/2011/07/exporting-animated-models-from-blender.html Exporting Animated Models From Blender To XNA]
+}}
+
+== Use With Other Applications ==
+
+The following development page has more information on the differences with the file formats for various applications:
+
 [[Dev:2.5/Py/Scripts/Import-Export/UnifiedFBX]]
 
 == Installation of Updates ==
